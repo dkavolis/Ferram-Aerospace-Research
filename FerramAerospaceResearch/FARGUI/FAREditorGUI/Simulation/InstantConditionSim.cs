@@ -1,4 +1,4 @@
-﻿/*
+/*
 Ferram Aerospace Research v0.15.9.5 "Lighthill"
 =========================
 Aerodynamics model for Kerbal Space Program
@@ -48,11 +48,13 @@ using System.Linq;
 using UnityEngine;
 using ferram4;
 using FerramAerospaceResearch.FARAeroComponents;
+using FerramAerospaceResearch.FARUtils;
 
 namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
-    class InstantConditionSim
+    class InstantConditionSim : IFARCloneable
     {
+        private FARCloneHelper _cloneHelper;
         List<FARAeroSection> _currentAeroSections;
         List<FARAeroPartModule> _currentAeroModules;
         List<FARWingAerodynamicModel> _wingAerodynamicModel;
@@ -60,6 +62,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
         public double _maxCrossSectionFromBody;
         public double _bodyLength;
 
+        public InstantConditionSim() => _cloneHelper = new FARCloneHelper();
         public bool Ready
         {
             get { return _currentAeroSections != null && _currentAeroModules != null && _wingAerodynamicModel != null; }
@@ -293,5 +296,51 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             return iterationOutput.Cl - neededCl;
         }
 
+        protected FARCloneHelper cloneHelper
+        {
+            get
+            {
+                if (_cloneHelper == null)
+                    _cloneHelper = new FARCloneHelper();
+                return _cloneHelper;
+            }
+        }
+
+        public Guid GUID
+        {
+            get
+            {
+                return cloneHelper.GUID;
+            }
+        }
+
+        public bool isClone
+        {
+            get
+            {
+                return cloneHelper.isClone;
+            }
+        }
+
+        protected InstantConditionSim(InstantConditionSim other, Dictionary<Guid, object> cache)
+        {
+            _cloneHelper = new FARCloneHelper(other, this, cache);
+
+            _currentAeroSections = FARCloneHelper.DeepCopy(other._currentAeroSections, cache);
+            _currentAeroModules = FARCloneHelper.DeepCopy(other._currentAeroModules, cache);
+            _wingAerodynamicModel = FARCloneHelper.DeepCopy(other._wingAerodynamicModel, cache);
+
+            _maxCrossSectionFromBody = other._maxCrossSectionFromBody;
+            _bodyLength = other._bodyLength;
+
+            neededCl = other.neededCl;
+
+            iterationInput = FARCloneHelper.Clone<InstantConditionSimInput>(other.iterationInput, cache);
+            iterationOutput = other.iterationOutput;
+        }
+
+        public T Clone<T>() where T : IFARCloneable => FARCloneHelper.Clone<T>(this);
+        public T Clone<T>(Dictionary<Guid, object> cache) where T : IFARCloneable => FARCloneHelper.Clone<T>(this, cache);
+        public virtual object Clone(IFARCloneable other, Dictionary<Guid, object> cache) => new InstantConditionSim((InstantConditionSim)other, cache);
     }
 }
