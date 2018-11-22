@@ -52,12 +52,13 @@ using KSP.Localization;
 using FerramAerospaceResearch;
 using FerramAerospaceResearch.FARGUI;
 using FerramAerospaceResearch.FARGUI.FARFlightGUI;
+using FerramAerospaceResearch.FARUtils;
 using ferram4;
 
 namespace FerramAerospaceResearch.FARAeroComponents
 {
     //Used to hold relevant aero data for each part before applying it
-    public class FARAeroPartModule : PartModule, ILiftProvider
+    public class FARAeroPartModule : FARCloneablePartModule, ILiftProvider
     {
         public Vector3 partLocalVel;
         public Vector3 partLocalVelNorm;
@@ -160,6 +161,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             }
         }
+
+        public FARAeroPartModule() : base() { }
 
         public void SetShielded(bool value)
         {
@@ -780,5 +783,54 @@ namespace FerramAerospaceResearch.FARAeroComponents
             legacyWingModel = null;
             stockAeroSurfaceModule = null;
         }
+
+        protected FARAeroPartModule(FARAeroPartModule other, Dictionary<Guid, object> cache) : base(other, cache)
+        {
+            partLocalVel = other.partLocalVel;
+            partLocalVelNorm = other.partLocalVelNorm;
+            partLocalAngVel = other.partLocalAngVel;
+
+            worldSpaceVelNorm = other.worldSpaceVelNorm;
+            worldSpaceAeroForce = other.worldSpaceAeroForce;
+            worldSpaceTorque = other.worldSpaceTorque;
+
+            totalWorldSpaceAeroForce = other.totalWorldSpaceAeroForce;
+
+            partLocalForce = other.partLocalForce;
+            partLocalTorque = other.partLocalTorque;
+
+            hackWaterDragVal = other.hackWaterDragVal;
+
+            // structs are copied on assignment
+            projectedArea = other.projectedArea;
+
+            partStressOverride = other.partStressOverride;
+            partStressMaxY = other.partStressMaxY;
+            partStressMaxXZ = other.partStressMaxXZ;
+            partForceMaxY = other.partForceMaxY;
+            partForceMaxXZ = other.partForceMaxXZ;
+
+            // don't copy arrow pointer right now
+            liftArrow = null;
+            dragArrow = null;
+            momentArrow = null;
+
+            fieldsVisible = other.fieldsVisible;
+
+            dragForce = other.dragForce;
+
+            liftForce = other.liftForce;
+
+            partTransform = other.partTransform;
+
+            materialColorUpdater = other.materialColorUpdater;
+            legacyWingModel = FARCloneHelper.Clone<FARWingAerodynamicModel>(other.legacyWingModel, cache);
+
+            // shallow copy as it is not mutated
+            stockAeroSurfaceModule = other.stockAeroSurfaceModule;
+        }
+
+        public override object Clone(IFARCloneable other, Dictionary<Guid, object> cache) => new FARAeroPartModule((FARAeroPartModule)other, cache);
+
     }
 }
