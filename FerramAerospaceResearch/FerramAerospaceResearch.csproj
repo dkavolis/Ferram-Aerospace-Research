@@ -160,6 +160,7 @@
     <Compile Include="FARUtils/FARLogger.cs" />
     <Compile Include="FARUtils/FARVersion.cs" />
     <Compile Include="FARUtils/IFARCloneable.cs" />
+    <Compile Include="FARUtils/FARCopyExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
