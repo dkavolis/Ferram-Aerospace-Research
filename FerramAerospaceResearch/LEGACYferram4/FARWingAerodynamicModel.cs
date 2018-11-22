@@ -1,4 +1,4 @@
-﻿/*
+/*
 Ferram Aerospace Research v0.15.9.5 "Lighthill"
 =========================
 Aerodynamics model for Kerbal Space Program
@@ -174,6 +174,8 @@ namespace ferram4
 
         public bool ready = false;
         bool massScaleReady = false;
+
+        public FARWingAerodynamicModel() : base() { }
 
         public void NUFAR_ClearExposedAreaFactor()
         {
@@ -1576,5 +1578,70 @@ namespace ferram4
             }
         }
 
+        protected FARWingAerodynamicModel(FARWingAerodynamicModel other, Dictionary<Guid, object> cache) : base(other, cache)
+        {
+            rawAoAmax = other.rawAoAmax;
+            AoAmax = other.AoAmax;
+            wingBaseMassMultiplier = other.wingBaseMassMultiplier;
+            curWingMass = other.curWingMass;
+            desiredMass = other.desiredMass;
+            baseMass = other.baseMass;
+            massMultiplier = other.massMultiplier;
+            oldMassMultiplier = other.oldMassMultiplier;
+            MAC = other.MAC;
+            MAC_actual = other.MAC_actual;
+            e = other.e;
+            nonSideAttach = other.nonSideAttach;
+            TaperRatio = other.TaperRatio;
+            stall = other.stall;
+            minStall = other.minStall;
+            piARe = other.piARe;
+            b_2 = other.b_2;
+            b_2_actual = other.b_2_actual;
+            MidChordSweep = other.MidChordSweep;
+            MidChordSweepSideways = other.MidChordSweepSideways;
+            cosSweepAngle = other.cosSweepAngle;
+            effective_b_2 = other.effective_b_2;
+            effective_MAC = other.effective_MAC;
+            effective_AR = other.effective_AR;
+            transformed_AR = other.transformed_AR;
+            // skip arrow pointers now
+            liftArrow = null;
+            dragArrow = null;
+            fieldsVisible = other.fieldsVisible;
+            dragForceWing = other.dragForceWing;
+            liftForceWing = other.liftForceWing;
+            rawLiftSlope = other.rawLiftSlope;
+            liftslope = other.liftslope;
+            finalLiftSlope = other.finalLiftSlope;
+            zeroLiftCdIncrement = other.zeroLiftCdIncrement;
+            criticalCl = other.criticalCl;
+            refAreaChildren = other.refAreaChildren;
+            AerodynamicCenter = other.AerodynamicCenter;
+            CurWingCentroid = other.CurWingCentroid;
+            ParallelInPlane = other.ParallelInPlane;
+            perp = other.perp;
+            liftDirection = other.liftDirection;
+            rootMidChordOffsetFromOrig = other.rootMidChordOffsetFromOrig;
+            localWingCentroid = other.localWingCentroid;
+            sweepPerpLocal = other.sweepPerpLocal;
+            sweepPerp2Local = other.sweepPerp2Local;
+            ParallelInPlaneLocal = other.ParallelInPlaneLocal;
+            wingInteraction = FARCloneHelper.Clone<FARWingInteraction>(other.wingInteraction, cache);
+            aeroModule = FARCloneHelper.Clone<FARAeroPartModule>(other.aeroModule, cache);
+            srfAttachNegative = other.srfAttachNegative;
+            parentWing = FARCloneHelper.Clone<FARWingAerodynamicModel>(other.parentWing, cache);
+            updateMassNextFrame = other.updateMassNextFrame;
+            ClIncrementFromRear = other.ClIncrementFromRear;
+            YmaxForce = other.YmaxForce;
+            XZmaxForce = other.XZmaxForce;
+            worldSpaceForce = other.worldSpaceForce;
+            NUFAR_areaExposedFactor = other.NUFAR_areaExposedFactor;
+            NUFAR_totalExposedAreaFactor = other.NUFAR_totalExposedAreaFactor;
+            ready = other.ready;
+            massScaleReady = other.massScaleReady;
+        }
+
+        public override object Clone(IFARCloneable other, Dictionary<Guid, object> cache) => new FARWingAerodynamicModel((FARWingAerodynamicModel)other, cache);
     }
 }
