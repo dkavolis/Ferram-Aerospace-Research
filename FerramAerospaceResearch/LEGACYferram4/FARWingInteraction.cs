@@ -1,4 +1,4 @@
-﻿/*
+/*
 Ferram Aerospace Research v0.15.9.5 "Lighthill"
 =========================
 Aerodynamics model for Kerbal Space Program
@@ -47,13 +47,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using FerramAerospaceResearch;
+using FerramAerospaceResearch.FARUtils;
 
 namespace ferram4
 {
-    public class FARWingInteraction
+    public class FARWingInteraction : IFARCloneable
     {
         static RaycastHitComparer _comparer = new RaycastHitComparer();
 
+        private FARCloneHelper _cloneHelper;
         private FARWingAerodynamicModel parentWingModule;
         private Part parentWingPart;
         private Vector3 rootChordMidLocal;
@@ -121,7 +123,9 @@ namespace ferram4
             private set { clInterferenceFactor = value; }
         }
 
-        public FARWingInteraction(FARWingAerodynamicModel parentModule, Part parentPart, Vector3 rootChordMid, short srfAttachNegative)
+        protected FARWingInteraction() => _cloneHelper = new FARCloneHelper();
+
+        public FARWingInteraction(FARWingAerodynamicModel parentModule, Part parentPart, Vector3 rootChordMid, short srfAttachNegative) : this()
         {
             parentWingModule = parentModule;
             parentWingPart = parentPart;
@@ -755,5 +759,79 @@ namespace ferram4
             else
                 return 2 * (2 - effective_AR_modifier) + 8 * (effective_AR_modifier - 1);
         }
+
+        protected FARCloneHelper cloneHelper
+        {
+            get
+            {
+                if (_cloneHelper == null)
+                    _cloneHelper = new FARCloneHelper();
+                return _cloneHelper;
+            }
+        }
+
+        public Guid GUID
+        {
+            get
+            {
+                return cloneHelper.GUID;
+            }
+        }
+
+        public bool isClone
+        {
+            get
+            {
+                return cloneHelper.isClone;
+            }
+        }
+
+        protected FARWingInteraction(FARWingInteraction other, Dictionary<Guid, object> cache) : base()
+        {
+            _cloneHelper = new FARCloneHelper(other, this, cache);
+
+            parentWingModule = FARCloneHelper.Clone<FARWingAerodynamicModel>(other.parentWingModule, cache);
+
+            // don't need to copy, only used for part transform
+            parentWingPart = other.parentWingPart;
+
+            rootChordMidLocal = other.rootChordMidLocal;
+            rootChordMidPt = other.rootChordMidPt;
+            srfAttachFlipped = other.srfAttachFlipped;
+
+            nearbyWingModulesForwardList = FARCloneHelper.DeepCopy(other.nearbyWingModulesForwardList, cache);
+            nearbyWingModulesBackwardList = FARCloneHelper.DeepCopy(other.nearbyWingModulesBackwardList, cache);
+            nearbyWingModulesLeftwardList = FARCloneHelper.DeepCopy(other.nearbyWingModulesLeftwardList, cache);
+            nearbyWingModulesRightwardList = FARCloneHelper.DeepCopy(other.nearbyWingModulesRightwardList, cache);
+
+            nearbyWingModulesForwardInfluence = FARCloneHelper.ShallowCopy(other.nearbyWingModulesForwardInfluence);
+            nearbyWingModulesBackwardInfluence = FARCloneHelper.ShallowCopy(other.nearbyWingModulesBackwardInfluence);
+            nearbyWingModulesLeftwardInfluence = FARCloneHelper.ShallowCopy(other.nearbyWingModulesLeftwardInfluence);
+            nearbyWingModulesRightwardInfluence = FARCloneHelper.ShallowCopy(other.nearbyWingModulesRightwardInfluence);
+
+            forwardExposure = other.forwardExposure;
+            backwardExposure = other.backwardExposure;
+            leftwardExposure = other.leftwardExposure;
+            rightwardExposure = other.rightwardExposure;
+
+            effectiveUpstreamMAC = other.effectiveUpstreamMAC;
+            effectiveUpstreamb_2 = other.effectiveUpstreamb_2;
+            effectiveUpstreamLiftSlope = other.effectiveUpstreamLiftSlope;
+            effectiveUpstreamArea = other.effectiveUpstreamArea;
+            effectiveUpstreamStall = other.effectiveUpstreamStall;
+            effectiveUpstreamCosSweepAngle = other.effectiveUpstreamCosSweepAngle;
+            effectiveUpstreamAoAMax = other.effectiveUpstreamAoAMax;
+            effectiveUpstreamAoA = other.effectiveUpstreamAoA;
+            effectiveUpstreamCd0 = other.effectiveUpstreamCd0;
+            effectiveUpstreamInfluence = other.effectiveUpstreamInfluence;
+            hasWingsUpstream = other.hasWingsUpstream;
+
+            aRFactor = other.aRFactor;
+            clInterferenceFactor = other.clInterferenceFactor;
+        }
+
+        public T Clone<T>() where T : IFARCloneable => FARCloneHelper.Clone<T>(this);
+        public T Clone<T>(Dictionary<Guid, object> cache) where T : IFARCloneable => FARCloneHelper.Clone<T>(this, cache);
+        public virtual object Clone(IFARCloneable other, Dictionary<Guid, object> cache) => new FARWingInteraction((FARWingInteraction)other, cache);
     }
 }
