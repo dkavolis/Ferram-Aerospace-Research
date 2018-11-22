@@ -162,6 +162,7 @@
     <Compile Include="FARUtils/IFARCloneable.cs" />
     <Compile Include="FARUtils/FARCloneHelper.cs" />
     <Compile Include="FARUtils/FARCopyExtensions.cs" />
+    <Compile Include="FARUtils/FARCloneablePartModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
