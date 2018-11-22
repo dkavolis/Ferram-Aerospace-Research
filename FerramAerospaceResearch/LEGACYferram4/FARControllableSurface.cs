@@ -1,4 +1,4 @@
-/*
+﻿/*
 Ferram Aerospace Research v0.15.9.5 "Lighthill"
 =========================
 Aerodynamics model for Kerbal Space Program
@@ -597,17 +597,20 @@ namespace ferram4
             deflectedNormal.z = Math.Sqrt(tmp);
 
             // Visually animate the surface
-            MovableSection.localRotation = MovableOrig;
-            if (AoAoffset != 0)
+            if (!isClone)
             {
-                Quaternion localRot;
-                if (flipAxis)
-                    localRot = Quaternion.FromToRotation(deflectedNormal, new Vector3(0, 0, 1));
-                else
-                    localRot = Quaternion.FromToRotation(new Vector3(0, 0, 1), deflectedNormal);
+                MovableSection.localRotation = MovableOrig;
+                if (AoAoffset != 0)
+                {
+                    Quaternion localRot;
+                    if (flipAxis)
+                        localRot = Quaternion.FromToRotation(deflectedNormal, new Vector3(0, 0, 1));
+                    else
+                        localRot = Quaternion.FromToRotation(new Vector3(0, 0, 1), deflectedNormal);
 
-                MovableSection.localRotation *= localRot;
+                    MovableSection.localRotation *= localRot;
 
+                }
             }
             CheckShielded();
         }

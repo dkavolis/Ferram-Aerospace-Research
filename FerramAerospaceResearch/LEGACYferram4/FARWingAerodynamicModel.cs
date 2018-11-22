@@ -1,4 +1,4 @@
-/*
+﻿/*
 Ferram Aerospace Research v0.15.9.5 "Lighthill"
 =========================
 Aerodynamics model for Kerbal Space Program
@@ -1503,56 +1503,59 @@ namespace ferram4
 
         private void UpdateAeroDisplay(Vector3 lift, Vector3 drag)
         {
-            if (PhysicsGlobals.AeroForceDisplay)
+            if (!isClone)
             {
-                if (liftArrow == null)
-                    liftArrow = ArrowPointer.Create(part_transform, localWingCentroid, lift, lift.magnitude * FARKSPAddonFlightScene.FARAeroForceDisplayScale, FerramAerospaceResearch.FARGUI.GUIColors.GetColor(0), true);
+                if (PhysicsGlobals.AeroForceDisplay)
+                {
+                    if (liftArrow == null)
+                        liftArrow = ArrowPointer.Create(part_transform, localWingCentroid, lift, lift.magnitude * FARKSPAddonFlightScene.FARAeroForceDisplayScale, FerramAerospaceResearch.FARGUI.GUIColors.GetColor(0), true);
+                    else
+                    {
+                        liftArrow.Direction = lift;
+                        liftArrow.Length = lift.magnitude * FARKSPAddonFlightScene.FARAeroForceDisplayScale;
+                    }
+
+                    if (dragArrow == null)
+                        dragArrow = ArrowPointer.Create(part_transform, localWingCentroid, drag, drag.magnitude * FARKSPAddonFlightScene.FARAeroForceDisplayScale, FerramAerospaceResearch.FARGUI.GUIColors.GetColor(1), true);
+                    else
+                    {
+                        dragArrow.Direction = drag;
+                        dragArrow.Length = drag.magnitude * FARKSPAddonFlightScene.FARAeroForceDisplayScale;
+                    }
+                }
                 else
                 {
-                    liftArrow.Direction = lift;
-                    liftArrow.Length = lift.magnitude * FARKSPAddonFlightScene.FARAeroForceDisplayScale;
+                    if ((object)liftArrow != null)
+                    {
+                        UnityEngine.Object.Destroy(liftArrow);
+                        liftArrow = null;
+                    }
+                    if ((object)dragArrow != null)
+                    {
+                        UnityEngine.Object.Destroy(dragArrow);
+                        dragArrow = null;
+                    }
                 }
 
-                if (dragArrow == null)
-                    dragArrow = ArrowPointer.Create(part_transform, localWingCentroid, drag, drag.magnitude * FARKSPAddonFlightScene.FARAeroForceDisplayScale, FerramAerospaceResearch.FARGUI.GUIColors.GetColor(1), true);
-                else
+                if (PhysicsGlobals.AeroDataDisplay)
                 {
-                    dragArrow.Direction = drag;
-                    dragArrow.Length = drag.magnitude * FARKSPAddonFlightScene.FARAeroForceDisplayScale;
-                }
-            }
-            else
-            {
-                if ((object)liftArrow != null)
-                {
-                    UnityEngine.Object.Destroy(liftArrow);
-                    liftArrow = null;
-                }
-                if ((object)dragArrow != null)
-                {
-                    UnityEngine.Object.Destroy(dragArrow);
-                    dragArrow = null;
-                }
-            }
+                    if (!fieldsVisible)
+                    {
+                        Fields["dragForceWing"].guiActive = true;
+                        Fields["liftForceWing"].guiActive = true;
+                        fieldsVisible = true;
+                    }
 
-            if (PhysicsGlobals.AeroDataDisplay)
-            {
-                if (!fieldsVisible)
-                {
-                    Fields["dragForceWing"].guiActive = true;
-                    Fields["liftForceWing"].guiActive = true;
-                    fieldsVisible = true;
+                    dragForceWing = drag.magnitude;
+                    liftForceWing = lift.magnitude;
+
                 }
-
-                dragForceWing = drag.magnitude;
-                liftForceWing = lift.magnitude;
-
-            }
-            else if (fieldsVisible)
-            {
-                Fields["dragForceWing"].guiActive = false;
-                Fields["liftForceWing"].guiActive = false;
-                fieldsVisible = false;
+                else if (fieldsVisible)
+                {
+                    Fields["dragForceWing"].guiActive = false;
+                    Fields["liftForceWing"].guiActive = false;
+                    fieldsVisible = false;
+                }
             }
 
         }
