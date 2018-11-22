@@ -1,4 +1,4 @@
-﻿/*
+/*
 Ferram Aerospace Research v0.15.9.5 "Lighthill"
 =========================
 Aerodynamics model for Kerbal Space Program
@@ -48,6 +48,7 @@ using UnityEngine;
 using KSP;
 using KSP.Localization;
 using FerramAerospaceResearch;
+using FerramAerospaceResearch.FARUtils;
 
 namespace ferram4
 {
@@ -212,6 +213,8 @@ namespace ferram4
                 }
             }
         }
+
+        public FARControllableSurface() : base() { }
 
         //[KSPEvent(guiName = "Std. Ctrl Settings", guiActiveEditor = true, guiActive = false)]
         void CheckFieldVisibility()
@@ -764,5 +767,73 @@ namespace ferram4
             pos = resultVector;
             neg = -resultVector;
         }
+
+        protected FARControllableSurface(FARControllableSurface other, Dictionary<Guid, object> cache) : base(other, cache)
+        {
+            movableSection = other.movableSection;
+
+            flipAxis = other.flipAxis;
+
+            controlSurfacePivot = other.controlSurfacePivot;
+
+            ctrlSurfFrac = other.ctrlSurfFrac;
+            transformName = other.transformName;
+
+            MovableOrig = other.MovableOrig;
+            MovableOrigReady = other.MovableOrigReady;
+
+            showStdCtrl = other.showStdCtrl;
+            prevStdCtrl = other.prevStdCtrl;
+
+            pitchaxis = other.pitchaxis;
+
+            yawaxis = other.yawaxis;
+
+            rollaxis = other.rollaxis;
+
+            pitchaxisDueToAoA = other.pitchaxisDueToAoA;
+
+            brakeRudder = other.brakeRudder;
+
+            maxdeflect = other.maxdeflect;
+
+            showFlpCtrl = other.showFlpCtrl;
+            prevFlpCtrl = other.prevFlpCtrl;
+
+            isFlap = other.isFlap;
+            prevIsFlap = other.prevIsFlap;
+
+            isSpoiler = other.isSpoiler;
+            prevIsSpoiler = other.prevIsSpoiler;
+
+            flapDeflectionLevel = other.flapDeflectionLevel;
+
+            maxdeflectFlap = other.maxdeflectFlap;
+
+            PitchLocation = other.PitchLocation;
+            YawLocation = other.YawLocation;
+            RollLocation = other.RollLocation;
+            BrakeRudderLocation = other.BrakeRudderLocation;
+            BrakeRudderSide = other.BrakeRudderSide;
+            flapLocation = other.flapLocation;
+            spoilerLocation = other.spoilerLocation;
+
+            AoAsign = other.AoAsign;
+            AoAdesiredControl = other.AoAdesiredControl;
+            AoAdesiredFlap = other.AoAdesiredFlap;
+            AoAcurrentControl = other.AoAcurrentControl;
+            AoAcurrentFlap = other.AoAcurrentFlap;
+            AoAoffset = other.AoAoffset;
+
+            lastAoAoffset = other.lastAoAoffset;
+            deflectedNormal = other.deflectedNormal;
+
+            brake = other.brake;
+            justStarted = other.justStarted;
+
+            lastReferenceTransform = other.lastReferenceTransform;
+        }
+
+        public override object Clone(IFARCloneable other, Dictionary<Guid, object> cache) => new FARControllableSurface((FARControllableSurface)other, cache);
     }
 }
