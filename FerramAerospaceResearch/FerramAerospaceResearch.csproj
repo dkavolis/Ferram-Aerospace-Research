@@ -159,6 +159,7 @@
     <Compile Include="ToolbarWrapper.cs" />
     <Compile Include="FARUtils/FARLogger.cs" />
     <Compile Include="FARUtils/FARVersion.cs" />
+    <Compile Include="FARUtils/IFARCloneable.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
