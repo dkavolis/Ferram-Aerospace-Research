@@ -51,7 +51,7 @@ using FerramAerospaceResearch.FARUtils;
 
 namespace ferram4
 {
-    public class FARPartModule : PartModule
+    public class FARPartModule : FARCloneablePartModule
     {
         protected Callback OnVesselPartsChange;
         public List<Part> VesselPartList = null;
@@ -59,6 +59,8 @@ namespace ferram4
         private Collider[] partColliders = null;
 
         public Collider[] PartColliders { get { if(partColliders == null) TriggerPartColliderUpdate(); return partColliders; } protected set { partColliders = value; } }
+
+        public FARPartModule() : base() { }
 
         public void ForceOnVesselPartsChange()
         {
@@ -156,5 +158,17 @@ namespace ferram4
             VesselPartList = null;
             partColliders = null;
         }
+
+        protected FARPartModule(FARPartModule other, Dictionary<Guid, object> cache) : base(other, cache)
+        {
+            // Only do a shallow copy of KSP objects since they are not mutated here
+            VesselPartList = FARCloneHelper.ShallowCopy(other.VesselPartList);
+            VesselPartListCount = other.VesselPartListCount;
+            partColliders = FARCloneHelper.ShallowCopy(other.partColliders);
+
+            // For now keeping the callback null, no need to update vessel part list on a clone
+        }
+
+        public override object Clone(IFARCloneable other, Dictionary<Guid, object> cache) => new FARPartModule((FARPartModule)other, cache);
     }
 }
