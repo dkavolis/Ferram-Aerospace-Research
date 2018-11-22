@@ -43,11 +43,14 @@ Copyright 2017, Michael Ferrara, aka Ferram4
  */
 
 using System;
+using System.Collections.Generic;
+using FerramAerospaceResearch.FARUtils;
 
 namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
-    class InstantConditionSimInput
+    class InstantConditionSimInput : IFARCloneable
     {
+        private FARCloneHelper _cloneHelper;
         public double alpha;
         public double beta;
         public double phi;
@@ -59,9 +62,9 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
         public int flaps;
         public bool spoilers;
 
-        public InstantConditionSimInput() { }
+        public InstantConditionSimInput() => _cloneHelper = new FARCloneHelper();
 
-        public InstantConditionSimInput(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue)
+        public InstantConditionSimInput(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue) : this()
         {
             this.alpha = alpha;
             this.beta = beta;
@@ -76,7 +79,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             spoilers = false;
         }
 
-        public InstantConditionSimInput(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue, int flaps, bool spoilers)
+        public InstantConditionSimInput(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue, int flaps, bool spoilers) : this()
         {
             this.alpha = alpha;
             this.beta = beta;
@@ -89,5 +92,51 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             this.flaps = flaps;
             this.spoilers = spoilers;
         }
+
+        protected FARCloneHelper cloneHelper
+        {
+            get
+            {
+                if (_cloneHelper == null)
+                    _cloneHelper = new FARCloneHelper();
+                return _cloneHelper;
+            }
+        }
+
+        public Guid GUID
+        {
+            get
+            {
+                return cloneHelper.GUID;
+            }
+        }
+
+        public bool isClone
+        {
+            get
+            {
+                return cloneHelper.isClone;
+            }
+        }
+
+        protected InstantConditionSimInput(InstantConditionSimInput other, Dictionary<Guid, object> cache)
+        {
+            _cloneHelper = new FARCloneHelper(other, this, cache);
+
+            alpha = other.alpha;
+            beta = other.beta;
+            phi = other.phi;
+            alphaDot = other.alphaDot;
+            betaDot = other.betaDot;
+            phiDot = other.phiDot;
+            machNumber = other.machNumber;
+            pitchValue = other.pitchValue;
+            flaps = other.flaps;
+            spoilers = other.spoilers;
+        }
+
+        public T Clone<T>() where T : IFARCloneable => FARCloneHelper.Clone<T>(this);
+        public T Clone<T>(Dictionary<Guid, object> cache) where T : IFARCloneable => FARCloneHelper.Clone<T>(this, cache);
+        public virtual object Clone(IFARCloneable other, Dictionary<Guid, object> cache) => new InstantConditionSimInput((InstantConditionSimInput)other, cache);
     }
 }
