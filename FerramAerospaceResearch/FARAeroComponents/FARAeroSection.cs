@@ -52,8 +52,9 @@ using FerramAerospaceResearch.FARUtils;
 
 namespace FerramAerospaceResearch.FARAeroComponents
 {
-    class FARAeroSection
+    class FARAeroSection : IFARCloneable
     {
+        private FARCloneHelper _cloneHelper;
         static FloatCurve crossFlowDragMachCurve;
         static FloatCurve crossFlowDragReynoldsCurve;
 
@@ -81,6 +82,15 @@ namespace FerramAerospaceResearch.FARAeroComponents
             public Vector3 xRefVectorPartSpace;
             public Vector3 nRefVectorPartSpace;
             public float dragFactor;    //sum of these should add up to 1
+
+            public PartData(PartData other, Dictionary<Guid, object> cache)
+            {
+                aeroModule = FARCloneHelper.Clone<FARAeroPartModule>(other.aeroModule, cache);
+                centroidPartSpace = other.centroidPartSpace;
+                xRefVectorPartSpace = other.xRefVectorPartSpace;
+                nRefVectorPartSpace = other.nRefVectorPartSpace;
+                dragFactor = other.dragFactor;
+            }
         }
 
         public static FARAeroSection CreateNewAeroSection()
@@ -98,7 +108,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             return section;
         }
 
-        private FARAeroSection() { }
+        private FARAeroSection() => _cloneHelper = new FARCloneHelper();
 
         public void UpdateAeroSection(float potentialFlowNormalForce, float viscCrossflowDrag, float diameter, float flatnessRatio, float hypersonicMomentForward, float hypersonicMomentBackward,
             Vector3 centroidWorldSpace, Vector3 xRefVectorWorldSpace, Vector3 nRefVectorWorldSpace, Matrix4x4 vesselToWorldMatrix, Vector3 vehicleMainAxis, List<FARAeroPartModule> moduleList,
@@ -631,5 +641,63 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             return crossFlowDrag;
         }
+
+        protected FARCloneHelper cloneHelper
+        {
+            get
+            {
+                if (_cloneHelper == null)
+                    _cloneHelper = new FARCloneHelper();
+                return _cloneHelper;
+            }
+        }
+
+        public Guid GUID
+        {
+            get
+            {
+                return cloneHelper.GUID;
+            }
+        }
+
+        public bool isClone
+        {
+            get
+            {
+                return cloneHelper.isClone;
+            }
+        }
+
+        protected FARAeroSection(FARAeroSection other, Dictionary<Guid, object> cache)
+        {
+            _cloneHelper = new FARCloneHelper(other, this, cache);
+
+            xForcePressureAoA0 = FARCloneHelper.Clone<FARFloatCurve>(other.xForcePressureAoA0, cache);
+            xForcePressureAoA180 = FARCloneHelper.Clone<FARFloatCurve>(other.xForcePressureAoA180, cache);
+            xForceSkinFriction = FARCloneHelper.Clone<FARFloatCurve>(other.xForceSkinFriction, cache);
+            potentialFlowNormalForce = other.potentialFlowNormalForce;
+            viscCrossflowDrag = other.viscCrossflowDrag;
+            flatnessRatio = other.flatnessRatio;
+            invFlatnessRatio = other.invFlatnessRatio;
+            hypersonicMomentForward = other.hypersonicMomentForward;
+            hypersonicMomentBackward = other.hypersonicMomentBackward;
+            diameter = other.diameter;
+
+            mergeFactor = other.mergeFactor;
+            worldNormalVector = other.worldNormalVector;
+
+            partData = new List<PartData>(other.partData.Capacity);
+            foreach (PartData p in other.partData)
+                partData.Add(new PartData(p, cache));
+
+            handledAeroModulesIndexDict = new Dictionary<FARAeroPartModule, int>(ObjectReferenceEqualityComparer<FARAeroPartModule>.Default);
+            foreach (KeyValuePair<FARAeroPartModule, int> entry in other.handledAeroModulesIndexDict)
+                handledAeroModulesIndexDict.Add(FARCloneHelper.Clone<FARAeroPartModule>(entry.Key, cache), entry.Value);
+
+        }
+
+        public T Clone<T>() where T : IFARCloneable => FARCloneHelper.Clone<T>(this);
+        public T Clone<T>(Dictionary<Guid, object> cache) where T : IFARCloneable => FARCloneHelper.Clone<T>(this, cache);
+        public virtual object Clone(IFARCloneable other, Dictionary<Guid, object> cache) => new FARAeroSection((FARAeroSection)other, cache);
     }
 }
