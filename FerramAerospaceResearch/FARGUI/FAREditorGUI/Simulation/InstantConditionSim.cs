@@ -1,4 +1,4 @@
-/*
+﻿/*
 Ferram Aerospace Research v0.15.9.5 "Lighthill"
 =========================
 Aerodynamics model for Kerbal Space Program
@@ -158,7 +158,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             for (int i = 0; i < _wingAerodynamicModel.Count; i++)
             {
                 FARWingAerodynamicModel w = _wingAerodynamicModel[i];
-                if (!(w && w.part))
+                if (!(!(w is null) && w.part))
                     continue;
 
                 w.ComputeForceEditor(velocity.normalized, input.machNumber, 2);

@@ -102,7 +102,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                 CoM += partMass * (Vector3d)p.transform.TransformPoint(p.CoMOffset);
                 mass += partMass;
                 FARWingAerodynamicModel w = p.GetComponent<FARWingAerodynamicModel>();
-                if (w != null)
+                if (!(w is null))
                 {
                     if (w.isShielded)
                         continue;

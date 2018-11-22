@@ -1,4 +1,4 @@
-/*
+﻿/*
 Ferram Aerospace Research v0.15.9.5 "Lighthill"
 =========================
 Aerodynamics model for Kerbal Space Program
@@ -663,7 +663,7 @@ namespace ferram4
                 FARWingAerodynamicModel wingModule = wingModules[i];
                 double wingInfluenceFactor = associatedInfluences[i] * directionalInfluence;
 
-                if (wingModule == null)
+                if (wingModule is null)
                 {
                     HandleNullPart(wingModules, associatedInfluences, i);
                     i--;
