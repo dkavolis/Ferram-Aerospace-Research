@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using FerramAerospaceResearch.FARUtils;
 
 namespace FerramAerospaceResearch
 {
     //recyclable float curve
-    class FARFloatCurve
+    class FARFloatCurve : IFARCloneable
     {
         struct CubicSection
         {
@@ -79,12 +81,14 @@ namespace FerramAerospaceResearch
             }
         }
 
+        private FARCloneHelper _cloneHelper;
         Vector3d[] controlPoints;
         CubicSection[] sections;
         int centerIndex;
 
-        private FARFloatCurve() { }
-        public FARFloatCurve(int numControlPoints)
+        private FARFloatCurve() => _cloneHelper = new FARCloneHelper();
+
+        public FARFloatCurve(int numControlPoints) : this()
         {
             controlPoints = new Vector3d[numControlPoints];
 
@@ -201,5 +205,44 @@ namespace FerramAerospaceResearch
                 sections[i] = tmpSection;
             }
         }
+
+        protected FARCloneHelper cloneHelper
+        {
+            get
+            {
+                if (_cloneHelper == null)
+                    _cloneHelper = new FARCloneHelper();
+                return _cloneHelper;
+            }
+        }
+
+        public Guid GUID
+        {
+            get
+            {
+                return cloneHelper.GUID;
+            }
+        }
+
+        public bool isClone
+        {
+            get
+            {
+                return cloneHelper.isClone;
+            }
+        }
+
+        protected FARFloatCurve(FARFloatCurve other, Dictionary<Guid, object> cache)
+        {
+            _cloneHelper = new FARCloneHelper(other, this, cache);
+
+            controlPoints = FARCloneHelper.ShallowCopy(other.controlPoints);
+            sections = FARCloneHelper.ShallowCopy(other.sections);  // structs are copied on assignment so this is the same as deep copy
+            centerIndex = other.centerIndex;
+        }
+
+        public T Clone<T>() where T : IFARCloneable => FARCloneHelper.Clone<T>(this);
+        public T Clone<T>(Dictionary<Guid, object> cache) where T : IFARCloneable => FARCloneHelper.Clone<T>(this, cache);
+        public virtual object Clone(IFARCloneable other, Dictionary<Guid, object> cache) => new FARFloatCurve((FARFloatCurve)other, cache);
     }
 }
