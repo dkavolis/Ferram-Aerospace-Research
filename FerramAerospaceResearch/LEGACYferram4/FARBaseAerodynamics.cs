@@ -46,6 +46,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using FerramAerospaceResearch;
+using FerramAerospaceResearch.FARUtils;
 using KSP.Localization;
 
 namespace ferram4
@@ -84,6 +85,8 @@ namespace ferram4
 
         // Keep track if the tinting effect is active or not
         //private bool tintIsActive = false;
+
+        public FARBaseAerodynamics() : base() { }
 
         public override void OnAwake()
         {
@@ -232,5 +235,20 @@ namespace ferram4
             if (node.HasValue("S"))
                 double.TryParse(node.GetValue("S"), out S);
         }
+
+        protected FARBaseAerodynamics(FARBaseAerodynamics other, Dictionary<Guid, object> cache) : base(other, cache)
+        {
+            Cl = other.Cl;
+            Cd = other.Cd;
+            Cm = other.Cm;
+
+            velocityEditor = other.velocityEditor;
+            // shallow copy of transform, it is not edited
+            part_transform = other.part_transform;
+            S = other.S;
+            isShielded = other.isShielded;
+            rho = other.rho;
+        }
+        public override object Clone(IFARCloneable other, Dictionary<Guid, object> cache) => new FARBaseAerodynamics((FARBaseAerodynamics)other, cache);
     }
 }
