@@ -163,6 +163,7 @@
     <Compile Include="FARUtils/FARCloneHelper.cs" />
     <Compile Include="FARUtils/FARCopyExtensions.cs" />
     <Compile Include="FARUtils/FARCloneablePartModule.cs" />
+    <Compile Include="FARAPIModules/InstantConditionSimulation.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
