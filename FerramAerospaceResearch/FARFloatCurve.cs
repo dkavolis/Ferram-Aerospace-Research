@@ -6,7 +6,7 @@ using FerramAerospaceResearch.FARUtils;
 namespace FerramAerospaceResearch
 {
     //recyclable float curve
-    class FARFloatCurve : IFARCloneable
+    internal class FARFloatCurve : IFARCloneable
     {
         struct CubicSection
         {

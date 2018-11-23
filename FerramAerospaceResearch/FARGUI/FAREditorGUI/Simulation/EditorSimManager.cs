@@ -50,9 +50,13 @@ using FerramAerospaceResearch.FARAeroComponents;
 
 namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
-    class EditorSimManager
+    internal class EditorSimManager
     {
         InstantConditionSim _instantCondition;
+        public InstantConditionSim InstantCondition
+        {
+            get { return _instantCondition; }
+        }
 
         StabilityDerivCalculator _stabDerivCalculator;
         public StabilityDerivCalculator StabDerivCalculator

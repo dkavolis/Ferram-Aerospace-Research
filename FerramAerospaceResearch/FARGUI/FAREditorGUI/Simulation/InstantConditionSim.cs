@@ -52,7 +52,7 @@ using FerramAerospaceResearch.FARUtils;
 
 namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
-    class InstantConditionSim : IFARCloneable
+    internal class InstantConditionSim : IFARCloneable
     {
         private FARCloneHelper _cloneHelper;
         List<FARAeroSection> _currentAeroSections;

@@ -50,7 +50,7 @@ using ferram4;
 
 namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
-    class SweepSim
+    internal class SweepSim
     {
         InstantConditionSim _instantCondition;
 

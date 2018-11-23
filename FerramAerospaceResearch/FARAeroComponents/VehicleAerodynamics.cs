@@ -53,7 +53,7 @@ using FerramAerospaceResearch.FARPartGeometry.GeometryModification;
 
 namespace FerramAerospaceResearch.FARAeroComponents
 {
-    class VehicleAerodynamics
+    internal class VehicleAerodynamics
     {
         static double[] indexSqrt = new double[1];
         static object _commonLocker = new object();

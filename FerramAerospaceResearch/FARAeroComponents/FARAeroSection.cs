@@ -52,7 +52,7 @@ using FerramAerospaceResearch.FARUtils;
 
 namespace FerramAerospaceResearch.FARAeroComponents
 {
-    class FARAeroSection : IFARCloneable
+    internal class FARAeroSection : IFARCloneable
     {
         private FARCloneHelper _cloneHelper;
         static FloatCurve crossFlowDragMachCurve;

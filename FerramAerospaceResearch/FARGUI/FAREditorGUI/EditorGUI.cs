@@ -91,6 +91,10 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
         bool partMovement = false;
 
         EditorSimManager _simManager;
+        internal EditorSimManager SimManager
+        {
+            get { return _simManager; }
+        }
 
         InstantConditionSim _instantSim;
         EditorAreaRulingOverlay _areaRulingOverlay;
