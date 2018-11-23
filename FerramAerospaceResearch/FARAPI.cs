@@ -45,6 +45,8 @@ Copyright 2017, Michael Ferrara, aka Ferram4
 using System;
 using UnityEngine;
 using FerramAerospaceResearch.FARGUI.FARFlightGUI;
+using FerramAerospaceResearch.FARAPIModules;
+using FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation;
 using FerramAerospaceResearch.FARAeroComponents;
 using FerramAerospaceResearch.FARUtils;
 
@@ -414,6 +416,41 @@ namespace FerramAerospaceResearch
                 return false;
 
             return vesselAeroModule.HasValidVoxelizationCurrently();
+        }
+        #endregion
+
+        #region Simulation
+        public class Simulation
+        {
+            private static Simulation instance;
+            private static Simulation Instance
+            {
+                get
+                {
+                    if (instance == null)
+                        instance = new Simulation();
+                    if (!HighLogic.LoadedSceneIsEditor)
+                        throw new InvalidOperationException("Simulation is only available in the editor scene.");
+                    return instance;
+                }
+            }
+
+            public static InstantConditionSimInput SimulationInput() => new InstantConditionSimInput();
+
+            public static InstantConditionSimInput SimulationInput(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue)
+            {
+                return new InstantConditionSimInput(alpha, beta, phi, alphaDot, betaDot, phiDot, machNumber, pitchValue);
+            }
+
+            private InstantConditionSimulation InstanceGetInstantConditionSim()
+            {
+                return new InstantConditionSimulation();
+            }
+
+            public static InstantConditionSimulation GetInstantConditionSim()
+            {
+                return Instance.InstanceGetInstantConditionSim();
+            }
         }
         #endregion
     }
