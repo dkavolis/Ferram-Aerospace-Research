@@ -1,4 +1,4 @@
-﻿/*
+/*
 Ferram Aerospace Research v0.15.9.5 "Lighthill"
 =========================
 Aerodynamics model for Kerbal Space Program
@@ -450,6 +450,16 @@ namespace FerramAerospaceResearch
             public static InstantConditionSimulation GetInstantConditionSim()
             {
                 return Instance.InstanceGetInstantConditionSim();
+            }
+
+            public static void UpdateCurrentBody(CelestialBody body)
+            {
+                FARAeroUtil.UpdateCurrentActiveBody(body);
+            }
+
+            public static CelestialBody CurrentBody
+            {
+                get { return FARAeroUtil.CurrentBody; }
             }
         }
         #endregion
