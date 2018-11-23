@@ -48,7 +48,7 @@ using FerramAerospaceResearch.FARUtils;
 
 namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
-    class InstantConditionSimInput : IFARCloneable
+    public class InstantConditionSimInput : IFARCloneable
     {
         private FARCloneHelper _cloneHelper;
         public double alpha;

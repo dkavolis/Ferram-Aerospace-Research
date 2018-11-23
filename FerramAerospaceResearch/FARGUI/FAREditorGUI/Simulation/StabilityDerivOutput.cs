@@ -50,7 +50,7 @@ using UnityEngine;
 
 namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
-    class StabilityDerivOutput
+    public class StabilityDerivOutput
     {
         public double[] stabDerivs = new double[27];
         public double b;

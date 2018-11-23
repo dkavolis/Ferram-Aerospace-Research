@@ -46,7 +46,7 @@ using System;
 
 namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
-    struct InstantConditionSimOutput
+    public struct InstantConditionSimOutput
     {
         public double Cl;
         public double Cd;
