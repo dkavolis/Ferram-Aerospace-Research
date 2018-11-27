@@ -442,6 +442,11 @@ namespace FerramAerospaceResearch
                 return new InstantConditionSimInput(alpha, beta, phi, alphaDot, betaDot, phiDot, machNumber, pitchValue);
             }
 
+            public static InstantConditionSimInput SimulationInput(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue, int flaps, bool spoilers)
+            {
+                return new InstantConditionSimInput(alpha, beta, phi, alphaDot, betaDot, phiDot, machNumber, pitchValue, flaps, spoilers);
+            }
+
             private InstantConditionSimulation InstanceGetInstantConditionSim()
             {
                 return new InstantConditionSimulation();

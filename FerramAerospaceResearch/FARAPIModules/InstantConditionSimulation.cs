@@ -75,6 +75,18 @@ namespace FerramAerospaceResearch.FARAPIModules
             return output;
         }
 
+        public InstantConditionSimOutput ComputeNonDimensionalForces(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue, bool clear, bool reset_stall = false)
+        {
+            InstantConditionSimInput input = new InstantConditionSimInput(alpha, beta, phi, alphaDot, betaDot, phiDot, machNumber, pitchValue);
+            return ComputeNonDimensionalForces(input, clear, reset_stall);
+        }
+
+        public InstantConditionSimOutput ComputeNonDimensionalForces(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue, int flaps, bool spoilers, bool clear, bool reset_stall = false)
+        {
+            InstantConditionSimInput input = new InstantConditionSimInput(alpha, beta, phi, alphaDot, betaDot, phiDot, machNumber, pitchValue, flaps, spoilers);
+            return ComputeNonDimensionalForces(input, clear, reset_stall);
+        }
+
         public void SetState(double machNumber, double Cl, Vector3d CoM, double pitch, int flapSetting, bool spoilers)
         {
             _instantCondition.SetState(machNumber, Cl, CoM, pitch, flapSetting, spoilers);
