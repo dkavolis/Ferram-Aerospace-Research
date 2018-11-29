@@ -103,5 +103,10 @@ namespace FerramAerospaceResearch.FARAPIModules
             return FARMathUtil.BrentsMethod(_instantCondition.FunctionIterateForAlpha, -30d, 30d, 0.001, 500);
         }
 
+        public void Update()
+        {
+            _instantCondition = EditorGUI.Instance.SimManager.InstantCondition.Clone<InstantConditionSim>();
+        }
+
     }
 }
