@@ -1,4 +1,4 @@
-/*
+﻿/*
 Ferram Aerospace Research v0.15.9.5 "Lighthill"
 =========================
 Aerodynamics model for Kerbal Space Program
@@ -435,13 +435,34 @@ namespace FerramAerospaceResearch
                 }
             }
 
+            /// <summary>
+            /// Create a default simulation input for use in InstantConditionSimulation.
+            /// </summary>
             public static InstantConditionSimInput SimulationInput() => new InstantConditionSimInput();
 
+            /// <summary>
+            /// Create simulation input for use in InstantConditionSimulation.
+            /// </summary>
+            /// <param name="alpha">Angle of attack</param>
+            /// <param name="beta">Sideslip angle</param>
+            /// <param name="phi">Roll angle</param>
+            /// <param name="alphaDot">Rate of change of angle of attack</param>
+            /// <param name="betaDot">Rate of change of sideslip angle</param>
+            /// <param name="phiDot">Rate of change of roll angle</param>
+            /// <param name="machNumber">Mach number</param>
+            /// <param name="pitchValue">Pitch angle</param>
+            /// <returns>Simulation input for use in InstantConditionSimulation.</returns>
             public static InstantConditionSimInput SimulationInput(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue)
             {
                 return new InstantConditionSimInput(alpha, beta, phi, alphaDot, betaDot, phiDot, machNumber, pitchValue);
             }
 
+            /// <summary>
+            /// Create simulation input for use in InstantConditionSimulation. See <see cref="FARAPI.Simulation.SimulationInput(double, double, double, double, double, double, double, double)" /> for arguments.
+            /// </summary>
+            /// <param name="flaps">Flap deflection 0 (no deflection) to 3 (full deflection)</param>
+            /// <param name="spoilers">Whether spoilers (brakes) are extended</param>
+            /// <returns>Simulation input for use in InstantConditionSimulation.</returns>
             public static InstantConditionSimInput SimulationInput(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue, int flaps, bool spoilers)
             {
                 return new InstantConditionSimInput(alpha, beta, phi, alphaDot, betaDot, phiDot, machNumber, pitchValue, flaps, spoilers);
@@ -452,16 +473,27 @@ namespace FerramAerospaceResearch
                 return new InstantConditionSimulation();
             }
 
+            /// <summary>
+            /// Creates a clone of an existing instant condition simulation so its state does not affect FAR and only the editor state (parts in the vehicle) affects the simulation.
+            /// </summary>
+            /// <returns>A clone of internal instant condition simulation</returns>
             public static InstantConditionSimulation GetInstantConditionSim()
             {
                 return Instance.InstanceGetInstantConditionSim();
             }
 
+            /// <summary>
+            /// Update the current active body used in simulations.
+            /// </summary>
+            /// <param name="body">Body to use in simulations</param>
             public static void UpdateCurrentBody(CelestialBody body)
             {
                 FARAeroUtil.UpdateCurrentActiveBody(body);
             }
 
+            /// <summary>
+            /// Get current body used in the simulations.
+            /// </summary>
             public static CelestialBody CurrentBody
             {
                 get { return FARAeroUtil.CurrentBody; }

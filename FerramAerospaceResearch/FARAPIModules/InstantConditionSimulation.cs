@@ -48,26 +48,52 @@ namespace FerramAerospaceResearch.FARAPIModules
     public class InstantConditionSimulation
     {
         private InstantConditionSim _instantCondition;
+
+        /// <summary>
+        /// The last iteration output.
+        /// </summary>
+        /// <value>The last iteration output when either FunctionIterateForAlpha or ComputeRequiredAoA was called.</value>
         public InstantConditionSimOutput iterationOutput
         {
             get { return _instantCondition.iterationOutput; }
         }
 
+        /// <summary>
+        /// Default constructor that encapsulates a clone of instant condition simulation used in FAR. <see cref="InstantConditionSimulation.Update" /> should be called if the editor state changes.
+        /// </summary>
         public InstantConditionSimulation()
         {
             _instantCondition = EditorGUI.Instance.SimManager.InstantCondition.Clone<InstantConditionSim>();
         }
 
+        /// <summary>
+        /// Whether simulation can be run.
+        /// </summary>
+        /// <value>Is simulation ready to be run.</value>
         public bool Ready
         {
             get { return _instantCondition.Ready; }
         }
 
+        /// <summary>
+        /// Compute the gravitational acceleration.
+        /// </summary>
+        /// <param name="body">Celestial body to compute acceleration for</param>
+        /// <param name="alt">Altitude above mean radius</param>
+        /// <returns>Gravitational acceleration.</returns>
         public double CalculateAccelerationDueToGravity(CelestialBody body, double alt)
         {
             return _instantCondition.CalculateAccelerationDueToGravity(body, alt);
         }
 
+        /// <summary>
+        /// Compute non-dimensional forces for the current body and vehicle.
+        /// <see cref="FARAPI.Simulation.UpdateCurrentBody" /> to set the celestial body to be used for simulation.
+        /// </summary>
+        /// <param name="input">Simulation input values InstantConditionSimInput</param>
+        /// <param name="clear">Whether to clear Cl and Cd from the wing aerodynamic model, only needed on the first simulation or for clearing stall.</param>
+        /// <param name="reset_stall">Whether to reset the stall, <paramref name="clear"/> needs to be true. Set to true if input conditions are changed that would result in stall</param>
+        /// <returns>InstantConditionSimOutput of non-dimensional forces</returns>
         public InstantConditionSimOutput ComputeNonDimensionalForces(InstantConditionSimInput input, bool clear, bool reset_stall = false)
         {
             InstantConditionSimOutput output = new InstantConditionSimOutput();
@@ -75,34 +101,63 @@ namespace FerramAerospaceResearch.FARAPIModules
             return output;
         }
 
+        /// <summary>
+        /// Overload of <see cref="ComputeNonDimensionalForces" /> using only native types. See <see cref="FARAPI.Simulation.SimulationInput(double, double, double, double, double, double, double, double)"/> for arguments.
+        /// </summary>
         public InstantConditionSimOutput ComputeNonDimensionalForces(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue, bool clear, bool reset_stall = false)
         {
             InstantConditionSimInput input = new InstantConditionSimInput(alpha, beta, phi, alphaDot, betaDot, phiDot, machNumber, pitchValue);
             return ComputeNonDimensionalForces(input, clear, reset_stall);
         }
 
+        /// <summary>
+        /// Overload of <see cref="ComputeNonDimensionalForces" /> using only native types. See <see cref="FARAPI.Simulation.SimulationInput(double, double, double, double, double, double, double, double, int, bool)"/> for arguments.
+        /// </summary>
         public InstantConditionSimOutput ComputeNonDimensionalForces(double alpha, double beta, double phi, double alphaDot, double betaDot, double phiDot, double machNumber, double pitchValue, int flaps, bool spoilers, bool clear, bool reset_stall = false)
         {
             InstantConditionSimInput input = new InstantConditionSimInput(alpha, beta, phi, alphaDot, betaDot, phiDot, machNumber, pitchValue, flaps, spoilers);
             return ComputeNonDimensionalForces(input, clear, reset_stall);
         }
 
+        /// <summary>
+        /// Set the state that will be used for computing difference between required and current lift coefficients.
+        /// <seealso cref="FunctionIterateForAlpha" />, <seealso cref="InstantConditionSimulation.ComputeRequiredAoA(double, double, Vector3d, double, int, bool)" />
+        /// </summary>
+        /// <param name="machNumber">Mach number</param>
+        /// <param name="Cl">Required lift coefficient</param>
+        /// <param name="CoM">Center of mass</param>
+        /// <param name="pitch">Pitch angle</param>
+        /// <param name="flapSetting">Flap deflection level 0 (no deflection) to 3 (full deflection)</param>
+        /// <param name="spoilers">Whether spoilers are extended</param>
         public void SetState(double machNumber, double Cl, Vector3d CoM, double pitch, int flapSetting, bool spoilers)
         {
             _instantCondition.SetState(machNumber, Cl, CoM, pitch, flapSetting, spoilers);
         }
 
+        /// <summary>
+        /// Compute the difference between required and current lift coefficients at angle of attack <paramref name="alpha"/>. <see cref="SetState"/> to
+        /// </summary>
+        /// <param name="alpha">Current angle of attack</param>
+        /// <returns>Difference between current and required lift coefficients.</returns>
         public double FunctionIterateForAlpha(double alpha)
         {
             return _instantCondition.FunctionIterateForAlpha(alpha);
         }
 
+        /// <summary>
+        /// Computes required angle of attack to achieve lift coefficient <paramref name="Cl"/> at a specified Mach number <paramref name="machNumber"/>.null Uses Brent's method internally.
+        /// See <see cref="SetState" /> for arguments.
+        /// </summary>
+        /// <returns>Angle of attack for steady flight</returns>
         public double ComputeRequiredAoA(double machNumber, double Cl, Vector3d CoM, double pitch, int flapSetting, bool spoilers)
         {
             _instantCondition.SetState(machNumber, Cl, CoM, pitch, flapSetting, spoilers);
             return FARMathUtil.BrentsMethod(_instantCondition.FunctionIterateForAlpha, -30d, 30d, 0.001, 500);
         }
 
+        /// <summary>
+        /// Updates this <see cref="InstantConditionSimulation" /> to match the current state of the editor.
+        /// </summary>
         public void Update()
         {
             _instantCondition = EditorGUI.Instance.SimManager.InstantCondition.Clone<InstantConditionSim>();
