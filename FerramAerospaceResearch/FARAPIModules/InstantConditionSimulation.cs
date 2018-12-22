@@ -58,6 +58,23 @@ namespace FerramAerospaceResearch.FARAPIModules
             get { return _instantCondition.iterationOutput; }
         }
 
+        public double maxCrossSectionFromBody { get => _instantCondition._maxCrossSectionFromBody; }
+        public double bodyLength { get => _instantCondition._bodyLength; }
+        public double area { get => _instantCondition.area; }
+        /// <summary>
+        /// Mean aerodynamic chord
+        /// </summary>
+        public double MAC { get => _instantCondition.MAC; }
+        /// <summary>
+        /// Wing span
+        /// </summary>
+        public double b_2 { get => _instantCondition.b_2; }
+        /// <summary>
+        /// Center of mass
+        /// </summary>
+        public Vector3d CoM { get => _instantCondition.CoM; }
+        public double mass { get => _instantCondition.mass; }
+
         /// <summary>
         /// Default constructor that encapsulates a clone of instant condition simulation used in FAR. <see cref="InstantConditionSimulation.Update" /> should be called if the editor state changes.
         /// </summary>
