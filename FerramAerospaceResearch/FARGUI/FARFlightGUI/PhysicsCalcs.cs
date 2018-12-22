@@ -69,6 +69,15 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 
         VesselFlightInfo vesselInfo;
 
+        //temporary variables:
+        private FARWingAerodynamicModel wingModel;
+        private FARAeroPartModule aeroModule;
+        Vector3d velVector, velVectorNorm ;
+        double vesselSpeed;
+        PartModule m;
+        Part p ;
+        Rigidbody rb ;
+
         public PhysicsCalcs(Vessel vessel, FARVesselAero vesselAerodynamics)
         {
             _vessel = vessel;
@@ -91,11 +100,11 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             useWingArea = false;
             for (int i = 0; i < legacyWingModels.Count; i++)
             {
-                FARWingAerodynamicModel w = legacyWingModels[i];
-                if ((object)w != null)
+                wingModel = legacyWingModels[i];
+                if ((object)wingModel != null)
                 {
                     useWingArea = true;
-                    wingArea += w.S;
+                    wingArea += wingModel.S;
                 }
             }
         }
@@ -104,16 +113,18 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         {
             vesselInfo = new VesselFlightInfo();
             if (_vessel == null)
+            {
                 return vesselInfo;
+            }
 
-            Vector3d velVector = _vessel.srf_velocity
+            velVector = _vessel.srf_velocity
                 - FARWind.GetWind(_vessel.mainBody, _vessel.rootPart, _vessel.ReferenceTransform.position);
-            Vector3d velVectorNorm = velVector.normalized;
-            double vesselSpeed = velVector.magnitude;
+            velVectorNorm = velVector.normalized;
+            vesselSpeed = velVector.magnitude;
 
 
             CalculateTotalAeroForce();
-            CalculateForceBreakdown(velVectorNorm, velVector);
+            CalculateForceBreakdown(velVectorNorm);
             CalculateVesselOrientation(velVectorNorm);
             CalculateEngineAndIntakeBasedParameters(vesselSpeed);
             CalculateBallisticCoefficientAndTermVel();
@@ -133,9 +144,9 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             {
                 for (int i = 0; i < _currentAeroModules.Count; i++)
                 {
-                    FARAeroPartModule m = _currentAeroModules[i];
-                    if ((object)m != null)
-                        totalAeroForceVector += m.totalWorldSpaceAeroForce;
+                    aeroModule = _currentAeroModules[i];
+                    if ((object)aeroModule != null)
+                        totalAeroForceVector += aeroModule.totalWorldSpaceAeroForce;
                 }
             }
 
@@ -153,7 +164,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             }*/
         }
 
-        private void CalculateForceBreakdown(Vector3d velVectorNorm, Vector3d velVector)
+        private void CalculateForceBreakdown(Vector3d velVectorNorm)
         {
             if (useWingArea)
                 vesselInfo.refArea = wingArea;
@@ -239,12 +250,11 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             PartResourceLibrary resLibrary = PartResourceLibrary.Instance;
 
 
-            List<Part> partsList = _vessel.Parts;
-            for (int i = 0; i < partsList.Count; i++)
+            for (int i = 0; i < _vessel.Parts.Count; i++)
             {
-                Part p = partsList[i];
+                p = _vessel.Parts[i];
 
-                Rigidbody rb = p.rb;
+                rb = p.rb;
                 if (rb != null)
                 {
                     vesselInfo.fullMass += rb.mass;
@@ -253,7 +263,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 
                 for (int j = 0; j < p.Modules.Count; j++)
                 {
-                    PartModule m = p.Modules[j];
+                    m = p.Modules[j];
                     if (m is ModuleEngines)
                     {
                         ModuleEngines e = (ModuleEngines)m;
@@ -344,8 +354,8 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         {
             for (int i = 0; i < _LEGACY_currentWingAeroModel.Count; i++)
             {
-                FARWingAerodynamicModel w = _LEGACY_currentWingAeroModel[i];
-                vesselInfo.stallFraction += w.GetStall() * w.S;
+                wingModel = _LEGACY_currentWingAeroModel[i];
+                vesselInfo.stallFraction += wingModel.GetStall() * wingModel.S;
 
             }
 

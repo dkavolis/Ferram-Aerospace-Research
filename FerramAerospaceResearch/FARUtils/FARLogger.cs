@@ -47,12 +47,17 @@ Copyright 2018, Daumantas Kavolis, aka dkavolis
 
 using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace FerramAerospaceResearch.FARUtils
 {
     public static class FARLogger
     {
+
+        private static Dictionary<string, Stopwatch> alltimers = new Dictionary<string, Stopwatch>();
+        private static Stopwatch myWatch = null;
+
 
         public static string defaultTag = $"[FAR {FARVersion.String}]";
 
@@ -102,28 +107,52 @@ namespace FerramAerospaceResearch.FARUtils
 
         #region Info
         [Conditional("DEBUG"), Conditional("INFO")]
-        public static void Info(object message) => UnityEngine.Debug.Log(Tag + " " + message);
+        public static void Info(object message)
+        {
+            UnityEngine.Debug.Log(Tag + " " + message);
+        }
 
         [Conditional("DEBUG"), Conditional("INFO")]
-        public static void Info(object message, UnityEngine.Object context) => UnityEngine.Debug.Log(Tag + " " + message, context);
+        public static void Info(object message, UnityEngine.Object context)
+        {
+            UnityEngine.Debug.Log(Tag + " " + message, context);
+        }
 
         [Conditional("DEBUG"), Conditional("INFO")]
-        public static void InfoFormat(string format, params object[] args) => UnityEngine.Debug.LogFormat(Tag + " " + format, args);
+        public static void InfoFormat(string format, params object[] args)
+        {
+            UnityEngine.Debug.LogFormat(Tag + " " + format, args);
+        }
 
         [Conditional("DEBUG"), Conditional("INFO")]
-        public static void InfoFormat(UnityEngine.Object context, string format, params object[] args) => UnityEngine.Debug.LogFormat(context, Tag + " " + format, args);
+        public static void InfoFormat(UnityEngine.Object context, string format, params object[] args)
+        {
+            UnityEngine.Debug.LogFormat(context, Tag + " " + format, args);
+        }
 
         [Conditional("DEBUG"), Conditional("INFO")]
-        public static void InfoWithCaller(object message) => UnityEngine.Debug.Log(Tag + " " + GetCallerInfo() + " - " + message);
+        public static void InfoWithCaller(object message)
+        {
+            UnityEngine.Debug.Log(Tag + " " + GetCallerInfo() + " - " + message);
+        }
 
         [Conditional("DEBUG"), Conditional("INFO")]
-        public static void InfoWithCaller(object message, UnityEngine.Object context) => UnityEngine.Debug.Log(Tag + " " + GetCallerInfo() + " - " + message, context);
+        public static void InfoWithCaller(object message, UnityEngine.Object context)
+        {
+            UnityEngine.Debug.Log(Tag + " " + GetCallerInfo() + " - " + message, context);
+        }
 
         [Conditional("DEBUG"), Conditional("INFO")]
-        public static void InfoFormatWithCaller(string format, params object[] args) => UnityEngine.Debug.LogFormat(Tag + " " + GetCallerInfo() + " - " + format, args);
+        public static void InfoFormatWithCaller(string format, params object[] args)
+        {
+            UnityEngine.Debug.LogFormat(Tag + " " + GetCallerInfo() + " - " + format, args);
+        }
 
         [Conditional("DEBUG"), Conditional("INFO")]
-        public static void InfoFormatWithCaller(UnityEngine.Object context, string format, params object[] args) => UnityEngine.Debug.LogFormat(context, Tag + " " + GetCallerInfo() + " - " + format, args);
+        public static void InfoFormatWithCaller(UnityEngine.Object context, string format, params object[] args)
+        {
+            UnityEngine.Debug.LogFormat(context, Tag + " " + GetCallerInfo() + " - " + format, args);
+        }
         #endregion // Info
 
         #region Debug
@@ -247,6 +276,61 @@ namespace FerramAerospaceResearch.FARUtils
             UnityEngine.Debug.LogException(exception, context);
         }
         #endregion // Exception
+
+        #region Performace
+        internal static void PerfStart(string id = "default")
+        {
+            myWatch = new Stopwatch();
+
+            if (alltimers.ContainsKey(id))
+            {
+                alltimers.Remove(id);
+            }
+            alltimers.Add(id, myWatch);
+            myWatch.Start();
+        }
+
+        /// <summary>
+        /// resets the Stopwatchtimer with the (string)id and prints the result.
+        /// </summary>
+        /// <param name="id"></param>
+        internal static void PerfStop(string id = "default")
+        {
+            if (alltimers.TryGetValue(id, out myWatch))
+            {
+                myWatch.Stop();
+                FARLogger.Info("Stopwatch: \"" + id + "\" elapsed time: " + myWatch.Elapsed);
+                myWatch.Reset();
+                alltimers.Remove(id);
+            }
+        }
+
+        /// <summary>
+        /// Pauses the timer with the id
+        /// </summary>
+        /// <param name="id"></param>
+        internal static void PerfPause(string id = "default")
+        {
+            if (alltimers.TryGetValue(id, out myWatch))
+            {
+                myWatch.Stop();
+            }
+        }
+
+        /// <summary>
+        /// resumes the timer
+        /// </summary>
+        /// <param name="id"></param>
+        internal static void PerfContinue(string id = "default")
+        {
+            if (alltimers.TryGetValue(id, out myWatch))
+            {
+                myWatch.Start();
+            }
+        }
+
+        #endregion
+
 
         //http://geekswithblogs.net/BlackRabbitCoder/archive/2013/07/25/c.net-little-wonders-getting-caller-information.aspx
         private static string GetCallerInfo()

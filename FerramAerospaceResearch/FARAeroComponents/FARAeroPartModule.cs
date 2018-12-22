@@ -103,6 +103,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
         //public double expSkinFrac;
 
         private Transform partTransform;
+        private Rigidbody rigidBody;
+
+        //private field for calculations
+        private Vector3 worldSpaceDragForce, worldSpaceLiftForce, waterDragForce, waterLiftForce, localForceTemp;
+
 
         private MaterialColorUpdater materialColorUpdater;
         private FARWingAerodynamicModel legacyWingModel;
@@ -436,14 +441,21 @@ namespace FerramAerospaceResearch.FARAeroComponents
         public void ApplyForces()
         {
             if (!part)
+            {
                 return;
+            }
 
             if (float.IsNaN(partLocalForce.sqrMagnitude))
+            {
                 partLocalForce = Vector3.zero;
-            if (float.IsNaN(partLocalTorque.sqrMagnitude))
-                partLocalTorque = Vector3.zero;
+            }
 
-            Vector3 localForceTemp = Vector3.Dot(partLocalVelNorm, partLocalForce) * partLocalVelNorm;
+            if (float.IsNaN(partLocalTorque.sqrMagnitude))
+            {
+                partLocalTorque = Vector3.zero;
+            }
+
+            localForceTemp = Vector3.Dot(partLocalVelNorm, partLocalForce) * partLocalVelNorm;
 
             partLocalForce = (localForceTemp * (float)part.dragScalar + (partLocalForce - localForceTemp) * (float)part.bodyLiftScalar);
             partLocalTorque *= (float)part.dragScalar;
@@ -452,13 +464,17 @@ namespace FerramAerospaceResearch.FARAeroComponents
             part.bodyLiftScalar = 0;
 
             if(!vessel.packed)
+            {
                 CheckAeroStressFailure();
+            }
 
             //Matrix4x4 matrix = partTransform.localToWorldMatrix;
-            Rigidbody rb = part.Rigidbody;
+            rigidBody = part.Rigidbody;
 
-            if (!rb)
+            if (!rigidBody)
+            {
                 return;
+            }
 
             worldSpaceAeroForce = partTransform.TransformDirection(partLocalForce);
             worldSpaceTorque = partTransform.TransformDirection(partLocalTorque);
@@ -474,11 +490,10 @@ namespace FerramAerospaceResearch.FARAeroComponents
             }
             else
             {
-                Vector3 worldSpaceDragForce, worldSpaceLiftForce;
+
                 worldSpaceDragForce = Vector3.Dot(worldSpaceVelNorm, worldSpaceAeroForce) * worldSpaceVelNorm;
                 worldSpaceLiftForce = worldSpaceAeroForce - worldSpaceDragForce;
 
-                Vector3 waterDragForce, waterLiftForce;
                 if (part.submergedPortion < 1)
                 {
                     float waterFraction = (float)(part.submergedDynamicPressurekPa * part.submergedPortion + part.dynamicPressurekPa * (1 - part.submergedPortion));
@@ -499,12 +514,15 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     waterLiftForce = worldSpaceLiftForce * (float)part.submergedLiftScalar;
                     worldSpaceDragForce = Vector3.zero;
                 }
-                hackWaterDragVal += Math.Abs(waterDragForce.magnitude / (rb.mass * rb.velocity.magnitude));
+                hackWaterDragVal += Math.Abs(waterDragForce.magnitude / (rigidBody.mass * rigidBody.velocity.magnitude));
                 //rb.drag += waterDragForce.magnitude / (rb.mass * rb.velocity.magnitude);
 
                 if(!float.IsNaN(worldSpaceDragForce.x))
+                {
                     part.AddForce(worldSpaceDragForce + worldSpaceLiftForce + waterLiftForce);
                     //rb.AddForce(worldSpaceDragForce + worldSpaceLiftForce + waterLiftForce);
+                }
+
 
                 worldSpaceAeroForce = worldSpaceDragForce + worldSpaceLiftForce + waterDragForce + waterLiftForce;
             }
@@ -541,9 +559,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         public void AddLocalForceAndTorque(Vector3 partLocalForce, Vector3 partLocalTorque, Vector3 partLocalLocation)
         {
-            Vector3 localRadVector = partLocalLocation - part.CoMOffset;
             this.partLocalForce += partLocalForce;
-            this.partLocalTorque += Vector3.Cross(localRadVector, partLocalForce);
+            this.partLocalTorque += Vector3.Cross((partLocalLocation - part.CoMOffset), partLocalForce);
 
             this.partLocalTorque += partLocalTorque;
 

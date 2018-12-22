@@ -125,10 +125,13 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             //since we're sharing the button, we need these shenanigans now
             if (FARDebugAndSettings.FARDebugButtonStock && HighLogic.LoadedSceneIsFlight)
                 if (showGUI)
+                {
                     FARDebugAndSettings.FARDebugButtonStock.SetTrue(false);
+                }
                 else
+                {
                     FARDebugAndSettings.FARDebugButtonStock.SetFalse(false);
-
+                }
 
             _vessel = GetComponent<Vessel>();
             _vesselAero = GetComponent<FARVesselAero>();
@@ -142,19 +145,27 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             //boxStyle.padding = new RectOffset(4, 4, 4, 4);
 
             if (vesselFlightGUI.ContainsKey(_vessel))
+            {
                 vesselFlightGUI[_vessel] = this;
+            }
             else
+            {
                 vesselFlightGUI.Add(_vessel, this);
+            }
 
             this.enabled = true;
 
             if(FARDebugValues.useBlizzyToolbar)
+            {
                 GenerateBlizzyToolbarButton();
+            }
 
             activeFlightGUICount++;
 
             if(_vessel == FlightGlobals.ActiveVessel || FlightGlobals.ActiveVessel == null)
+            {
                 LoadConfigs();
+            }
 
             GameEvents.onShowUI.Add(ShowUI);
             GameEvents.onHideUI.Add(HideUI);
@@ -173,19 +184,30 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             _physicsCalcs = null;
 
             if(_flightDataGUI != null)
+            {
                 _flightDataGUI.SaveSettings();
+            }
+
             _flightDataGUI = null;
 
             if(_stabilityAugmentation != null)
+            {
                 _stabilityAugmentation.SaveAndDestroy();
+            }
+
             _stabilityAugmentation = null;
 
             if(_airSpeedGUI != null)
+            {
                 _airSpeedGUI.SaveSettings();
+            }
+
             _airSpeedGUI = null;
 
             if (_aeroVizGUI != null)
+            {
                 _aeroVizGUI.SaveSettings();
+            }
 
             _flightStatusGUI = null;
             settingsWindow = null;
@@ -196,7 +218,9 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             {
                 activeFlightGUICount = 0;
                 if (blizzyFlightGUIButton != null)
+                {
                     ClearBlizzyToolbarButton();
+                }
             }
 
             savedShowGUI = showGUI;
@@ -208,13 +232,24 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             {
                 SaveConfigs();
                 if(_airSpeedGUI != null)
+                {
                     _airSpeedGUI.SaveSettings();
-                if(_stabilityAugmentation != null)
+                }
+
+                if (_stabilityAugmentation != null)
+                {
                     _stabilityAugmentation.SaveSettings();
-                if(_flightDataGUI != null)
+                }
+
+                if (_flightDataGUI != null)
+                {
                     _flightDataGUI.SaveSettings();
-                if(_aeroVizGUI != null)
+                }
+
+                if (_aeroVizGUI != null)
+                {
                     _aeroVizGUI.SaveSettings();
+                }
             }
         }
         public static void SaveActiveData()
@@ -230,7 +265,10 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         //Receives message from FARVesselAero through _vessel on the recalc being completed
         public void UpdateAeroModules(List<FARAeroPartModule> newAeroModules, List<FARWingAerodynamicModel> legacyWingModels)
         {
-            _physicsCalcs.UpdateAeroModules(newAeroModules, legacyWingModels);
+            if (showGUI)
+            {
+                _physicsCalcs.UpdateAeroModules(newAeroModules, legacyWingModels);
+            }
         }
 
         //Receives a message from any FARWingAerodynamicModel or FARAeroPartModule that has failed to update the GUI
@@ -243,8 +281,10 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         #region PhysicsAndOrientationBlock
         void FixedUpdate()
         {
-            if (_physicsCalcs == null)
+            if (_physicsCalcs == null || !showGUI )
+            {
                 return;
+            }
 
             infoParameters = _physicsCalcs.UpdatePhysicsParameters();
 
@@ -271,9 +311,13 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         {
             //OnGUIAppLauncherReady();
             if (_airSpeedGUI != null)
+            {
                 _airSpeedGUI.ChangeSurfVelocity();
+            }
             else if (_vessel != null)
+            {
                 _airSpeedGUI = new AirspeedSettingsGUI(_vessel);
+            }
         }
 
         #region GUI Functions

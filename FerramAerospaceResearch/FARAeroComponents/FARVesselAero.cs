@@ -220,24 +220,24 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 _vehicleAero.GetNewAeroData(out _currentAeroModules, out _unusedAeroModules, out _currentAeroSections, out _legacyWingModels);
 
                 if ((object)_flightGUI == null)
+                {
                     _flightGUI = vessel.GetComponent<FerramAerospaceResearch.FARGUI.FARFlightGUI.FlightGUI>();
+                }
 
                 _flightGUI.UpdateAeroModules(_currentAeroModules, _legacyWingModels);
                 //FARLogger.Info("Updating " + _vessel.vesselName + " aero properties\n\rCross-Sectional Area: " + _vehicleAero.MaxCrossSectionArea + " Crit Mach: " + _vehicleAero.CriticalMach + "\n\rUnusedAeroCount: " + _unusedAeroModules.Count + " UsedAeroCount: " + _currentAeroModules.Count + " sectCount: " + _currentAeroSections.Count);
 
                 for (int i = 0; i < _unusedAeroModules.Count; i++)
                 {
-                    FARAeroPartModule a = _unusedAeroModules[i];
-                    a.SetShielded(true);
-                    a.ForceLegacyAeroUpdates();
+                    _unusedAeroModules[i].SetShielded(true);
+                    _unusedAeroModules[i].ForceLegacyAeroUpdates();
                     //FARLogger.Info("" + a.part.partInfo.title + " shielded, area: " + a.ProjectedAreas.totalArea);
                 }
 
                 for (int i = 0; i < _currentAeroModules.Count; i++)
                 {
-                    FARAeroPartModule a = _currentAeroModules[i];
-                    a.SetShielded(false);
-                    a.ForceLegacyAeroUpdates();
+                    _currentAeroModules[i].SetShielded(false);
+                    _currentAeroModules[i].ForceLegacyAeroUpdates();
                     //FARLogger.Info("" + a.part.partInfo.title + " unshielded, area: " + a.ProjectedAreas.totalArea);
                 }
 
@@ -254,14 +254,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 _updateRateLimiter++;
             }
             else if (_updateQueued)
+            {
                 VesselUpdate(_recalcGeoModules);
+            }
         }
 
         private void CalculateAndApplyVesselAeroProperties()
         {
-            float atmDensity = (float)vessel.atmDensity;
-
-            if (atmDensity <= 0)
+            if (vessel.atmDensity <= 0)
             {
                 machNumber = 0;
                 reynoldsNumber = 0;
@@ -274,14 +274,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             float pseudoKnudsenNumber = (float)(machNumber / (reynoldsNumber + machNumber));
 
-            Vector3 frameVel = Krakensbane.GetFrameVelocityV3f();
 
             //if(_updateQueued)       //only happens if we have an voxelization scheduled, then we need to check for null
             for (int i = _currentAeroModules.Count - 1; i >= 0; i--)        //start from the top and come down to improve performance if it needs to remove anything
             {
-                FARAeroPartModule m = _currentAeroModules[i];
-                if (m != null && m.part != null && m.part.partTransform != null)
-                    m.UpdateVelocityAndAngVelocity(frameVel);
+                if (_currentAeroModules[i] != null && _currentAeroModules[i].part != null && _currentAeroModules[i].part.partTransform != null)
+                {
+                    _currentAeroModules[i].UpdateVelocityAndAngVelocity(Krakensbane.GetFrameVelocityV3f());
+                }
                 else
                 {
                     _currentAeroModules.RemoveAt(i);
@@ -296,14 +296,15 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 }*/
 
             for (int i = 0; i < _currentAeroSections.Count; i++)
-                _currentAeroSections[i].FlightCalculateAeroForces(atmDensity, (float)machNumber, (float)(reynoldsNumber / Length), pseudoKnudsenNumber, skinFrictionDragCoefficient);
+            {
+                _currentAeroSections[i].FlightCalculateAeroForces(vessel.atmDensity, machNumber, (reynoldsNumber / Length), pseudoKnudsenNumber, skinFrictionDragCoefficient);
+            }
 
             _vesselIntakeRamDrag.ApplyIntakeRamDrag((float)machNumber, vessel.srf_velocity.normalized, (float)vessel.dynamicPressurekPa);
 
             for (int i = 0; i < _currentAeroModules.Count; i++)
             {
-                FARAeroPartModule m = _currentAeroModules[i];
-                m.ApplyForces();
+                _currentAeroModules[i].ApplyForces();
             }
         }
 
