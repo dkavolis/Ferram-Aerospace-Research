@@ -62,6 +62,12 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
         public double _maxCrossSectionFromBody;
         public double _bodyLength;
 
+        public double area;
+        public double MAC;
+        public double b_2;
+        public Vector3d CoM;
+        public double mass;
+
         public InstantConditionSim() => _cloneHelper = new FARCloneHelper();
         public bool Ready
         {
@@ -87,20 +93,11 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             return accel;
         }
 
-        public void GetClCdCmSteady(InstantConditionSimInput input, out InstantConditionSimOutput output, bool clear, bool reset_stall = false)
+        public void PrecomputeVessel()
         {
-            output = new InstantConditionSimOutput();
+            CoM = Vector3d.zero;
+            mass = 0;
 
-            double area = 0;
-            double MAC = 0;
-            double b_2 = 0;
-
-            Vector3d forward = Vector3.forward;
-            Vector3d up = Vector3.up;
-            Vector3d right = Vector3.right;
-
-            Vector3d CoM = Vector3d.zero;
-            double mass = 0;
             List<Part> partsList = EditorLogic.SortedShipList;
             for (int i = 0; i < partsList.Count; i++)
             {
@@ -119,6 +116,21 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                 mass += partMass;
             }
             CoM /= mass;
+        }
+
+        public void GetClCdCmSteady(InstantConditionSimInput input, out InstantConditionSimOutput output, bool clear, bool reset_stall = false)
+        {
+            output = new InstantConditionSimOutput();
+
+            area = 0;
+            MAC = 0;
+            b_2 = 0;
+
+            Vector3d forward = Vector3.forward;
+            Vector3d up = Vector3.up;
+            Vector3d right = Vector3.right;
+
+            if (!isClone) PrecomputeVessel();
 
             if (EditorDriver.editorFacility == EditorFacility.VAB)
             {
@@ -337,6 +349,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 
             iterationInput = FARCloneHelper.Clone<InstantConditionSimInput>(other.iterationInput, cache);
             iterationOutput = other.iterationOutput;
+
+            PrecomputeVessel();
         }
 
         public T Clone<T>() where T : IFARCloneable => FARCloneHelper.Clone<T>(this);
