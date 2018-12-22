@@ -100,6 +100,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
         VehicleAerodynamics _vehicleAero;
         VesselIntakeRamDrag _vesselIntakeRamDrag;
 
+        // some internal variables
+        private Vector3 frameVel;
+
         protected override void OnStart()
         {
             FARLogger.Info("FARVesselAero on " + vessel.name + " reporting startup");
@@ -274,13 +277,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             float pseudoKnudsenNumber = (float)(machNumber / (reynoldsNumber + machNumber));
 
+            frameVel = Krakensbane.GetFrameVelocityV3f();
 
             //if(_updateQueued)       //only happens if we have an voxelization scheduled, then we need to check for null
             for (int i = _currentAeroModules.Count - 1; i >= 0; i--)        //start from the top and come down to improve performance if it needs to remove anything
             {
                 if (_currentAeroModules[i] != null && _currentAeroModules[i].part != null && _currentAeroModules[i].part.partTransform != null)
                 {
-                    _currentAeroModules[i].UpdateVelocityAndAngVelocity(Krakensbane.GetFrameVelocityV3f());
+                    _currentAeroModules[i].UpdateVelocityAndAngVelocity(frameVel);
                 }
                 else
                 {
