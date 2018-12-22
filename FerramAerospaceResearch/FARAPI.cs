@@ -441,7 +441,7 @@ namespace FerramAerospaceResearch
             public static InstantConditionSimInput SimulationInput() => new InstantConditionSimInput();
 
             /// <summary>
-            /// Create simulation input for use in InstantConditionSimulation.
+            /// Create simulation input for use in InstantConditionSimulation. The angles are in degrees.
             /// </summary>
             /// <param name="alpha">Angle of attack</param>
             /// <param name="beta">Sideslip angle</param>

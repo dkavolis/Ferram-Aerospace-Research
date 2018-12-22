@@ -143,7 +143,7 @@ namespace FerramAerospaceResearch.FARAPIModules
         /// <param name="machNumber">Mach number</param>
         /// <param name="Cl">Required lift coefficient</param>
         /// <param name="CoM">Center of mass</param>
-        /// <param name="pitch">Pitch angle</param>
+        /// <param name="pitch">Pitch angle in degrees</param>
         /// <param name="flapSetting">Flap deflection level 0 (no deflection) to 3 (full deflection)</param>
         /// <param name="spoilers">Whether spoilers are extended</param>
         public void SetState(double machNumber, double Cl, Vector3d CoM, double pitch, int flapSetting, bool spoilers)
@@ -154,7 +154,7 @@ namespace FerramAerospaceResearch.FARAPIModules
         /// <summary>
         /// Compute the difference between required and current lift coefficients at angle of attack <paramref name="alpha"/>. <see cref="SetState"/> to
         /// </summary>
-        /// <param name="alpha">Current angle of attack</param>
+        /// <param name="alpha">Current angle of attack in degrees</param>
         /// <returns>Difference between current and required lift coefficients.</returns>
         public double FunctionIterateForAlpha(double alpha)
         {
