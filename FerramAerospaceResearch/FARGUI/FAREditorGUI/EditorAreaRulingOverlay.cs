@@ -327,12 +327,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
         }*/
 
 
-        private void UpdateRenderer(LineRenderer renderer, Matrix4x4 transformMatrix, double[] xCoords, double[] yCoords)
-        {
-            UpdateRenderer(renderer, transformMatrix, xCoords, yCoords, 1);
-        }
-
-        private void UpdateRenderer(LineRenderer renderer, Matrix4x4 transformMatrix, double[] xCoords, double[] yCoords, double yScalingFactor)
+        private void UpdateRenderer(LineRenderer renderer, Matrix4x4 transformMatrix, double[] xCoords, double[] yCoords, double yScalingFactor = 1)
         {
             // getting transform is internal call, cache
             Transform transform = renderer.transform;

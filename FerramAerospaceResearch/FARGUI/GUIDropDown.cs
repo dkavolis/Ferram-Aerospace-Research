@@ -69,9 +69,7 @@ namespace FerramAerospaceResearch.FARGUI
         private static GUIStyle selectedItemStyle;
         // ReSharper restore StaticMemberInGenericType
 
-        public GUIDropDown(string[] stringOptions, T[] typeOptions) : this(stringOptions, typeOptions, 0) { }
-
-        public GUIDropDown(string[] stringOptions, T[] typeOptions, int defaultOption)
+        public GUIDropDown(string[] stringOptions, T[] typeOptions, int defaultOption = 0)
         {
             this.stringOptions = stringOptions;
             this.typeOptions = typeOptions;

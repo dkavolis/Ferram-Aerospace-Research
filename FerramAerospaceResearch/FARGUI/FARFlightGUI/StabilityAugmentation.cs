@@ -85,7 +85,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         public StabilityAugmentation(Vessel vessel)
         {
             _vessel = vessel;
-            systemDropdown = new GUIDropDown<int>(systemLabel, new[] { 0, 1, 2, 3, 4, 5 }, 0);
+            systemDropdown = new GUIDropDown<int>(systemLabel, new[] { 0, 1, 2, 3, 4, 5 });
             LoadSettings();
             systemInstances = new ControlSystem[systemTemplates.Length];
 

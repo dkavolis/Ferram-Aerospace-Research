@@ -358,13 +358,7 @@ namespace ferram4
             AddLine(lineName, xValues, yValues, lineColor, lineThickness);
         }
 
-        public void AddLine(string lineName, double[] xValues, double[] yValues, Color lineColor, int lineThickness)
-        {
-            AddLine(lineName, xValues, yValues, lineColor, lineThickness, true);
-
-        }
-
-        public void AddLine(string lineName, double[] xValues, double[] yValues, Color lineColor, int lineThickness, bool display)
+        public void AddLine(string lineName, double[] xValues, double[] yValues, Color lineColor, int lineThickness, bool display = true)
         {
             if (allLines.ContainsKey(lineName))
             {

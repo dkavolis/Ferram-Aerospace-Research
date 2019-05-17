@@ -137,7 +137,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             _flightDataGUI = new FlightDataGUI();
             _aeroVizGUI = new AeroVisualizationGUI();
 
-            settingsWindow = new GUIDropDown<int>(new[] { Localizer.Format("FARFlightGUIWindowSelect0"), Localizer.Format("FARFlightGUIWindowSelect1"), Localizer.Format("FARFlightGUIWindowSelect2"), Localizer.Format("FARFlightGUIWindowSelect3") }, new[] { 0, 1, 2, 3 }, 0);
+            settingsWindow = new GUIDropDown<int>(new[] { Localizer.Format("FARFlightGUIWindowSelect0"), Localizer.Format("FARFlightGUIWindowSelect1"), Localizer.Format("FARFlightGUIWindowSelect2"), Localizer.Format("FARFlightGUIWindowSelect3") }, new[] { 0, 1, 2, 3 });
             //boxStyle.padding = new RectOffset(4, 4, 4, 4);
 
             if (vesselFlightGUI.ContainsKey(_vessel))

@@ -145,7 +145,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             // ReSharper restore PossibleLossOfFraction
 
             _instantSim = new InstantConditionSim();
-            GUIDropDown<int> flapSettingDropDown = new GUIDropDown<int>(new[] { Localizer.Format("FARFlapSetting0"), Localizer.Format("FARFlapSetting1"), Localizer.Format("FARFlapSetting2"), Localizer.Format("FARFlapSetting3") }, new[] { 0, 1, 2, 3 }, 0);
+            GUIDropDown<int> flapSettingDropDown = new GUIDropDown<int>(new[] { Localizer.Format("FARFlapSetting0"), Localizer.Format("FARFlapSetting1"), Localizer.Format("FARFlapSetting2"), Localizer.Format("FARFlapSetting3") }, new[] { 0, 1, 2, 3 });
             GUIDropDown<CelestialBody> celestialBodyDropdown = CreateBodyDropdown();
 
             modeDropdown = new GUIDropDown<FAREditorMode>(FAReditorMode_str, new[] {FAREditorMode.STATIC, FAREditorMode.STABILITY, FAREditorMode.SIMULATION, FAREditorMode.AREA_RULING});
