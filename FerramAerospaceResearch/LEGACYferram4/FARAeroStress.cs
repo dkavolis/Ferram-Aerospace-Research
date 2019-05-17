@@ -118,18 +118,20 @@ namespace FerramAerospaceResearch
 
         private static FARPartStressTemplate CreateFARPartStressTemplate(ConfigNode template)
         {
-            FARPartStressTemplate parsedTemplate = new FARPartStressTemplate();
-            parsedTemplate.XZmaxStress = 500;
-            parsedTemplate.YmaxStress = 500;
-            parsedTemplate.name = "default";
-            parsedTemplate.isSpecialTemplate = false;
-            parsedTemplate.minNumResources = 0;
-            parsedTemplate.resources = new List<string>();
-            parsedTemplate.excludeResources = new List<string>();
-            parsedTemplate.rejectUnlistedResources = false;
-            parsedTemplate.crewed = false;
-            parsedTemplate.flowModeNeeded = false;
-            parsedTemplate.flowMode = ResourceFlowMode.NO_FLOW;
+            FARPartStressTemplate parsedTemplate = new FARPartStressTemplate
+            {
+                XZmaxStress             = 500,
+                YmaxStress              = 500,
+                name                    = "default",
+                isSpecialTemplate       = false,
+                minNumResources         = 0,
+                resources               = new List<string>(),
+                excludeResources        = new List<string>(),
+                rejectUnlistedResources = false,
+                crewed                  = false,
+                flowModeNeeded          = false,
+                flowMode                = ResourceFlowMode.NO_FLOW
+            };
 
             if (template.HasValue("name"))
                 parsedTemplate.name = template.GetValue("name");

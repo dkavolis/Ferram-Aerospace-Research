@@ -147,13 +147,15 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             public static implicit operator ProjectedArea(VoxelCrossSection.SideAreaValues b)
             {
-                ProjectedArea a = new ProjectedArea();
-                a.iN = b.iN;
-                a.iP = b.iP;
-                a.jN = b.jN;
-                a.jP = b.jP;
-                a.kN = b.kN;
-                a.kP = b.kP;
+                ProjectedArea a = new ProjectedArea
+                {
+                    iN = b.iN,
+                    iP = b.iP,
+                    jN = b.jN,
+                    jP = b.jP,
+                    kN = b.kN,
+                    kP = b.kP
+                };
                 return a;
 
             }

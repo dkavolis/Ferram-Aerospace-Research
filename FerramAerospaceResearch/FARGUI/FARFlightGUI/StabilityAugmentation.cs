@@ -319,40 +319,48 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 
         public static void BuildDefaultSystems()
         {
-            ControlSystem sys = new ControlSystem();
             //Roll system
-            sys.kP = 0.5;
-            sys.kD = 1;
-            sys.kI = 0.5;
+            ControlSystem sys = new ControlSystem
+            {
+                kP = 0.5,
+                kD = 1,
+                kI = 0.5
+            };
 
             systemTemplates[0] = sys;
 
-            sys = new ControlSystem();
             //Yaw system
-            sys.kP = 0;
-            sys.kD = 1;
-            sys.kI = 0;
+            sys = new ControlSystem
+            {
+                kP = 0,
+                kD = 1,
+                kI = 0
+            };
 
             systemTemplates[1] = sys;
 
-            sys = new ControlSystem();
             //Pitch system
-            sys.kP = 0;
-            sys.kD = 1;
-            sys.kI = 0;
+            sys = new ControlSystem
+            {
+                kP = 0,
+                kD = 1,
+                kI = 0
+            };
 
             systemTemplates[2] = sys;
 
-            sys = new ControlSystem();
             //AoA system
-            sys.kP = 0.25;
-            sys.kD = 0;
-            sys.kI = 0;
+            sys = new ControlSystem
+            {
+                kP = 0.25,
+                kD = 0,
+                kI = 0
+            };
+
+            systemTemplates[3] = sys;
 
             aoALowLim = -10;
             aoAHighLim = 20;
-
-            systemTemplates[3] = sys;
 
             scalingDynPres = 20;
         }

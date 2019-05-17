@@ -78,13 +78,15 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
         public static EditorAreaRulingOverlay CreateNewAreaRulingOverlay(Color axisColor, Color crossSectionColor, Color derivColor, double yScaleMaxDistance, double yAxisGridScale)
         {
-            EditorAreaRulingOverlay overlay = new EditorAreaRulingOverlay();
+            EditorAreaRulingOverlay overlay = new EditorAreaRulingOverlay
+            {
+                _axisColor         = axisColor,
+                _crossSectionColor = crossSectionColor,
+                _derivColor        = derivColor,
+                _yScaleMaxDistance = yScaleMaxDistance,
+                _yAxisGridScale    = yAxisGridScale
+            };
 
-            overlay._axisColor = axisColor;
-            overlay._crossSectionColor = crossSectionColor;
-            overlay._derivColor = derivColor;
-            overlay._yScaleMaxDistance = yScaleMaxDistance;
-            overlay._yAxisGridScale = yAxisGridScale;
 
             overlay.Initialize();
 
@@ -100,10 +102,12 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             {
                 Material lineMaterial = FARAssets.ShaderCache.LineRenderer.Material;
 
-                _rendererMaterial = new Material(lineMaterial);
-                _rendererMaterial.hideFlags = HideFlags.HideAndDontSave;
-                _rendererMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
-                _rendererMaterial.renderQueue = 4500;
+                _rendererMaterial = new Material(lineMaterial)
+                {
+                    hideFlags   = HideFlags.HideAndDontSave,
+                    shader      = {hideFlags = HideFlags.HideAndDontSave},
+                    renderQueue = 4500
+                };
             }
 
             FARLogger.Debug("Creating renderers with material " + _rendererMaterial);
@@ -112,8 +116,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             _derivRenderer = CreateNewRenderer(_derivColor, 0.1f, _rendererMaterial);
             _coeffRenderer = CreateNewRenderer(Color.cyan, 0.1f, _rendererMaterial);
 
-            _markingRenderers = new List<LineRenderer>();
-            _markingRenderers.Add(CreateNewRenderer(_axisColor, 0.1f, _rendererMaterial));
+            _markingRenderers = new List<LineRenderer> {CreateNewRenderer(_axisColor, 0.1f, _rendererMaterial)};
         }
 
         public void Cleanup()

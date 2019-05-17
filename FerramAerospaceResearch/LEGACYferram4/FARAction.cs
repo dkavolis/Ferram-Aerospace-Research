@@ -153,8 +153,7 @@ namespace ferram4
 
         public static void DrawGUI()
         {
-            GUIStyle label = new GUIStyle(GUI.skin.label);
-            label.normal.textColor = GUI.skin.toggle.normal.textColor;
+            GUIStyle label = new GUIStyle(GUI.skin.label) {normal = {textColor = GUI.skin.toggle.normal.textColor}};
             GUILayout.Label(Localizer.Format("FARActionDefaultLabel"));
             GUILayout.BeginHorizontal(); // left column: label, right column: text field
             GUILayout.BeginVertical();

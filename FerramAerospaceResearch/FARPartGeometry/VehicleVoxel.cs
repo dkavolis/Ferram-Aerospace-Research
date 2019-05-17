@@ -251,10 +251,12 @@ namespace FerramAerospaceResearch.FARPartGeometry
             //FARLogger.Info("" + xLength + " " + yLength + " " + zLength);
             //FARLogger.Info("" + size);
 
-            Vector3d extents = new Vector3d(); //this will be the distance from the center to the edges of the voxel object
-            extents.x = xLength * 4 * elementSize;
-            extents.y = yLength * 4 * elementSize;
-            extents.z = zLength * 4 * elementSize;
+            Vector3d extents = new Vector3d
+            {
+                x = xLength * 4 * elementSize,
+                y = yLength * 4 * elementSize,
+                z = zLength * 4 * elementSize
+            }; //this will be the distance from the center to the edges of the voxel object
 
             Vector3d center = (max + min) * 0.5f;    //Center of the vessel
 
@@ -275,8 +277,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private VehicleVoxel()
         {
-            voxelMesh = new DebugVisualVoxelMeshController();
-            voxelMesh.Active = false;
+            voxelMesh = new DebugVisualVoxelMeshController {Active = false};
         }
 
         /*public VehicleVoxel(List<Part> partList, List<GeometryPartModule> geoModules, int elementCount, bool multiThreaded = true, bool solidify = true)
@@ -2410,11 +2411,13 @@ namespace FerramAerospaceResearch.FARPartGeometry
         // ReSharper disable once UnusedMember.Local
         private Vector4d TransformPlaneToIndices(Vector4d plane)
         {
-            Vector4d newPlane = new Vector4d();
-            newPlane.x = plane.x * elementSize;
-            newPlane.y = plane.y * elementSize;
-            newPlane.z = plane.z * elementSize;
-            newPlane.w = plane.w + plane.x * lowerRightCorner.x + plane.y * lowerRightCorner.y + plane.z * lowerRightCorner.z;
+            Vector4d newPlane = new Vector4d
+            {
+                x = plane.x * elementSize,
+                y = plane.y * elementSize,
+                z = plane.z * elementSize,
+                w = plane.w + plane.x * lowerRightCorner.x + plane.y * lowerRightCorner.y + plane.z * lowerRightCorner.z
+            };
 
             return newPlane;
         }
@@ -2519,8 +2522,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
                     {
                         if (!(p is null))
                         {
-                            pt = new SweepPlanePoint(p, i, k);
-                            pt.jLastInactive = j;
+                            pt = new SweepPlanePoint(p, i, k) {jLastInactive = j};
                             sweepPlane[i, k] = pt;
                         }
                     }

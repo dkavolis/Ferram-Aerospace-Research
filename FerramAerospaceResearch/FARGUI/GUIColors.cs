@@ -132,8 +132,7 @@ namespace FerramAerospaceResearch.FARGUI
             string[] splitValues = input.Split(separators);
 
             int curIndex = 0;
-            Color color = new Color();
-            color.a = 1;
+            Color color = new Color {a = 1};
             for (int i = 0; i < splitValues.Length; i++)
             {
                 string s = splitValues[i];

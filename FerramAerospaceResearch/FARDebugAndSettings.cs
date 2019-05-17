@@ -242,23 +242,29 @@ namespace FerramAerospaceResearch
         private void debugWindow(int windowID)
         {
 
-            GUIStyle thisStyle = new GUIStyle(GUI.skin.toggle);
-            thisStyle.stretchHeight = true;
-            thisStyle.stretchWidth = true;
-            thisStyle.padding = new RectOffset(4, 4, 4, 4);
-            thisStyle.margin = new RectOffset(4, 4, 4, 4);
+            GUIStyle thisStyle = new GUIStyle(GUI.skin.toggle)
+            {
+                stretchHeight = true,
+                stretchWidth  = true,
+                padding       = new RectOffset(4, 4, 4, 4),
+                margin        = new RectOffset(4, 4, 4, 4)
+            };
 
-            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
-            buttonStyle.stretchHeight = true;
-            buttonStyle.stretchWidth = true;
-            buttonStyle.padding = new RectOffset(4, 4, 4, 4);
-            buttonStyle.margin = new RectOffset(4, 4, 4, 4);
+            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button)
+            {
+                stretchHeight = true,
+                stretchWidth  = true,
+                padding       = new RectOffset(4, 4, 4, 4),
+                margin        = new RectOffset(4, 4, 4, 4)
+            };
 
-            GUIStyle boxStyle = new GUIStyle(GUI.skin.box);
-            boxStyle.stretchHeight = true;
-            boxStyle.stretchWidth = true;
-            boxStyle.padding = new RectOffset(4, 4, 4, 4);
-            boxStyle.margin = new RectOffset(4, 4, 4, 4);
+            GUIStyle boxStyle = new GUIStyle(GUI.skin.box)
+            {
+                stretchHeight = true,
+                stretchWidth  = true,
+                padding       = new RectOffset(4, 4, 4, 4),
+                margin        = new RectOffset(4, 4, 4, 4)
+            };
 
             activeTab = (MenuTab)GUILayout.SelectionGrid((int)activeTab, MenuTab_str, 3);
 
@@ -359,18 +365,20 @@ namespace FerramAerospaceResearch
             }
             if (GUILayout.Button("+", buttonStyle, GUILayout.Width(30), GUILayout.Height(30)))
             {
-                FARPartStressTemplate newTemplate = new FARPartStressTemplate();
-                newTemplate.XZmaxStress = 500;
-                newTemplate.YmaxStress = 500;
-                newTemplate.name = "default";
-                newTemplate.isSpecialTemplate = false;
-                newTemplate.minNumResources = 0;
-                newTemplate.resources = new List<string>();
-                newTemplate.excludeResources = new List<string>();
-                newTemplate.rejectUnlistedResources = false;
-                newTemplate.crewed = false;
-                newTemplate.flowModeNeeded = false;
-                newTemplate.flowMode = ResourceFlowMode.NO_FLOW;
+                FARPartStressTemplate newTemplate = new FARPartStressTemplate
+                {
+                    XZmaxStress             = 500,
+                    YmaxStress              = 500,
+                    name                    = "default",
+                    isSpecialTemplate       = false,
+                    minNumResources         = 0,
+                    resources               = new List<string>(),
+                    excludeResources        = new List<string>(),
+                    rejectUnlistedResources = false,
+                    crewed                  = false,
+                    flowModeNeeded          = false,
+                    flowMode                = ResourceFlowMode.NO_FLOW
+                };
 
                 FARAeroStress.StressTemplates.Add(newTemplate);
             }

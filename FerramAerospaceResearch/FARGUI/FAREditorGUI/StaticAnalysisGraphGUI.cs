@@ -76,22 +76,26 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             this.bodySettingDropdown = bodySettingDropdown;
 
             //Set up defaults for AoA Sweep
-            aoASweepInputs = new GraphInputs();
-            aoASweepInputs.lowerBound = "0";
-            aoASweepInputs.upperBound = "25";
-            aoASweepInputs.numPts = "100";
-            aoASweepInputs.flapSetting = 0;
-            aoASweepInputs.pitchSetting = "0";
-            aoASweepInputs.otherInput = "0.2";
+            aoASweepInputs = new GraphInputs
+            {
+                lowerBound   = "0",
+                upperBound   = "25",
+                numPts       = "100",
+                flapSetting  = 0,
+                pitchSetting = "0",
+                otherInput   = "0.2"
+            };
 
             //Set up defaults for Mach Sweep
-            machSweepInputs = new GraphInputs();
-            machSweepInputs.lowerBound = "0";
-            machSweepInputs.upperBound = "3";
-            machSweepInputs.numPts = "100";
-            machSweepInputs.flapSetting = 0;
-            machSweepInputs.pitchSetting = "0";
-            machSweepInputs.otherInput = "2";
+            machSweepInputs = new GraphInputs
+            {
+                lowerBound   = "0",
+                upperBound   = "3",
+                numPts       = "100",
+                flapSetting  = 0,
+                pitchSetting = "0",
+                otherInput   = "2"
+            };
 
             _graph.SetBoundaries(0, 25, 0, 2);
             _graph.SetGridScaleUsingValues(5, 0.5);

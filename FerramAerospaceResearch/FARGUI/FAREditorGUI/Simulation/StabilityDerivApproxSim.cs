@@ -137,8 +137,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             RungeKutta4 transSolve = new RungeKutta4(endTime, initDt, A, InitCond);
             transSolve.Solve();
 
-            GraphData lines = new GraphData();
-            lines.xValues = transSolve.time;
+            GraphData lines = new GraphData {xValues = transSolve.time};
 
             double[] yVal = transSolve.GetSolution(0);
             ScaleAndClampValues(yVal, 180 / Math.PI, 50);
@@ -227,8 +226,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             RungeKutta4 transSolve = new RungeKutta4(endTime, initDt, A, InitCond);
             transSolve.Solve();
 
-            GraphData lines = new GraphData();
-            lines.xValues = transSolve.time;
+            GraphData lines = new GraphData {xValues = transSolve.time};
 
             double[] yVal = transSolve.GetSolution(0);
             ScaleAndClampValues(yVal, 1, 50);

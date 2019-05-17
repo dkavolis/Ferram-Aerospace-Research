@@ -83,13 +83,16 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         public static FARAeroSection CreateNewAeroSection()
         {
-            FARAeroSection section = new FARAeroSection();
+            FARAeroSection section = new FARAeroSection
+            {
+                xForcePressureAoA0   = new FARFloatCurve(6),
+                xForcePressureAoA180 = new FARFloatCurve(6),
+                xForceSkinFriction   = new FARFloatCurve(3),
+                partData             = new List<PartData>(),
+                handledAeroModulesIndexDict =
+                    new Dictionary<FARAeroPartModule, int>(ObjectReferenceEqualityComparer<FARAeroPartModule>.Default)
+            };
 
-            section.xForcePressureAoA0 = new FARFloatCurve(6);
-            section.xForcePressureAoA180 = new FARFloatCurve(6);
-            section.xForceSkinFriction = new FARFloatCurve(3);
-            section.partData = new List<PartData>();
-            section.handledAeroModulesIndexDict = new Dictionary<FARAeroPartModule, int>(ObjectReferenceEqualityComparer<FARAeroPartModule>.Default);
 
             GenerateCrossFlowDragCurve();
 
@@ -144,8 +147,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             for (int i = 0; i < moduleList.Count; i++)
             {
-                PartData data = new PartData();
-                data.aeroModule = moduleList[i];
+                PartData data = new PartData {aeroModule = moduleList[i]};
                 Matrix4x4 transformMatrix = partWorldToLocalMatrixDict[data.aeroModule.part].worldToLocalMatrix;
 
                 Vector3 forceCenterWorldSpace = centroidLocationAlongxRef + Vector3.ProjectOnPlane(partWorldToLocalMatrixDict[data.aeroModule.part].worldPosition, worldVehicleAxis) + avgPosDiffFromCentroid;

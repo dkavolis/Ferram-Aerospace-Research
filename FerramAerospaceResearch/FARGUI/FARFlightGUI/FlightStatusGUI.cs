@@ -121,9 +121,11 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 
         public void Display()
         {
-            GUIStyle minorTitle = new GUIStyle(GUI.skin.label);
-            minorTitle.alignment = TextAnchor.UpperCenter;
-            minorTitle.padding = new RectOffset(0, 0, 0, 0);
+            GUIStyle minorTitle = new GUIStyle(GUI.skin.label)
+            {
+                alignment = TextAnchor.UpperCenter,
+                padding   = new RectOffset(0, 0, 0, 0)
+            };
 
             if (stallStyle == null)
                 stallStyle = new GUIStyle(FlightGUI.boxStyle);

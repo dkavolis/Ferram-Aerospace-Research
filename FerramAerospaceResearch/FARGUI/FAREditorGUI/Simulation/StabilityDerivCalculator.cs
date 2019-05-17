@@ -68,10 +68,12 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             double u0 = sspeed * machNumber;
             double q = u0 * u0 * density * 0.5f;
 
-            StabilityDerivOutput stabDerivOutput = new StabilityDerivOutput();
-            stabDerivOutput.nominalVelocity = u0;
-            stabDerivOutput.altitude = alt;
-            stabDerivOutput.body = body;
+            StabilityDerivOutput stabDerivOutput = new StabilityDerivOutput
+            {
+                nominalVelocity = u0,
+                altitude        = alt,
+                body            = body
+            };
 
             Vector3d CoM = Vector3d.zero;
             double mass = 0;

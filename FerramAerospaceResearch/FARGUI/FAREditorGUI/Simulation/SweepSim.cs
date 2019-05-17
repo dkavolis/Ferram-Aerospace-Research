@@ -91,8 +91,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                 LDValues[i] = output.Cl * 0.1 / output.Cd;
             }
 
-            GraphData data = new GraphData();
-            data.xValues = AlphaValues;
+            GraphData data = new GraphData {xValues = AlphaValues};
             data.AddData(ClValues, GUIColors.GetColor(0), Localizer.Format("FARAbbrevCl"), true);
             data.AddData(CdValues, GUIColors.GetColor(1), Localizer.Format("FARAbbrevCd"), true);
             data.AddData(CmValues, GUIColors.GetColor(2), Localizer.Format("FARAbbrevCm"), true);
@@ -155,8 +154,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                 }
             }
 
-            GraphData data = new GraphData();
-            data.xValues = AlphaValues;
+            GraphData data = new GraphData {xValues = AlphaValues};
             data.AddData(ClValues2, GUIColors.GetColor(0) * 0.5f, "Cl2", false);
             data.AddData(ClValues, GUIColors.GetColor(0), Localizer.Format("FARAbbrevCl"), true);
 

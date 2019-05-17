@@ -108,8 +108,7 @@ namespace FerramAerospaceResearch.FARGUI
         {
             if (listStyle == null)
             {
-                listStyle = new GUIStyle(GUI.skin.window);
-                listStyle.padding = new RectOffset(1, 1, 1, 1);
+                listStyle = new GUIStyle(GUI.skin.window) {padding = new RectOffset(1, 1, 1, 1)};
             }
             if (toggleBtnStyle == null)
             {
@@ -128,17 +127,27 @@ namespace FerramAerospaceResearch.FARGUI
             }
             if (dropdownItemStyle == null)
             {
-                dropdownItemStyle = new GUIStyle(GUI.skin.button);
-                dropdownItemStyle.padding = new RectOffset(2, 2, 2, 2);
-                dropdownItemStyle.margin.top = 1;
-                dropdownItemStyle.margin.bottom = 1;
+                dropdownItemStyle = new GUIStyle(GUI.skin.button)
+                {
+                    padding = new RectOffset(2, 2, 2, 2),
+                    margin =
+                    {
+                        top    = 1,
+                        bottom = 1
+                    }
+                };
             }
             if (selectedItemStyle == null)
             {
-                selectedItemStyle = new GUIStyle(GUI.skin.button);
-                selectedItemStyle.padding = new RectOffset(2, 2, 2, 2);
-                selectedItemStyle.margin.top = 1;
-                selectedItemStyle.margin.bottom = 1;
+                selectedItemStyle = new GUIStyle(GUI.skin.button)
+                {
+                    padding = new RectOffset(2, 2, 2, 2),
+                    margin =
+                    {
+                        top    = 1,
+                        bottom = 1
+                    }
+                };
                 selectedItemStyle.normal.textColor
                     = selectedItemStyle.focused.textColor
                     = selectedItemStyle.hover.textColor

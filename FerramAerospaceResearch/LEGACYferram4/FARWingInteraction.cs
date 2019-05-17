@@ -296,10 +296,12 @@ namespace ferram4
         {
             double interferencevalue = 1;
 
-            Ray ray = new Ray();
+            Ray ray = new Ray
+            {
+                origin    = parentWingModule.WingCentroid(),
+                direction = rayDirection
+            };
 
-            ray.origin = parentWingModule.WingCentroid();
-            ray.direction = rayDirection;
 
             RaycastHit hit = new RaycastHit();
 
@@ -353,8 +355,7 @@ namespace ferram4
         #region StandardWingExposureDetection
         private double ExposureInChordDirection(out FARWingAerodynamicModel[] nearbyWings, Vector3 rayDirection, List<Part> vesselPartList, float b_2, float MAC, float MidChordSweep)
         {
-            Ray ray = new Ray();
-            ray.direction = rayDirection;
+            Ray ray = new Ray {direction = rayDirection};
 
             nearbyWings = new FARWingAerodynamicModel[5];
 
@@ -374,8 +375,7 @@ namespace ferram4
 
         private double ExposureInSpanDirection(out FARWingAerodynamicModel[] nearbyWings, Vector3 rayDirection, List<Part> vesselPartList, float b_2, float MAC, float TaperRatio, float MidChordSweep)
         {
-            Ray ray = new Ray();
-            ray.direction = rayDirection;
+            Ray ray = new Ray {direction = rayDirection};
 
             nearbyWings = new FARWingAerodynamicModel[5];
 
@@ -405,8 +405,7 @@ namespace ferram4
 
         private double ExposureSmallSrf(out FARWingAerodynamicModel[] nearbyWings, Vector3 rayDirection, List<Part> vesselPartList, float rayCastDist, float MAC)
         {
-            Ray ray = new Ray();
-            ray.direction = rayDirection;
+            Ray ray = new Ray {direction = rayDirection};
 
             nearbyWings = new FARWingAerodynamicModel[1];
 

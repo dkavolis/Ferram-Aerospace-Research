@@ -538,8 +538,7 @@ namespace ferram4
             GUILayout.BeginVertical();
             GUILayout.BeginArea(new Rect(20 + horizontalBorder, 15 + verticalBorder, 30, displayRect.height + 2 * verticalBorder));
 
-            GUIStyle LabelStyle = new GUIStyle(GUI.skin.label);
-            LabelStyle.alignment = TextAnchor.UpperCenter;
+            GUIStyle LabelStyle = new GUIStyle(GUI.skin.label) {alignment = TextAnchor.UpperCenter};
 
             GUILayout.Label(topBound, LabelStyle, GUILayout.Height(20), GUILayout.ExpandWidth(true));
             int pixelspace = (int)displayRect.height / 2 - 72;
