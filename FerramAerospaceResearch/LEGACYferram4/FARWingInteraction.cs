@@ -92,20 +92,9 @@ namespace ferram4
         private static FloatCurve wingCamberFactor;
         private static FloatCurve wingCamberMoment;
 
-        private double aRFactor = 1;
-        private double clInterferenceFactor = 1;
+        public double ARFactor { get; private set; } = 1;
 
-        public double ARFactor
-        {
-            get { return aRFactor; }
-            private set { aRFactor = value; }
-        }
-
-        public double ClInterferenceFactor
-        {
-            get { return clInterferenceFactor; }
-            private set { clInterferenceFactor = value; }
-        }
+        public double ClInterferenceFactor { get; private set; } = 1;
 
         public FARWingInteraction(FARWingAerodynamicModel parentModule, Part parentPart, Vector3 rootChordMid, short srfAttachNegative)
         {

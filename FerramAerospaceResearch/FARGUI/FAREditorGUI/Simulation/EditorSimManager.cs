@@ -52,23 +52,11 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
     {
         private InstantConditionSim _instantCondition;
 
-        private StabilityDerivCalculator _stabDerivCalculator;
-        public StabilityDerivCalculator StabDerivCalculator
-        {
-            get { return _stabDerivCalculator; }
-        }
+        public StabilityDerivCalculator StabDerivCalculator { get; }
 
-        private StabilityDerivLinearSim _stabDerivLinearSim;
-        public StabilityDerivLinearSim StabDerivLinearSim
-        {
-            get { return _stabDerivLinearSim; }
-        }
+        public StabilityDerivLinearSim StabDerivLinearSim { get; }
 
-        private SweepSim _sweepSim;
-        public SweepSim SweepSim
-        {
-            get { return _sweepSim; }
-        }
+        public SweepSim SweepSim { get; }
 
         private EditorAeroCenter _aeroCenter;
 
@@ -77,9 +65,9 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
         public EditorSimManager(InstantConditionSim _instantSim)
         {
             _instantCondition = _instantSim;
-            _stabDerivCalculator = new StabilityDerivCalculator(_instantCondition);
-            _stabDerivLinearSim = new StabilityDerivLinearSim(_instantCondition);
-            _sweepSim = new SweepSim(_instantCondition);
+            StabDerivCalculator = new StabilityDerivCalculator(_instantCondition);
+            StabDerivLinearSim = new StabilityDerivLinearSim(_instantCondition);
+            SweepSim = new SweepSim(_instantCondition);
             _aeroCenter = new EditorAeroCenter();
             vehicleData = new StabilityDerivOutput();
         }
