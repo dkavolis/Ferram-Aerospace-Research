@@ -157,8 +157,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 data.nRefVectorPartSpace = transformMatrix.MultiplyVector(nRefVectorWorldSpace);
                 data.dragFactor = dragFactor[i];
 
-                transformMatrix = transformMatrix * vesselToWorldMatrix;
-
                 if (i < partData.Count)
                     partData[i] = data;
                 else
@@ -241,8 +239,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             for (int i = 0; i < otherSection.partData.Count; ++i)
             {
                 PartData tmpOtherData = otherSection.partData[i];
-                int index = -1;
-                if (handledAeroModulesIndexDict.TryGetValue(tmpOtherData.aeroModule, out index))
+                if (handledAeroModulesIndexDict.TryGetValue(tmpOtherData.aeroModule, out int index))
                 {
                     PartData tmpData = partData[index];
                     tmpData.centroidPartSpace += tmpOtherData.centroidPartSpace;         //prep'd for averaging
@@ -422,7 +419,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 double cosHalfAoA = Math.Sqrt(0.5 + 0.5 * Math.Abs(cosAoA));
 
 
-                double nForce = 0;
+                double nForce;
                 nForce = potentialFlowNormalForce * Math.Sign(cosAoA) * cosHalfAoA * sin2AoA;  //potential flow normal force
                 if (nForce < 0)     //potential flow is not significant over the rear face of things
                     nForce = 0;
