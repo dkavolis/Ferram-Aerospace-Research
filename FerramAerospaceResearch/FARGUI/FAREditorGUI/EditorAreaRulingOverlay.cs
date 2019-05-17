@@ -291,10 +291,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             {
                 double height = i * gridScale;
                 UpdateRenderer(_markingRenderers[i], voxelLocalToWorldMatrix, shortXCoords, new[] { height, height });
-                if (i > _numGridLines)
-                    _markingRenderers[i].enabled = false;
-                else
-                    _markingRenderers[i].enabled = _areaRenderer.enabled;
+                _markingRenderers[i].enabled = i <= _numGridLines && _areaRenderer.enabled;
             }
         }
 

@@ -80,10 +80,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                 for (int i = 0; i < m; i++)
                 {
                     MatrixDump.Append(matrix[i, j]);
-                    if (i < m - 1)
-                        MatrixDump.Append(",");
-                    else
-                        MatrixDump.Append("]\n\r");
+                    MatrixDump.Append(i < m - 1 ? "," : "]\n\r");
                 }
             }
             FARLogger.Info(MatrixDump.ToString());

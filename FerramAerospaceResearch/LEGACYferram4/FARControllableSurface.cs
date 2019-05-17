@@ -67,10 +67,7 @@ namespace ferram4
                         MovableOrig = movableSection.localRotation;         //Its original orientation
                         MovableOrigReady = true;
                     }
-                    if (Vector3.Dot(MovableSection.right, part.partTransform.right) > 0)
-                        flipAxis = false;
-                    else
-                        flipAxis = true;
+                    flipAxis = Vector3.Dot(MovableSection.right, part.partTransform.right) <= 0;
                 }
                 return movableSection;
             }
@@ -362,10 +359,7 @@ namespace ferram4
         {
             if (NUFAR_areaExposedFactor < 0.1 * S && !NUFAR_totalExposedAreaFactor.NearlyEqual(0))
             {
-                if (Math.Abs(AoAoffset) > 5)
-                    isShielded = false;
-                else
-                    isShielded = true;
+                isShielded = Math.Abs(AoAoffset) <= 5;
             }
         }
 
@@ -550,10 +544,7 @@ namespace ferram4
             {
                 double degreesPerSecond = Math.Max(Math.Abs(maximumDeflection), Math.Abs(current)) / blendTimeConstant;
                 double tmp = current + TimeWarp.fixedDeltaTime * degreesPerSecond * Math.Sign(desired - current);
-                if(error > 0)
-                    current = tmp.Clamp(current, desired);
-                else
-                    current = tmp.Clamp(desired, current);
+                current = error > 0 ? tmp.Clamp(current, desired) : tmp.Clamp(desired, current);
             }
             else
                 return desired;
@@ -596,10 +587,7 @@ namespace ferram4
             if (!AoAoffset.NearlyEqual(0))
             {
                 Quaternion localRot;
-                if (flipAxis)
-                    localRot = Quaternion.FromToRotation(deflectedNormal, new Vector3(0, 0, 1));
-                else
-                    localRot = Quaternion.FromToRotation(new Vector3(0, 0, 1), deflectedNormal);
+                localRot = flipAxis ? Quaternion.FromToRotation(deflectedNormal, new Vector3(0, 0, 1)) : Quaternion.FromToRotation(new Vector3(0, 0, 1), deflectedNormal);
 
                 MovableSection.localRotation *= localRot;
 
@@ -664,10 +652,7 @@ namespace ferram4
 
                 if (part.symMethod == SymmetryMethod.Mirror || part.symmetryCounterparts.Count < 1)
                 {
-                    if (HighLogic.LoadedSceneIsFlight)
-                        flapLocation = Math.Sign(Vector3.Dot(vessel.ReferenceTransform.forward, partForward));      //figure out which way is up
-                    else
-                        flapLocation = Math.Sign(Vector3.Dot(EditorLogic.RootPart.partTransform.forward, partForward));      //figure out which way is up
+                    flapLocation = Math.Sign(Vector3.Dot(HighLogic.LoadedSceneIsFlight ? vessel.ReferenceTransform.forward : EditorLogic.RootPart.partTransform.forward, partForward));
 
                     spoilerLocation = -flapLocation;
                 }
@@ -702,30 +687,21 @@ namespace ferram4
             {
                 if (bool.TryParse(node.GetValue("pitchaxis"), out tmpBool))
                 {
-                    if (tmpBool)
-                        pitchaxis = 100;
-                    else
-                        pitchaxis = 0;
+                    pitchaxis = tmpBool ? 100 : 0;
                 }
             }
             if (node.HasValue("yawaxis"))
             {
                 if (bool.TryParse(node.GetValue("yawaxis"), out tmpBool))
                 {
-                    if (tmpBool)
-                        yawaxis = 100;
-                    else
-                        yawaxis = 0;
+                    yawaxis = tmpBool ? 100 : 0;
                 }
             }
             if (node.HasValue("rollaxis"))
             {
                 if (bool.TryParse(node.GetValue("rollaxis"), out tmpBool))
                 {
-                    if (tmpBool)
-                        rollaxis = 100;
-                    else
-                        rollaxis = 0;
+                    rollaxis = tmpBool ? 100 : 0;
                 }
             }
         }

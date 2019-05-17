@@ -135,10 +135,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             if (statusBlinker)
             {
                 stallStyle.normal.textColor = stallStyle.focused.textColor = stallStyle.hover.textColor = stallStyle.active.textColor = stallStyle.onActive.textColor = stallStyle.onNormal.textColor = stallStyle.onFocused.textColor = stallStyle.onHover.textColor = stallStyle.onActive.textColor = statusColor;
-                if (statusBlinkerTimer < 0.5)
-                    GUILayout.Box(statusString, stallStyle, GUILayout.ExpandWidth(true));
-                else
-                    GUILayout.Box("", stallStyle, GUILayout.ExpandWidth(true));
+                GUILayout.Box(statusBlinkerTimer < 0.5 ? statusString : "", stallStyle, GUILayout.ExpandWidth(true));
 
                 if (statusBlinkerTimer < 1)
                     statusBlinkerTimer += TimeWarp.deltaTime;

@@ -115,10 +115,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
         public void ArrowAnim(ArrowPointer velArrow)
         {
-            if (pingPongAoAFactor < 1)
-                velArrow.Direction = Vector3.Slerp(lowerAoAVec, upperAoAVec, pingPongAoAFactor);
-            else
-                velArrow.Direction = Vector3.Slerp(lowerAoAVec, upperAoAVec, 2 - pingPongAoAFactor);
+            velArrow.Direction = pingPongAoAFactor < 1 ? Vector3.Slerp(lowerAoAVec, upperAoAVec, pingPongAoAFactor) : Vector3.Slerp(lowerAoAVec, upperAoAVec, 2 - pingPongAoAFactor);
 
             pingPongAoAFactor += TimeWarp.deltaTime * 0.5f;
 

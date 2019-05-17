@@ -84,14 +84,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
         {
             aoA *= FARMathUtil.deg2rad;
 
-            if (EditorDriver.editorFacility == EditorFacility.SPH)
-            {
-                aoAVec = new Vector3d(0, -Math.Sin(aoA), Math.Cos(aoA));
-            }
-            else
-            {
-                aoAVec = new Vector3d(0, Math.Cos(aoA), Math.Sin(aoA));
-            }
+            aoAVec = EditorDriver.editorFacility == EditorFacility.SPH ? new Vector3d(0, -Math.Sin(aoA), Math.Cos(aoA)) : new Vector3d(0, Math.Cos(aoA), Math.Sin(aoA));
         }
 
         public void Display()

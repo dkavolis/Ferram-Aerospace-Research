@@ -766,10 +766,7 @@ namespace FerramAerospaceResearch
 
             double tmp = b * b - 4 * a * c;
 
-            if (tmp > 0)
-                attachedShock = true;
-            else
-                attachedShock = false;
+            attachedShock = tmp > 0;
 
             return tmp;
         }

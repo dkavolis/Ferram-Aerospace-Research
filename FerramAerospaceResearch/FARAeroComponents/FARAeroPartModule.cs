@@ -314,10 +314,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 LegacyWingModel = null;
 
             // For handling airbrakes aero visualization
-            if (part.Modules.Contains<ModuleAeroSurface>())
-                stockAeroSurfaceModule = part.Modules.GetModule<ModuleAeroSurface>();
-            else
-                stockAeroSurfaceModule = null;
+            stockAeroSurfaceModule = part.Modules.Contains<ModuleAeroSurface>() ? part.Modules.GetModule<ModuleAeroSurface>() : null;
         }
 
         public double ProjectedAreaWorld(Vector3 normalizedDirectionVector)

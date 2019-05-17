@@ -207,10 +207,7 @@ namespace ferram4
                 if (p == null)
                     continue;
                 FARWingAerodynamicModel model;
-                if (this is FARControllableSurface)
-                    model = p.Modules.GetModule<FARControllableSurface>();
-                else
-                    model = p.Modules.GetModule<FARWingAerodynamicModel>();
+                model = this is FARControllableSurface ? p.Modules.GetModule<FARControllableSurface>() : p.Modules.GetModule<FARWingAerodynamicModel>();
 
                 ++counterpartsCount;
                 sum += model.NUFAR_areaExposedFactor;
@@ -229,10 +226,7 @@ namespace ferram4
                 if (p == null)
                     continue;
                 FARWingAerodynamicModel model;
-                if (this is FARControllableSurface)
-                    model = p.Modules.GetModule<FARControllableSurface>();
-                else
-                    model = p.Modules.GetModule<FARWingAerodynamicModel>();
+                model = this is FARControllableSurface ? p.Modules.GetModule<FARControllableSurface>() : p.Modules.GetModule<FARWingAerodynamicModel>();
 
                 model.NUFAR_areaExposedFactor = sum;
                 model.NUFAR_totalExposedAreaFactor = totalExposedSum;
@@ -242,12 +236,7 @@ namespace ferram4
 
         public void NUFAR_UpdateShieldingStateFromAreaFactor()
         {
-            if (NUFAR_areaExposedFactor < 0.1 * S)
-                isShielded = true;
-            else
-            {
-                isShielded = false;
-            }
+            isShielded = NUFAR_areaExposedFactor < 0.1 * S;
         }
 
         #region GetFunctions
@@ -750,10 +739,7 @@ namespace ferram4
             //Throw AoA into lifting line theory and adjust for part exposure and compressibility effects
 
             double skinFrictionDrag;
-            if(HighLogic.LoadedSceneIsFlight)
-                skinFrictionDrag = FARAeroUtil.SkinFrictionDrag(density, effective_MAC, v_scalar, MachNumber, vessel.externalTemperature, vessel.mainBody.atmosphereAdiabaticIndex);
-            else
-                skinFrictionDrag = 0.005;
+            skinFrictionDrag = HighLogic.LoadedSceneIsFlight ? FARAeroUtil.SkinFrictionDrag(density, effective_MAC, v_scalar, MachNumber, vessel.externalTemperature, vessel.mainBody.atmosphereAdiabaticIndex) : 0.005;
 
 
             skinFrictionDrag *= 1.1;    //account for thickness
@@ -1160,10 +1146,7 @@ namespace ferram4
             double angle1 = halfAngle - AbsAoA;                  //Region 1 is the upper surface ahead of the max thickness
             double M1;
             double p1;       //pressure ratio wrt to freestream pressure
-            if (angle1 >= 0)
-                p1 = ShockWaveCalculation(angle1, M, out M1, maxSinBeta, minSinBeta);
-            else
-                p1 = PMExpansionCalculation(Math.Abs(angle1), M, out M1);
+            p1 = angle1 >= 0 ? ShockWaveCalculation(angle1, M, out M1, maxSinBeta, minSinBeta) : PMExpansionCalculation(Math.Abs(angle1), M, out M1);
 
             //Region 2 is the upper surface behind the max thickness
             double p2 = PMExpansionCalculation(2 * halfAngle, M1) * p1;
@@ -1275,10 +1258,8 @@ namespace ferram4
             double CosPartAngle = Vector3.Dot(sweepPerpLocal, ParallelInPlaneLocal).Clamp(-1, 1);
             double tmp = Vector3.Dot(sweepPerp2Local, ParallelInPlaneLocal).Clamp(-1, 1);
 
-            if (Math.Abs(CosPartAngle) > Math.Abs(tmp))                //Based on perp vector find which line is the right one
-                sweepHalfChord = CosPartAngle;//Math.Acos(CosPartAngle);       //keep as cos to make things right
-            else
-                sweepHalfChord = tmp;//Math.Acos(tmp);
+            //Based on perp vector find which line is the right one
+            sweepHalfChord = Math.Abs(CosPartAngle) > Math.Abs(tmp) ? CosPartAngle : tmp;
 
             //if (sweepHalfChord > Math.PI * 0.5)
             //    sweepHalfChord -= Math.PI;

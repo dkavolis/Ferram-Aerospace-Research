@@ -234,10 +234,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
 
                 GraphData data;
-                if(longitudinal)
-                    data = simManager.StabDerivLinearSim.RunTransientSimLongitudinal(vehicleData, Convert.ToDouble(inits.maxTime), Convert.ToDouble(inits.dt), initCond);
-                else
-                    data = simManager.StabDerivLinearSim.RunTransientSimLateral(vehicleData, Convert.ToDouble(inits.maxTime), Convert.ToDouble(inits.dt), initCond);
+                data = longitudinal ? simManager.StabDerivLinearSim.RunTransientSimLongitudinal(vehicleData, Convert.ToDouble(inits.maxTime), Convert.ToDouble(inits.dt), initCond) : simManager.StabDerivLinearSim.RunTransientSimLateral(vehicleData, Convert.ToDouble(inits.maxTime), Convert.ToDouble(inits.dt), initCond);
 
                 UpdateGraph(data, Localizer.Format("FAREditorSimGraphTime"), Localizer.Format("FAREditorSimGraphParams"), 0, Convert.ToDouble(inits.maxTime), 50);
             }

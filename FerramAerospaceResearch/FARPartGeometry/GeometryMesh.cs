@@ -129,14 +129,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private void UpdateLocalToWorldMatrix()
         {
-            if (!isSkinned)
-            {
-                meshLocalToWorld = meshTransform.localToWorldMatrix;
-            }
-            else
-            {
-                meshLocalToWorld = Matrix4x4.TRS(meshTransform.position, meshTransform.rotation, Vector3.one);
-            }
+            meshLocalToWorld = !isSkinned ? meshTransform.localToWorldMatrix : Matrix4x4.TRS(meshTransform.position, meshTransform.rotation, Vector3.one);
         }
 
         public void TransformBasis(Matrix4x4 newThisToVesselMatrix)

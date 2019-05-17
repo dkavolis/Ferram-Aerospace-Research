@@ -118,10 +118,11 @@ namespace ferram4
                 for (int i = 0; i < lineLegend.width; i++)
                     for (int j = 0; j < lineLegend.height; j++)
                     {
-                        if (Mathf.Abs((int)(j - (lineLegend.height / 2f))) < lineThickness)
-                            lineLegend.SetPixel(i, j, lineColor);
-                        else
-                            lineLegend.SetPixel(i, j, backgroundColor);
+                        lineLegend.SetPixel(i,
+                                            j,
+                                            Mathf.Abs((int) (j - (lineLegend.height / 2f))) < lineThickness
+                                                ? lineColor
+                                                : backgroundColor);
                     }
                 lineLegend.Apply();
             }

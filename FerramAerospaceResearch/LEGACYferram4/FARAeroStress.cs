@@ -92,10 +92,10 @@ namespace FerramAerospaceResearch
                 res.AddValue("excludeRes", s);
             }
 
-            if (template.flowModeNeeded)
-                res.AddValue("flowMode", FARDebugAndSettings.FlowMode_str[(int)template.flowMode]);
-            else
-                res.AddValue("flowMode", "unneeded");
+            res.AddValue("flowMode",
+                         template.flowModeNeeded
+                             ? FARDebugAndSettings.FlowMode_str[(int) template.flowMode]
+                             : "unneeded");
 
             node.AddNode(res);
 

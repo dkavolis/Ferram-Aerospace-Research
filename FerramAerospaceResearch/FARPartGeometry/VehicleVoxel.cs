@@ -123,10 +123,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
             lock (clearedChunks)
             {
                 useHigherResVoxels = FARSettingsScenarioModule.VoxelSettings.useHigherResVoxelPoints;
-                if (useHigherResVoxels)
-                    maxLocation = 255;
-                else
-                    maxLocation = 15;
+                maxLocation = useHigherResVoxels ? 255 : 15;
 
                 maxLocationByte = (byte)maxLocation;
 
@@ -1928,10 +1925,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                         byte location = (byte)Math.Ceiling(floatLoc);
                         VoxelOrientationPlane plane;
-                        if (signW <= 0)
-                            plane = VoxelOrientationPlane.X_UP;
-                        else
-                            plane = VoxelOrientationPlane.X_DOWN;
+                        plane = signW <= 0 ? VoxelOrientationPlane.X_UP : VoxelOrientationPlane.X_DOWN;
 
                         SetVoxelPoint(i, j, k, part, plane, location);
                         continue;
@@ -1954,10 +1948,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                         byte location = (byte)Math.Ceiling(floatLoc);
                         VoxelOrientationPlane plane;
-                        if (signW <= 0)
-                            plane = VoxelOrientationPlane.X_UP;
-                        else
-                            plane = VoxelOrientationPlane.X_DOWN;
+                        plane = signW <= 0 ? VoxelOrientationPlane.X_UP : VoxelOrientationPlane.X_DOWN;
 
                         SetVoxelPoint(i, j, k, part, plane, location);
                         continue;
@@ -1993,10 +1984,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                         byte location = (byte)Math.Ceiling(floatLoc);
                         VoxelOrientationPlane plane;
-                        if (signW <= 0)
-                            plane = VoxelOrientationPlane.X_UP;
-                        else
-                            plane = VoxelOrientationPlane.X_DOWN;
+                        plane = signW <= 0 ? VoxelOrientationPlane.X_UP : VoxelOrientationPlane.X_DOWN;
 
                         SetVoxelPoint(i, j, k, part, plane, location);
 
@@ -2094,10 +2082,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                         byte location = (byte)Math.Ceiling(floatLoc);
                         VoxelOrientationPlane plane;
-                        if (signW <= 0)
-                            plane = VoxelOrientationPlane.Y_UP;
-                        else
-                            plane = VoxelOrientationPlane.Y_DOWN;
+                        plane = signW <= 0 ? VoxelOrientationPlane.Y_UP : VoxelOrientationPlane.Y_DOWN;
 
                         SetVoxelPoint(i, j, k, part, plane, location);
                         continue;
@@ -2120,10 +2105,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                         byte location = (byte)Math.Ceiling(floatLoc);
                         VoxelOrientationPlane plane;
-                        if (signW <= 0)
-                            plane = VoxelOrientationPlane.Y_UP;
-                        else
-                            plane = VoxelOrientationPlane.Y_DOWN;
+                        plane = signW <= 0 ? VoxelOrientationPlane.Y_UP : VoxelOrientationPlane.Y_DOWN;
 
                         SetVoxelPoint(i, j, k, part, plane, location);
                         continue;
@@ -2158,10 +2140,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                         byte location = (byte)Math.Ceiling(floatLoc);
                         VoxelOrientationPlane plane;
-                        if (signW <= 0)
-                            plane = VoxelOrientationPlane.Y_UP;
-                        else
-                            plane = VoxelOrientationPlane.Y_DOWN;
+                        plane = signW <= 0 ? VoxelOrientationPlane.Y_UP : VoxelOrientationPlane.Y_DOWN;
 
                         SetVoxelPoint(i, j, k, part, plane, location);
                     }
@@ -2256,10 +2235,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                         byte location = (byte)Math.Ceiling(floatLoc);
                         VoxelOrientationPlane plane;
-                        if (signW <= 0)
-                            plane = VoxelOrientationPlane.Z_UP;
-                        else
-                            plane = VoxelOrientationPlane.Z_DOWN;
+                        plane = signW <= 0 ? VoxelOrientationPlane.Z_UP : VoxelOrientationPlane.Z_DOWN;
 
                         SetVoxelPoint(i, j, k, part, plane, location);
                         continue;
@@ -2281,10 +2257,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                         byte location = (byte)Math.Ceiling(floatLoc);
                         VoxelOrientationPlane plane;
-                        if (signW <= 0)
-                            plane = VoxelOrientationPlane.Z_UP;
-                        else
-                            plane = VoxelOrientationPlane.Z_DOWN;
+                        plane = signW <= 0 ? VoxelOrientationPlane.Z_UP : VoxelOrientationPlane.Z_DOWN;
 
                         SetVoxelPoint(i, j, k, part, plane, location);
                         continue;
@@ -2320,10 +2293,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                         byte location = (byte)Math.Ceiling(floatLoc);
                         VoxelOrientationPlane plane;
-                        if (signW <= 0)
-                            plane = VoxelOrientationPlane.Z_UP;
-                        else
-                            plane = VoxelOrientationPlane.Z_DOWN;
+                        plane = signW <= 0 ? VoxelOrientationPlane.Z_UP : VoxelOrientationPlane.Z_DOWN;
 
                         SetVoxelPoint(i, j, k, part, plane, location);
                     }
@@ -2539,10 +2509,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
                         {  //Make sure the point is labeled as a voxel shell if there is already a part there
                             inactiveInteriorPts.Remove(pt);
 
-                            if (pt.mark == SweepPlanePoint.MarkingType.Clear)
-                                pt.mark = SweepPlanePoint.MarkingType.VoxelShell;
-                            else
-                                pt.mark = SweepPlanePoint.MarkingType.VoxelShellPreviouslyInterior;     //this marks that this point was once part of the voxel shell
+                            pt.mark = pt.mark == SweepPlanePoint.MarkingType.Clear ? SweepPlanePoint.MarkingType.VoxelShell : SweepPlanePoint.MarkingType.VoxelShellPreviouslyInterior;
 
 
                             pt.part = p;
