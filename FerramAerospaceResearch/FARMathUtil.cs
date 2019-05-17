@@ -315,44 +315,57 @@ namespace FerramAerospaceResearch
             Func<double, double> f = mfobj.Delegate;
             double x1 = xstepinitial;
             double f1 = f(x1);
-            if (f1 < f0) return mfobj.BrentSolve("Negative initial gradient.");
+            if (f1 < f0)
+                return mfobj.BrentSolve("Negative initial gradient.");
 
         LblSkipRight:
-            if (f1 > 0) return mfobj.LinearSolution(x0, f0, x1, f1);
+            if (f1 > 0)
+                return mfobj.LinearSolution(x0, f0, x1, f1);
             double x2 = Clamp(x1 + xstepsize, 0d, rightedge);
-            if (Math.Abs(x2 - x1) < tol_brent) return mfobj.BrentSolve("Reached far right edge."); // Rodhern: Strict equality replaced with approximate equality for readability in dkavolis branch.
+            if (Math.Abs(x2 - x1) < tol_brent)
+                return mfobj.BrentSolve("Reached far right edge."); // Rodhern: Strict equality replaced with approximate equality for readability in dkavolis branch.
             double f2 = f(x2);
             if (f2 > f1)
             { // skip right
-                x0 = x1; f0 = f1;
-                x1 = x2; f1 = f2;
+                x0 = x1;
+                f0 = f1;
+                x1 = x2;
+                f1 = f2;
                 goto LblSkipRight;
             }
 
         LblTriangle:
-            if (f1 > 0) return mfobj.LinearSolution(x0, f0, x1, f1);
-            if (x2 - x0 < tol_triangle) return mfobj.BrentSolve("Local maximum is negative (search point x= " + x0 + ").");
+            if (f1 > 0)
+                return mfobj.LinearSolution(x0, f0, x1, f1);
+            if (x2 - x0 < tol_triangle)
+                return mfobj.BrentSolve("Local maximum is negative (search point x= " + x0 + ").");
             double x01 = (x0 + x1) / 2d;
             double x12 = (x1 + x2) / 2d;
             double f01 = f(x01);
             double f12 = f(x12);
             if (f01 >= f1 && f01 >= f12)
             { // maximum at x01
-                x1 = x01; f1 = f01;
-                x2 = x1; f2 = f1;
+                x1 = x01;
+                f1 = f01;
+                x2 = x1;
+                // f2 = f1;
                 goto LblTriangle;
             }
 
             if (f12 > f1 && f12 > f01)
             { // maximum at x12
-                x0 = x1; f0  = f1;
-                x1 = x12; f1 = f12;
+                x0 = x1;
+                f0  = f1;
+                x1 = x12;
+                f1 = f12;
                 goto LblTriangle;
             }
 
             // shrink around x1
-            x0 = x01; f0 = f01;
-            x2 = x12; f2 = f12;
+            x0 = x01;
+            f0 = f01;
+            x2 = x12;
+            // f2 = f12;
             goto LblTriangle;
         }
 
@@ -396,7 +409,8 @@ namespace FerramAerospaceResearch
 
             LblLoop:
                 double x = x0 + (x0 - x1) * f0 / (f1 - f0);
-                if (x1 - x0 < tol_linear) return x;
+                if (x1 - x0 < tol_linear)
+                    return x;
                 x = Clamp(x, maxpart * x0 + minpart * x1, minpart * x0 + maxpart * x1);
                 double fx = F(x);
                 if (fx < 0d)
