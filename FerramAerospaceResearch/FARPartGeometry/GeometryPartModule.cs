@@ -60,8 +60,10 @@ namespace FerramAerospaceResearch.FARPartGeometry
     {
         public bool destroyed;
 
+        // ReSharper disable NotAccessedField.Global -> unity
         public Transform partTransform;
         public Rigidbody partRigidBody;
+        // ReSharper restore NotAccessedField.Global
 
         public Bounds overallMeshBounds;
 
@@ -754,7 +756,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private MeshData GetVisibleMeshData(Transform t, bool skipIfNoRenderer, bool onlyMeshes)
         {
-            Mesh m = null;
+            Mesh m;
             MeshFilter mf = t.GetComponent<MeshFilter>();
 
             if (onlyMeshes && t.GetComponent<MeshCollider>() != null)       //if we've decided to force use of meshes, we don't want colliders

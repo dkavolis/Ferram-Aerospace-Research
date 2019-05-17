@@ -59,7 +59,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             _instantCondition = instantConditionSim;
         }
 
-        public StabilityDerivExportOutput CalculateStabilityDerivs(CelestialBody body, double alt, double machNumber, int flapSetting, bool spoilers, double alpha, double beta, double phi)
+        public StabilityDerivOutput CalculateStabilityDerivs(CelestialBody body, double alt, double machNumber, int flapSetting, bool spoilers, double alpha, double beta, double phi)
         {
             double pressure = body.GetPressure(alt);
             double temperature = body.GetTemperature(alt);
@@ -69,7 +69,6 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             double q = u0 * u0 * density * 0.5f;
 
             StabilityDerivOutput stabDerivOutput = new StabilityDerivOutput();
-            StabilityDerivExportVariables stabDerivExport = new StabilityDerivExportVariables();
             stabDerivOutput.nominalVelocity = u0;
             stabDerivOutput.altitude = alt;
             stabDerivOutput.body = body;
@@ -370,18 +369,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             stabDerivOutput.stabDerivs[23] = pertOutput.Cn;     //Nr
             stabDerivOutput.stabDerivs[22] = pertOutput.C_roll; //Lr
 
-            // Assign values to export variables
-            stabDerivExport.craftmass = mass;
-            stabDerivExport.envpressure = pressure;
-            stabDerivExport.envtemperature = temperature;
-            stabDerivExport.envdensity = density;
-            stabDerivExport.envsoundspeed = sspeed;
-            stabDerivExport.envg = _instantCondition.CalculateAccelerationDueToGravity(body, alt);
-            stabDerivExport.sitmach = machNumber;
-            stabDerivExport.sitdynpres = q;
-            stabDerivExport.siteffg = effectiveG;
-
-            return new StabilityDerivExportOutput(stabDerivOutput, stabDerivExport);
+            return stabDerivOutput;
         }
 
     }

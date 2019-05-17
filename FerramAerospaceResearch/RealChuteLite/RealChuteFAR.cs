@@ -92,6 +92,7 @@ namespace FerramAerospaceResearch.RealChuteLite
         [KSPField]
         public bool invertCanopy = true;
 
+        // ReSharper disable NotAccessedField.Global -> unity
         //Persistant fields
         [KSPField(isPersistant = false)]    //this cannot be persistent to ensure that bad values aren't saved, and since these chutes aren't customizable there's no reason to save this
         public float preDeployedDiameter = 1, deployedDiameter = 25;
@@ -111,6 +112,7 @@ namespace FerramAerospaceResearch.RealChuteLite
         public float currentTemp = 20;
         [KSPField(guiActive = false, guiName = "RCLStatusMaxTemp", guiFormat = "0.00", guiUnits = "RCLTempUnit")]
         public float chuteDisplayMaxTemp = (float)(maxTemp + absoluteZero);
+        // ReSharper restore NotAccessedField.Global
         #endregion
 
         #region Propreties

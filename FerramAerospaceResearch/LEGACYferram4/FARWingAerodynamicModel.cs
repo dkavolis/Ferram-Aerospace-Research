@@ -121,11 +121,13 @@ namespace ferram4
 
         private bool fieldsVisible;
 
+        // ReSharper disable NotAccessedField.Global -> unity
         [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiFormat = "F3", guiUnits = "FARUnitKN")]
         public float dragForceWing;
 
         [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiFormat = "F3", guiUnits = "FARUnitKN")]
         public float liftForceWing;
+        // ReSharper restore NotAccessedField.Global
 
         private double rawLiftSlope;
         private double liftslope;
@@ -173,7 +175,6 @@ namespace ferram4
         protected double NUFAR_areaExposedFactor;
         protected double NUFAR_totalExposedAreaFactor;
 
-        public bool ready;
         private bool massScaleReady;
 
         public void NUFAR_ClearExposedAreaFactor()
@@ -448,7 +449,6 @@ namespace ferram4
 
 
             OnVesselPartsChange += UpdateThisWingInteractions;
-            ready = true;
         }
 
         public void StartInitialization()

@@ -89,11 +89,13 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private bool fieldsVisible;
 
+        // ReSharper disable NotAccessedField.Global -> unity
         [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiFormat = "F3", guiUnits = "FARUnitKN")]
         public float dragForce;
 
         [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiFormat = "F3", guiUnits = "FARUnitKN")]
         public float liftForce;
+        // ReSharper restore NotAccessedField.Global
 
         //[KSPField(isPersistant = false, guiActive = true)]
         //public double expSkinArea;

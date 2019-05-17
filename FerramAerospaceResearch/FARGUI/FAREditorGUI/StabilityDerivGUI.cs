@@ -232,10 +232,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
             if (body.GetPressure(altitudeDouble) > 0)
             {
-                StabilityDerivExportOutput stabDerivResult = simManager.StabDerivCalculator.CalculateStabilityDerivs(body, altitudeDouble, machDouble, flapsettingInt, spoilersDeployedBool, 0, 0, 0);
-                stabDerivOutput = stabDerivResult.outputvals;
-                simManager.vehicleData = stabDerivResult.outputvals;
-                SetAngleVectors(stabDerivResult.outputvals.stableAoA);
+                StabilityDerivOutput stabDerivResult = simManager.StabDerivCalculator.CalculateStabilityDerivs(body, altitudeDouble, machDouble, flapsettingInt, spoilersDeployedBool, 0, 0, 0);
+                SetAngleVectors(stabDerivResult.stableAoA);
 
             }
             else

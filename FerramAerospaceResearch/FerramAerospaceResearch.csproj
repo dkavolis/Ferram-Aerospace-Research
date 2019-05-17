@@ -122,7 +122,6 @@
     <Compile Include="FARGUI\FAREditorGUI\Simulation\InstantConditionSimOutput.cs" />
     <Compile Include="FARGUI\FAREditorGUI\Simulation\StabilityDerivApproxSim.cs" />
     <Compile Include="FARGUI\FAREditorGUI\Simulation\StabilityDerivOutput.cs" />
-    <Compile Include="FARGUI\FAREditorGUI\Simulation\StabilityDerivExportOutput.cs" />
     <Compile Include="FARGUI\FAREditorGUI\Simulation\StabilityDerivCalculator.cs" />
     <Compile Include="FARGUI\FAREditorGUI\Simulation\SweepSim.cs" />
     <Compile Include="FARGUI\FAREditorGUI\EditorAreaRulingOverlay.cs" />

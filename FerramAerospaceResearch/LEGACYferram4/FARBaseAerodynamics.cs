@@ -52,12 +52,14 @@ namespace ferram4
 {
     public class FARBaseAerodynamics : FARPartModule, ILiftProvider
     {
+        // ReSharper disable NotAccessedField.Global
         [KSPField(isPersistant = false, guiActive = false, guiName = "FARAbbrevCl")]
         public double Cl;
         [KSPField(isPersistant = false, guiActive = false, guiName = "FARAbbrevCd")]
         public double Cd;
         [KSPField(isPersistant = false, guiActive = false, guiName = "FARAbbrevCm")]
         public double Cm;
+        // ReSharper restore NotAccessedField.Global
 
                 //protected float MachNumber = 0;
         protected Vector3d velocityEditor = Vector3.zero;

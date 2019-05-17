@@ -79,6 +79,7 @@ namespace ferram4
         private bool flipAxis;
 
 
+        // ReSharper disable once NotAccessedField.Global
         [KSPField(isPersistant = false)]
         public Vector3 controlSurfacePivot = new Vector3(1f, 0f, 0f);
 
