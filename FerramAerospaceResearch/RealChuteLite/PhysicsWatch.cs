@@ -41,7 +41,7 @@ namespace FerramAerospaceResearch.RealChuteLite
         /// <summary>
         /// If the watch is currently counting down time
         /// </summary>
-        public bool IsRunning { get; protected set; }
+        public bool IsRunning { get; private set; }
 
         /// <summary>
         /// The current elapsed time of the watch
