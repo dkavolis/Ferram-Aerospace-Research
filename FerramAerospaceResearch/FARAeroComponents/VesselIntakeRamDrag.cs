@@ -84,10 +84,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 for (int j = 0; j < p.Modules.Count; j++)
                 {
                     PartModule m = p.Modules[j];
-                    if (m is ModuleResourceIntake)
+                    if (m is ModuleResourceIntake intake)
                     {
-                        ModuleResourceIntake intake = (ModuleResourceIntake)m;
-
                         if (intake.node != null && intake.node.attachedPart != null)
                             continue;
 
@@ -112,11 +110,10 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 {
                     PartModule m = p.Modules[j];
 
-                    if (m is ModuleEngines)
+                    if (m is ModuleEngines e)
                     {
-                        ModuleEngines e = (ModuleEngines)m;
                         if (FARAeroUtil.AJELoaded)
-                            if (m.ClassID == AJE_JET_CLASS_ID || m.ClassID == AJE_PROP_CLASS_ID)
+                            if (e.ClassID == AJE_JET_CLASS_ID || e.ClassID == AJE_PROP_CLASS_ID)
                             {
                                 _airBreathingEngines.Add(e);
                                 continue;

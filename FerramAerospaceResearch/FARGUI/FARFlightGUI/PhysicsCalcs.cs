@@ -271,15 +271,13 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
                 for (int j = 0; j < p.Modules.Count; j++)
                 {
                     PartModule m = p.Modules[j];
-                    if (m is ModuleEngines)
+                    if (m is ModuleEngines e)
                     {
-                        ModuleEngines e = (ModuleEngines)m;
                         FuelConsumptionFromEngineModule(e, ref totalThrust, ref totalThrust_Isp, ref fuelConsumptionVol, ref airDemandVol, invDeltaTime);
                     }
 
-                    if (m is ModuleResourceIntake)
+                    if (m is ModuleResourceIntake intake)
                     {
-                        ModuleResourceIntake intake = (ModuleResourceIntake)m;
                         if (intake.intakeEnabled)
                         {
                             airAvailableVol += intake.airFlow * intakeAirDensity / invDeltaTime;

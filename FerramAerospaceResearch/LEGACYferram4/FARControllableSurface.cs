@@ -209,8 +209,8 @@ namespace ferram4
                 for (int j = 0; j < p.Modules.Count; j++)
                 {
                     PartModule m = p.Modules[j];
-                    if (m is FARControllableSurface)
-                        (m as FARControllableSurface).SetDeflection(flapDeflectionLevel);
+                    if (m is FARControllableSurface controllableSurface)
+                        controllableSurface.SetDeflection(flapDeflectionLevel);
                 }
             }
         }

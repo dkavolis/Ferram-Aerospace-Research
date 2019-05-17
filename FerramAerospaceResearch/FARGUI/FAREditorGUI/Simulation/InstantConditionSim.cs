@@ -180,8 +180,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 
                 Vector3d vel = velocity + Vector3d.Cross(angVel, relPos);
 
-                if (w is FARControllableSurface)
-                    (w as FARControllableSurface).SetControlStateEditor(CoM, vel, (float)input.pitchValue, 0, 0, input.flaps, input.spoilers);
+                if (w is FARControllableSurface controllableSurface)
+                    controllableSurface.SetControlStateEditor(CoM, vel, (float)input.pitchValue, 0, 0, input.flaps, input.spoilers);
                 else if (w.isShielded)
                     continue;
 
@@ -295,8 +295,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                 if (w.isShielded)
                     continue;
 
-                if (w is FARControllableSurface)
-                    (w as FARControllableSurface).SetControlStateEditor(CoM, Vector3.up, (float)pitch, 0, 0, flapSetting, spoilers);
+                if (w is FARControllableSurface controllableSurface)
+                    controllableSurface.SetControlStateEditor(CoM, Vector3.up, (float)pitch, 0, 0, flapSetting, spoilers);
             }
         }
 

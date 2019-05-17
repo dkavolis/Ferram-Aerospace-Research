@@ -142,8 +142,8 @@ namespace ferram4
 
             foreach (Part p in EditorLogic.SortedShipList)
                 foreach (PartModule m in p.Modules)
-                    if (m is FARBaseAerodynamics)
-                        parts.Add(m as FARBaseAerodynamics);
+                    if (m is FARBaseAerodynamics aerodynamics)
+                        parts.Add(aerodynamics);
 
             return parts;
         }

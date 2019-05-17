@@ -117,9 +117,9 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                     area += w.S;
                     MAC += w.GetMAC() * w.S;
                     b += w.Getb_2() * w.S;
-                    if (w is FARControllableSurface)
+                    if (w is FARControllableSurface controllableSurface)
                     {
-                        (w as FARControllableSurface).SetControlStateEditor(CoM, p.transform.up, 0, 0, 0, input.flaps, input.spoilers);
+                        controllableSurface.SetControlStateEditor(CoM, p.transform.up, 0, 0, 0, input.flaps, input.spoilers);
                     }
                 }
             }

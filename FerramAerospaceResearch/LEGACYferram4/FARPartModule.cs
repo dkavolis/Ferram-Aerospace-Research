@@ -88,9 +88,8 @@ namespace ferram4
             for (int i = 0; i < part.Modules.Count; i++)
             {
                 PartModule m = part.Modules[i];
-                if (m is FARPartModule)
+                if (m is FARPartModule farModule)
                 {
-                    FARPartModule farModule = (m as FARPartModule);
                     if (farModule.partColliders != null)
                     {
                         partColliders = farModule.partColliders;

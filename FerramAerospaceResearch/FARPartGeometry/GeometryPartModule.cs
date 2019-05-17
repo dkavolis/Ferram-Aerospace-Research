@@ -435,9 +435,9 @@ namespace FerramAerospaceResearch.FARPartGeometry
         private void SetupIGeometryUpdaters()
         {
             geometryUpdaters = new List<IGeometryUpdater>();
-            if(part is CompoundPart)
+            if(part is CompoundPart compoundPart)
             {
-                CompoundPartGeoUpdater compoundUpdate = new CompoundPartGeoUpdater((CompoundPart)part, this);
+                CompoundPartGeoUpdater compoundUpdate = new CompoundPartGeoUpdater(compoundPart, this);
                 geometryUpdaters.Add(compoundUpdate);
             }
             if(part.Modules.Contains<ModuleProceduralFairing>())
@@ -501,10 +501,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
             {
                 PartModule module = part.Modules[intakeType];
 
-                if (module is ModuleResourceIntake)
+                if (module is ModuleResourceIntake intake)
                 {
-                    ModuleResourceIntake intake = (ModuleResourceIntake)module;
-
                     IntegratedIntakeEngineCrossSectionAdjuster intakeAdjuster = IntegratedIntakeEngineCrossSectionAdjuster.CreateAdjuster(intake, worldToVesselMatrix);
                     crossSectionAdjusters.Add(intakeAdjuster);
                 }
@@ -519,10 +517,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
             {
                 PartModule module = part.Modules[intakeType];
 
-                if (module is ModuleResourceIntake)
+                if (module is ModuleResourceIntake intake)
                 {
-                    ModuleResourceIntake intake = (ModuleResourceIntake)module;
-
                     IntakeCrossSectionAdjuster intakeAdjuster = IntakeCrossSectionAdjuster.CreateAdjuster(intake, worldToVesselMatrix);
                     crossSectionAdjusters.Add(intakeAdjuster);
                 }

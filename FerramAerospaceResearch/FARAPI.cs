@@ -430,9 +430,9 @@ namespace FerramAerospaceResearch
             for(int i =0; i < vessel.vesselModules.Count; ++i)
             {
                 VesselModule vM = vessel.vesselModules[i];
-                if(vM is FARVesselAero)
+                if(vM is FARVesselAero vesselAero)
                 {
-                    vesselAeroModule = (FARVesselAero)vM;
+                    vesselAeroModule = vesselAero;
                     break;
                 }
             }
@@ -458,9 +458,9 @@ namespace FerramAerospaceResearch
             for(int i =0; i < vessel.vesselModules.Count; ++i)
             {
                 VesselModule vM = vessel.vesselModules[i];
-                if(vM is FARVesselAero)
+                if(vM is FARVesselAero vesselAero)
                 {
-                    vesselAeroModule = (FARVesselAero)vM;
+                    vesselAeroModule = vesselAero;
                     break;
                 }
             }
