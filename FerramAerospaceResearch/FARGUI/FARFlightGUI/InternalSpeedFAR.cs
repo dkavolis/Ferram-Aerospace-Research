@@ -68,10 +68,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
                 AirspeedSettingsGUI airspeedSettingsGUI = flightGUI.airSpeedGUI;
                 if (airspeedSettingsGUI != null)
                 {
-                    string value;
-                    AirspeedSettingsGUI.SurfaceVelMode mode;
-
-                    if (airspeedSettingsGUI.GetVelocityDisplayString(out value, out mode))
+                    if (airspeedSettingsGUI.GetVelocityDisplayString(out string value, out AirspeedSettingsGUI.SurfaceVelMode mode))
                     {
                         textObject.text.SetText(shortCaptions[(int)mode] + value);
                         return; // we are done here

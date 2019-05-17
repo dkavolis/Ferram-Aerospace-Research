@@ -90,10 +90,9 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             double Ixz = 0;
 
             InstantConditionSimInput input = new InstantConditionSimInput(alpha, beta, phi, 0, 0, 0, machNumber, 0, flapSetting, spoilers);
-            InstantConditionSimOutput nominalOutput;
             InstantConditionSimOutput pertOutput = new InstantConditionSimOutput();
 
-            _instantCondition.GetClCdCmSteady(input, out nominalOutput, true);
+            _instantCondition.GetClCdCmSteady(input, out InstantConditionSimOutput nominalOutput, true);
 
             List<Part> partsList = EditorLogic.SortedShipList;
             for (int i = 0; i < partsList.Count; i++)

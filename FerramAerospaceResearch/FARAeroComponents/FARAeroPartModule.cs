@@ -350,10 +350,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
         {
             CalculateTotalAeroForce();
 
-            FlightGUI flightGUI;
             AeroVisualizationGUI aeroVizGUI = null;
 
-            if (FlightGUI.vesselFlightGUI != null && vessel != null && FlightGUI.vesselFlightGUI.TryGetValue(vessel, out flightGUI))
+            if (FlightGUI.vesselFlightGUI != null && vessel != null && FlightGUI.vesselFlightGUI.TryGetValue(vessel, out FlightGUI flightGUI))
                 aeroVizGUI = flightGUI.AeroVizGUI;
 
             if (aeroVizGUI == null) return;

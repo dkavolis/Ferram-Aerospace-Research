@@ -81,9 +81,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                 if (input.machNumber.NearlyEqual(0))
                     input.machNumber = 0.001;
 
-                InstantConditionSimOutput output;
-
-                _instantCondition.GetClCdCmSteady(input, out output, i == 0);
+                _instantCondition.GetClCdCmSteady(input, out InstantConditionSimOutput output, i == 0);
                 AlphaValues[i] = input.machNumber;
                 ClValues[i] = output.Cl;
                 CdValues[i] = output.Cd;
@@ -132,9 +130,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 
                 input.alpha = angle;
 
-                InstantConditionSimOutput output;
-
-                _instantCondition.GetClCdCmSteady(input, out output, i == 0);
+                _instantCondition.GetClCdCmSteady(input, out InstantConditionSimOutput output, i == 0);
 
                 //                FARLogger.Info("Cl: " + Cl + " Cd: " + Cd);
                 if (i < numPoints)

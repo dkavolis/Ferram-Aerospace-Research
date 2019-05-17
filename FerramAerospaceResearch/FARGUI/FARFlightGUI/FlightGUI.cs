@@ -210,8 +210,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         }
         public static void SaveActiveData()
         {
-            FlightGUI gui;
-            if (FlightGlobals.ready && FlightGlobals.ActiveVessel != null && vesselFlightGUI != null && vesselFlightGUI.TryGetValue(FlightGlobals.ActiveVessel, out gui))
+            if (FlightGlobals.ready && FlightGlobals.ActiveVessel != null && vesselFlightGUI != null && vesselFlightGUI.TryGetValue(FlightGlobals.ActiveVessel, out FlightGUI gui))
             {
                 if(gui != null)
                     gui.SaveData();

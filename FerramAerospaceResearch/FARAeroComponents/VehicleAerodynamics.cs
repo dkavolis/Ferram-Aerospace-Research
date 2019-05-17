@@ -881,11 +881,10 @@ namespace FerramAerospaceResearch.FARAeroComponents
                             if (adjuster.AreaRemovedFromCrossSection().NearlyEqual(0))
                                 continue;
 
-                            VoxelCrossSection.SideAreaValues val;
                             Part p = adjuster.GetPart();
 
                             //see if you can find that in this section
-                            if (vehicleCrossSection[i].partSideAreaValues.TryGetValue(p, out val))
+                            if (vehicleCrossSection[i].partSideAreaValues.TryGetValue(p, out VoxelCrossSection.SideAreaValues val))
                             {
                                 if (adjuster.AreaRemovedFromCrossSection() > 0)
                                 {
@@ -983,11 +982,10 @@ namespace FerramAerospaceResearch.FARAeroComponents
                         if (!adjuster.IntegratedCrossSectionIncreaseDecrease())
                             continue;
 
-                        VoxelCrossSection.SideAreaValues val;
                         Part p = adjuster.GetPart();
 
                         //see if you can find that in this section
-                        if (vehicleCrossSection[i].partSideAreaValues.TryGetValue(p, out val))
+                        if (vehicleCrossSection[i].partSideAreaValues.TryGetValue(p, out VoxelCrossSection.SideAreaValues val))
                         {
                             ductedArea += val.crossSectionalAreaCount;
                             actualArea += adjuster.AreaRemovedFromCrossSection();
@@ -1053,9 +1051,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private void CalculateVesselAeroProperties()
         {
-            int front, back, numSections;
+            int numSections;
 
-            _voxel.CrossSectionData(_vehicleCrossSection, _vehicleMainAxis, out front, out back, out _sectionThickness, out _maxCrossSectionArea);
+            _voxel.CrossSectionData(_vehicleCrossSection, _vehicleMainAxis, out int front, out int back, out _sectionThickness, out _maxCrossSectionArea);
 
             numSections = back - front;
             _length = _sectionThickness * numSections;

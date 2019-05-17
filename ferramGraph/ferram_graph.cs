@@ -423,9 +423,7 @@ namespace ferram4
                 return;
             }
 
-            ferramGraphLine line;
-
-            if (allLines.TryGetValue(lineName, out line))
+            if (allLines.TryGetValue(lineName, out ferramGraphLine line))
             {
 
                 line.InputData(xValues, yValues);
@@ -493,8 +491,7 @@ namespace ferram4
         // ReSharper disable once UnusedMember.Global
         public void LineColor(string lineName, Color newColor)
         {
-            ferramGraphLine line;
-            if (allLines.TryGetValue(lineName, out line))
+            if (allLines.TryGetValue(lineName, out ferramGraphLine line))
             {
                 line.lineColor = newColor;
 
@@ -507,8 +504,7 @@ namespace ferram4
         // ReSharper disable once UnusedMember.Global
         public void LineThickness(string lineName, int thickness)
         {
-            ferramGraphLine line;
-            if (allLines.TryGetValue(lineName, out line))
+            if (allLines.TryGetValue(lineName, out ferramGraphLine line))
             {
                 line.lineThickness = Mathf.Clamp(thickness, 1, 6);
 

@@ -158,8 +158,7 @@ namespace FerramAerospaceResearch
                         continue;
 
                     double[] Rgamma_and_gamma = new double[2];
-                    double tmp;
-                    double.TryParse(bodyProperties.GetValue("viscosityAtReferenceTemp"), out tmp);
+                    double.TryParse(bodyProperties.GetValue("viscosityAtReferenceTemp"), out double tmp);
 
                     Rgamma_and_gamma[0] = tmp;
 

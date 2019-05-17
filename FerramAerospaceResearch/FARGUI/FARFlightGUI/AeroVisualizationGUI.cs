@@ -183,8 +183,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 
             if (node != null)
             {
-                double tmp;
-                if (double.TryParse(node.GetValue("fullySaturatedCl"), out tmp))
+                if (double.TryParse(node.GetValue("fullySaturatedCl"), out double tmp))
                     _fullySaturatedCl = tmp;
                 if (double.TryParse(node.GetValue("fullySaturatedCd"), out tmp))
                     _fullySaturatedCd = tmp;

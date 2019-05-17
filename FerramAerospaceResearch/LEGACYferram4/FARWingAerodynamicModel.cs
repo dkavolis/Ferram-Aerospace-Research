@@ -968,8 +968,7 @@ namespace ferram4
             rawLiftSlope = CalculateSubsonicLiftSlope(MachNumber);// / AoA;     //Prandtl lifting Line
 
 
-            double ACshift, ACweight;
-            CalculateWingCamberInteractions(MachNumber, AoA, out ACshift, out ACweight);
+            CalculateWingCamberInteractions(MachNumber, AoA, out double ACshift, out double ACweight);
             DetermineStall(AoA);
 
             double beta = Math.Sqrt(MachNumber * MachNumber - 1);
@@ -1170,9 +1169,8 @@ namespace ferram4
             double p2 = PMExpansionCalculation(2 * halfAngle, M1) * p1;
 
             double angle3 = halfAngle + AbsAoA;                  //Region 3 is the lower surface ahead of the max thickness
-            double M3;
             double p3;       //pressure ratio wrt to freestream pressure
-            p3 = ShockWaveCalculation(angle3, M, out M3, maxSinBeta, minSinBeta);
+            p3 = ShockWaveCalculation(angle3, M, out double M3, maxSinBeta, minSinBeta);
 
             //Region 4 is the lower surface behind the max thickness
             double p4 = PMExpansionCalculation(2 * halfAngle, M3) * p3;

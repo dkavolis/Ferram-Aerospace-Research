@@ -506,8 +506,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
         {
             //TODO: Look into setting better limits for iterating over sweep plane to improve off-axis performance
 
-            double wInc;
-            Vector4d plane = CalculateEquationOfSweepPlane(orientationVector, out wInc);
+            Vector4d plane = CalculateEquationOfSweepPlane(orientationVector, out double wInc);
 
             double x, y, z;
             x = Math.Abs(plane.x);
@@ -1347,13 +1346,12 @@ namespace FerramAerospaceResearch.FARPartGeometry
         private void DetermineIfPartGetsForcesAndAreas(Dictionary<Part, VoxelCrossSection.SideAreaValues> partSideAreas, PartSizePair voxel, int i, int j, int k)
         {
             // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
-            VoxelCrossSection.SideAreaValues areas;
             VoxelOrientationPlane filledPlanes = VoxelOrientationPlane.NONE;
             bool partGetsForces = true;
 
             Part p = voxel.part;
 
-            if (!partSideAreas.TryGetValue(p, out areas))
+            if (!partSideAreas.TryGetValue(p, out VoxelCrossSection.SideAreaValues areas))
             {
                 areas = new VoxelCrossSection.SideAreaValues();
                 partGetsForces = false;

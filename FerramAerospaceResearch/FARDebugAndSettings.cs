@@ -560,8 +560,7 @@ namespace FerramAerospaceResearch
             config = PluginConfiguration.CreateForType<FARSettingsScenarioModule>();
             config.load();
 
-            bool tmp;
-            if (node.HasValue("allowStructuralFailures") && bool.TryParse(node.GetValue("allowStructuralFailures"), out tmp))
+            if (node.HasValue("allowStructuralFailures") && bool.TryParse(node.GetValue("allowStructuralFailures"), out bool tmp))
                 FARDebugValues.allowStructuralFailures = tmp;
             else
                 FARDebugValues.allowStructuralFailures = true;

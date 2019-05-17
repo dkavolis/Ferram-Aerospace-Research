@@ -273,9 +273,8 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             }
             else
             {
-                int tmp;
                 //unitMode = (SurfaceVelUnit)int.Parse(node.GetValue("unitTypeIndex"));
-                if (int.TryParse(node.GetValue("unitTypeIndex"), out tmp))
+                if (int.TryParse(node.GetValue("unitTypeIndex"), out int tmp))
                     unitMode = (SurfaceVelUnit)tmp;
                 else
                     unitMode = 0;

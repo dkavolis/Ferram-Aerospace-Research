@@ -68,8 +68,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.DesignConcerns
             {
                 _simInput.alpha = -1;
                 _simInput.machNumber = 0.5;
-                InstantConditionSimOutput output;
-                _instantSim.GetClCdCmSteady(_simInput, out output, true, true);
+                _instantSim.GetClCdCmSteady(_simInput, out InstantConditionSimOutput output, true, true);
 
                 double Cm_1 = output.Cm;
                 _simInput.alpha = 1;
