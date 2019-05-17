@@ -56,12 +56,7 @@ namespace FerramAerospaceResearch.FARGUI
         private static GUIColors _instance;
         public static GUIColors Instance
         {
-            get
-            {
-                if (_instance == null)
-                    _instance = new GUIColors();
-                return _instance;
-            }
+            get { return _instance ?? (_instance = new GUIColors()); }
         }
 
         private GUIColors()

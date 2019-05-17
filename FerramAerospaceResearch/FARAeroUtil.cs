@@ -420,24 +420,14 @@ namespace FerramAerospaceResearch
         // ReSharper disable once UnusedMember.Global
         public static List<FARWingAerodynamicModel> CurEditorWings
         {
-            get
-            {
-                if (curEditorWingCache == null)
-                    curEditorWingCache = ListEditorWings();
-                return curEditorWingCache;
-            }
+            get { return curEditorWingCache ?? (curEditorWingCache = ListEditorWings()); }
         }
         // Parts currently added to the vehicle in the editor
         private static List<Part> CurEditorPartsCache;
 
         public static List<Part> CurEditorParts
         {
-            get
-            {
-                if (CurEditorPartsCache == null)
-                    CurEditorPartsCache = ListEditorParts(false);
-                return CurEditorPartsCache;
-            }
+            get { return CurEditorPartsCache ?? (CurEditorPartsCache = ListEditorParts(false)); }
         }
 
         // Parts currently added, plus the ghost part(s) about to be attached
@@ -445,12 +435,7 @@ namespace FerramAerospaceResearch
 
         public static List<Part> AllEditorParts
         {
-            get
-            {
-                if (AllEditorPartsCache == null)
-                    AllEditorPartsCache = ListEditorParts(true);
-                return AllEditorPartsCache;
-            }
+            get { return AllEditorPartsCache ?? (AllEditorPartsCache = ListEditorParts(true)); }
         }
 
         public static void ResetEditorParts()

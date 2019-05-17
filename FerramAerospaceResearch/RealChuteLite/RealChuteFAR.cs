@@ -283,14 +283,7 @@ namespace FerramAerospaceResearch.RealChuteLite
         private static GUIStyle boldLabel;
         public static GUIStyle BoldLabel
         {
-            get
-            {
-                if (boldLabel == null)
-                {
-                    boldLabel = new GUIStyle(HighLogic.Skin.label) { fontStyle = FontStyle.Bold };
-                }
-                return boldLabel;
-            }
+            get { return boldLabel ?? (boldLabel = new GUIStyle(HighLogic.Skin.label) {fontStyle = FontStyle.Bold}); }
         }
 
         //Yellow KSP style GUI label
@@ -299,15 +292,12 @@ namespace FerramAerospaceResearch.RealChuteLite
         {
             get
             {
-                if (yellowLabel == null)
-                {
-                    yellowLabel = new GUIStyle(HighLogic.Skin.label)
-                    {
-                        normal = { textColor = XKCDColors.BrightYellow },
-                        hover = { textColor = XKCDColors.BrightYellow }
-                    };
-                }
-                return yellowLabel;
+                return yellowLabel ??
+                       (yellowLabel = new GUIStyle(HighLogic.Skin.label)
+                           {
+                               normal = {textColor = XKCDColors.BrightYellow},
+                               hover  = {textColor = XKCDColors.BrightYellow}
+                           });
             }
         }
 
@@ -317,15 +307,12 @@ namespace FerramAerospaceResearch.RealChuteLite
         {
             get
             {
-                if (redLabel == null)
-                {
-                    redLabel = new GUIStyle(HighLogic.Skin.label)
-                    {
-                        normal = { textColor = XKCDColors.Red },
-                        hover = { textColor = XKCDColors.Red }
-                    };
-                }
-                return redLabel;
+                return redLabel ??
+                       (redLabel = new GUIStyle(HighLogic.Skin.label)
+                           {
+                               normal = {textColor = XKCDColors.Red},
+                               hover  = {textColor = XKCDColors.Red}
+                           });
             }
         }
 
