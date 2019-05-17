@@ -84,9 +84,8 @@ namespace ferram4
         public void TriggerPartColliderUpdate()
         {
             //Set up part collider list to easy runtime overhead with memory churning
-            for (int i = 0; i < part.Modules.Count; i++)
+            foreach (PartModule m in part.Modules)
             {
-                PartModule m = part.Modules[i];
                 if (m is FARPartModule farModule)
                 {
                     if (farModule.partColliders != null)
@@ -96,6 +95,7 @@ namespace ferram4
                     }
                 }
             }
+
             // For some reason fuelLine throws NRE when trying to get colliders
             if (partColliders == null)
             {

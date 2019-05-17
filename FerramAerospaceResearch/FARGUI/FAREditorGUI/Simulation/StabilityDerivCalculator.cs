@@ -95,10 +95,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             _instantCondition.GetClCdCmSteady(input, out InstantConditionSimOutput nominalOutput, true);
 
             List<Part> partsList = EditorLogic.SortedShipList;
-            for (int i = 0; i < partsList.Count; i++)
+            foreach (Part p in partsList)
             {
-                Part p = partsList[i];
-
                 if (FARAeroUtil.IsNonphysical(p))
                     continue;
                 double partMass = p.mass;
@@ -107,7 +105,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 
                 //partMass += p.GetModuleMass(p.mass);
                 // If you want to use GetModuleMass, you need to start from p.partInfo.mass, not p.mass
-                CoM += partMass * (Vector3d)p.transform.TransformPoint(p.CoMOffset);
+                CoM  += partMass * (Vector3d)p.transform.TransformPoint(p.CoMOffset);
                 mass += partMass;
                 FARWingAerodynamicModel w = p.GetComponent<FARWingAerodynamicModel>();
                 if (w != null)
@@ -116,8 +114,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                         continue;
 
                     area += w.S;
-                    MAC += w.GetMAC() * w.S;
-                    b += w.Getb_2() * w.S;
+                    MAC  += w.GetMAC() * w.S;
+                    b    += w.Getb_2() * w.S;
                     if (w is FARControllableSurface controllableSurface)
                     {
                         controllableSurface.SetControlStateEditor(CoM, p.transform.up, 0, 0, 0, input.flaps, input.spoilers);
@@ -139,21 +137,19 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             stabDerivOutput.MAC = MAC;
             stabDerivOutput.area = area;
 
-            for (int i = 0; i < partsList.Count; i++)
+            foreach (Part p in partsList)
             {
-                Part p = partsList[i];
-
                 if (p == null || FARAeroUtil.IsNonphysical(p))
                     continue;
                 //This section handles the parallel axis theorem
                 Vector3 relPos = p.transform.TransformPoint(p.CoMOffset) - CoM;
-                double x2, y2, z2, x, y, z;
+                double  x2, y2, z2, x, y, z;
                 x2 = relPos.z * relPos.z;
                 y2 = relPos.x * relPos.x;
                 z2 = relPos.y * relPos.y;
-                x = relPos.z;
-                y = relPos.x;
-                z = relPos.y;
+                x  = relPos.z;
+                y  = relPos.x;
+                z  = relPos.y;
 
                 double partMass = p.mass;
                 if (p.Resources.Count > 0)
@@ -171,21 +167,21 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                 Ixz += -x * z * partMass;
 
                 //And this handles the part's own moment of inertia
-                Vector3 principalInertia = p.Rigidbody.inertiaTensor;
-                Quaternion prncInertRot = p.Rigidbody.inertiaTensorRotation;
+                Vector3    principalInertia = p.Rigidbody.inertiaTensor;
+                Quaternion prncInertRot     = p.Rigidbody.inertiaTensorRotation;
 
                 //The rows of the direction cosine matrix for a quaternion
                 Vector3 Row1 = new Vector3(prncInertRot.x * prncInertRot.x - prncInertRot.y * prncInertRot.y - prncInertRot.z * prncInertRot.z + prncInertRot.w * prncInertRot.w,
-                    2 * (prncInertRot.x * prncInertRot.y + prncInertRot.z * prncInertRot.w),
-                    2 * (prncInertRot.x * prncInertRot.z - prncInertRot.y * prncInertRot.w));
+                                           2 * (prncInertRot.x * prncInertRot.y + prncInertRot.z * prncInertRot.w),
+                                           2 * (prncInertRot.x * prncInertRot.z - prncInertRot.y * prncInertRot.w));
 
                 Vector3 Row2 = new Vector3(2 * (prncInertRot.x * prncInertRot.y - prncInertRot.z * prncInertRot.w),
-                    -prncInertRot.x * prncInertRot.x + prncInertRot.y * prncInertRot.y - prncInertRot.z * prncInertRot.z + prncInertRot.w * prncInertRot.w,
-                    2 * (prncInertRot.y * prncInertRot.z + prncInertRot.x * prncInertRot.w));
+                                           -prncInertRot.x * prncInertRot.x + prncInertRot.y * prncInertRot.y - prncInertRot.z * prncInertRot.z + prncInertRot.w * prncInertRot.w,
+                                           2 * (prncInertRot.y * prncInertRot.z + prncInertRot.x * prncInertRot.w));
 
                 Vector3 Row3 = new Vector3(2 * (prncInertRot.x * prncInertRot.z + prncInertRot.y * prncInertRot.w),
-                    2 * (prncInertRot.y * prncInertRot.z - prncInertRot.x * prncInertRot.w),
-                    -prncInertRot.x * prncInertRot.x - prncInertRot.y * prncInertRot.y + prncInertRot.z * prncInertRot.z + prncInertRot.w * prncInertRot.w);
+                                           2 * (prncInertRot.y * prncInertRot.z - prncInertRot.x * prncInertRot.w),
+                                           -prncInertRot.x * prncInertRot.x - prncInertRot.y * prncInertRot.y + prncInertRot.z * prncInertRot.z + prncInertRot.w * prncInertRot.w);
 
 
                 //And converting the principal moments of inertia into the coordinate system used by the system

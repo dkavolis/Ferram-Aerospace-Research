@@ -43,6 +43,7 @@ Copyright 2019, Michael Ferrara, aka Ferram4
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using FerramAerospaceResearch.FARUtils;
 using KSP.Localization;
 using UnityEngine;
@@ -147,13 +148,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
                 FARLogger.Error("Could not save Aero Visualization Settings because settings config list was null");
                 return;
             }
-            ConfigNode node = null;
-            for (int i = 0; i < flightGUISettings.Count; i++)
-                if (flightGUISettings[i].name == "AeroVizSettings")
-                {
-                    node = flightGUISettings[i];
-                    break;
-                }
+            ConfigNode node = flightGUISettings.FirstOrDefault(t => t.name == "AeroVizSettings");
 
             if (node == null)
             {
@@ -173,13 +168,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         {
             List<ConfigNode> flightGUISettings = FARSettingsScenarioModule.FlightGUISettings;
 
-            ConfigNode node = null;
-            for (int i = 0; i < flightGUISettings.Count; i++)
-                if (flightGUISettings[i].name == "AeroVizSettings")
-                {
-                    node = flightGUISettings[i];
-                    break;
-                }
+            ConfigNode node = flightGUISettings.FirstOrDefault(t => t.name == "AeroVizSettings");
 
             if (node != null)
             {

@@ -80,8 +80,8 @@ namespace FerramAerospaceResearch.FARThreading
         {
             if (_exceptionsThrown.Count > 0)
             {
-                for (int i = 0; i < _exceptionsThrown.Count; i++)
-                    FARLogger.Exception(_exceptionsThrown[i]);
+                foreach (Exception exception in _exceptionsThrown)
+                    FARLogger.Exception(exception);
 
                 _exceptionsThrown.Clear();
             }
@@ -96,8 +96,8 @@ namespace FerramAerospaceResearch.FARThreading
             if (_infoMessages.Count > 0)
             {
                 StringBuilder sB = new StringBuilder();
-                for (int i = 0; i < _infoMessages.Count; i++)
-                    sB.AppendLine(_infoMessages[i]);
+                foreach (string message in _infoMessages)
+                    sB.AppendLine(message);
 
                 _infoMessages.Clear();
 
@@ -111,8 +111,8 @@ namespace FerramAerospaceResearch.FARThreading
             if (_debugMessages.Count > 0)
             {
                 StringBuilder sB = new StringBuilder();
-                for (int i = 0; i < _debugMessages.Count; i++)
-                    sB.AppendLine(_debugMessages[i]);
+                foreach (string message in _debugMessages)
+                    sB.AppendLine(message);
 
                 _debugMessages.Clear();
 

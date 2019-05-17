@@ -43,6 +43,7 @@ Copyright 2019, Michael Ferrara, aka Ferram4
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using FerramAerospaceResearch.FARUtils;
 using KSP.Localization;
@@ -307,13 +308,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
                 FARLogger.Error("Could not save Flight Data Settings because settings config list was null");
                 return;
             }
-            ConfigNode node = null;
-            for (int i = 0; i < flightGUISettings.Count; i++)
-                if (flightGUISettings[i].name == "FlightDataSettings")
-                {
-                    node = flightGUISettings[i];
-                    break;
-                }
+            ConfigNode node = flightGUISettings.FirstOrDefault(t => t.name == "FlightDataSettings");
 
             if (node == null)
             {
@@ -332,13 +327,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         {
             List<ConfigNode> flightGUISettings = FARSettingsScenarioModule.FlightGUISettings;
 
-            ConfigNode node = null;
-            for (int i = 0; i < flightGUISettings.Count; i++)
-                if (flightGUISettings[i].name == "FlightDataSettings")
-                {
-                    node = flightGUISettings[i];
-                    break;
-                }
+            ConfigNode node = flightGUISettings.FirstOrDefault(t => t.name == "FlightDataSettings");
 
             if (node != null)
             {

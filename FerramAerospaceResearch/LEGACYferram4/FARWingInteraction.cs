@@ -226,36 +226,32 @@ namespace ferram4
         {
             //Hashset to avoid repeating the same one affected
 
-            for (int i = 0; i < nearbyWingModulesForwardList.Count; i++)
+            foreach (FARWingAerodynamicModel w in nearbyWingModulesForwardList)
             {
-                FARWingAerodynamicModel w = nearbyWingModulesForwardList[i];
                 if (!wingsHandled.Contains(w))
                 {
                     w.UpdateThisWingInteractions();
                     wingsHandled.Add(w);
                 }
             }
-            for (int i = 0; i < nearbyWingModulesBackwardList.Count; i++)
+            foreach (FARWingAerodynamicModel w in nearbyWingModulesBackwardList)
             {
-                FARWingAerodynamicModel w = nearbyWingModulesBackwardList[i];
                 if (!wingsHandled.Contains(w))
                 {
                     w.UpdateThisWingInteractions();
                     wingsHandled.Add(w);
                 }
             }
-            for (int i = 0; i < nearbyWingModulesRightwardList.Count; i++)
+            foreach (FARWingAerodynamicModel w in nearbyWingModulesRightwardList)
             {
-                FARWingAerodynamicModel w = nearbyWingModulesRightwardList[i];
                 if (!wingsHandled.Contains(w))
                 {
                     w.UpdateThisWingInteractions();
                     wingsHandled.Add(w);
                 }
             }
-            for (int i = 0; i < nearbyWingModulesLeftwardList.Count; i++)
+            foreach (FARWingAerodynamicModel w in nearbyWingModulesLeftwardList)
             {
-                FARWingAerodynamicModel w = nearbyWingModulesLeftwardList[i];
                 if (!wingsHandled.Contains(w))
                 {
                     w.UpdateThisWingInteractions();
@@ -309,15 +305,12 @@ namespace ferram4
 
             hit.distance = 0;
             RaycastHit[] hits = Physics.RaycastAll(ray, dist, FARAeroUtil.RaycastMask);
-            for (int i = 0; i < hits.Length; i++)
+            foreach (RaycastHit h in hits)
             {
-                RaycastHit h = hits[i];
                 if (h.collider != null)
                 {
-                    for (int j = 0; j < PartList.Count; j++)
+                    foreach (Part p in PartList)
                     {
-                        Part p = PartList[j];
-
                         if (p == null)
                             continue;
 
@@ -330,16 +323,16 @@ namespace ferram4
                         {
                             Collider[] colliders = w.PartColliders;
 
-                            for (int k = 0; k < colliders.Length; k++)
-                                if (h.collider == colliders[k] && h.distance > 0)
+                            foreach (Collider collider in colliders)
+                                if (h.collider == collider && h.distance > 0)
                                 {
 
                                     double tmp = h.distance / dist;
                                     tmp = tmp.Clamp(0, 1);
                                     double tmp2 = Math.Abs(Vector3.Dot(parentWingPart.partTransform.forward, w.part.partTransform.forward));
-                                    tmp = 1 - (1 - tmp) * tmp2;
+                                    tmp               = 1 - (1 - tmp) * tmp2;
                                     interferencevalue = Math.Min(tmp, interferencevalue);
-                                    gotSomething = true;
+                                    gotSomething      = true;
 
                                     break;
                                 }
@@ -429,15 +422,13 @@ namespace ferram4
             FARWingAerodynamicModel wingHit = null;
 
             RaycastHit[] sortedHits = SortHitsByDistance(hits);
-            for (int j = 0; j < sortedHits.Length; j++)
+            foreach (RaycastHit h in sortedHits)
             {
                 gotSomething = false;
-                RaycastHit h = sortedHits[j];
                 if (h.collider != null)
                 {
-                    for (int k = 0; k < vesselPartList.Count; k++)
+                    foreach (Part p in vesselPartList)
                     {
-                        Part p = vesselPartList[k];
                         if (p == null || p == parentWingPart)
                             continue;
 
@@ -457,13 +448,13 @@ namespace ferram4
                         else
                             colliders = new[] { p.collider };
 
-                        for (int l = 0; l < colliders.Length; l++)
-                            if (h.collider == colliders[l] && h.distance > 0)
+                        foreach (Collider collider in colliders)
+                            if (h.collider == collider && h.distance > 0)
                             {
                                 if (firstHit)
                                 {
                                     exposure -= exposureDecreasePerHit;
-                                    firstHit = false;
+                                    firstHit =  false;
                                 }
 
                                 FARWingAerodynamicModel hitModule = p.GetComponent<FARWingAerodynamicModel>();
@@ -473,12 +464,13 @@ namespace ferram4
                                     if (tmp > wingInteractionFactor + 0.01)
                                     {
                                         wingInteractionFactor = tmp;
-                                        wingHit = hitModule;
+                                        wingHit               = hitModule;
                                     }
                                 }
                                 gotSomething = true;
                                 break;
                             }
+
                         if (gotSomething)
                             break;
                     }
@@ -670,11 +662,7 @@ namespace ferram4
             wingModules.RemoveAt(index);
             associatedInfluences.RemoveAt(index);
 
-            double influenceSum = 0;
-            for (int j = 0; j < associatedInfluences.Count; j++)
-            {
-                influenceSum += associatedInfluences[j];
-            }
+            double influenceSum = associatedInfluences.Sum();
             influenceSum = 1 / influenceSum;
 
             for (int j = 0; j < associatedInfluences.Count; j++)

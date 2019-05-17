@@ -157,22 +157,19 @@ namespace ferram4
 
             var parts = GetAllEditorModules();
 
-            for(int i = 0; i < parts.Count; i++)
+            foreach (FARBaseAerodynamics ba in parts)
             {
-                FARBaseAerodynamics ba = parts[i];
                 ba.velocityEditor = vel;
                 ba.ResetCenterOfLift();
             }
 
             // run computations twice to let things like flap interactions settle
-            for (int i = 0; i < parts.Count; i++)
+            foreach (FARBaseAerodynamics ba in parts)
             {
-                FARBaseAerodynamics ba = parts[i];
                 ba.PrecomputeCenterOfLift(vel, 0.5, density, dummy);
             }
-            for (int i = 0; i < parts.Count; i++)
+            foreach (FARBaseAerodynamics ba in parts)
             {
-                FARBaseAerodynamics ba = parts[i];
                 ba.PrecomputeCenterOfLift(vel, 0.5, density, lift);
             }
         }

@@ -219,9 +219,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private List<FARWingAerodynamicModel> LEGACY_UpdateWingAerodynamicModels()
         {
             _legacyWingModels.Clear();
-            for (int i = 0; i < _currentAeroModules.Count; i++)
+            foreach (FARAeroPartModule aeroModule in _currentAeroModules)
             {
-                Part p = _currentAeroModules[i].part;
+                Part p = aeroModule.part;
                 if (!p)
                     continue;
                 if (p.Modules.Contains<FARWingAerodynamicModel>())
@@ -252,20 +252,17 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 sect.LEGACY_SetLiftForFARWingAerodynamicModel();
             }*/
 
-            for (int i = 0; i < _legacyWingModels.Count; i++)
+            foreach (FARWingAerodynamicModel w in _legacyWingModels)
             {
-                FARWingAerodynamicModel w = _legacyWingModels[i];
                 w.NUFAR_CalculateExposedAreaFactor();
             }
 
-            for (int i = 0; i < _legacyWingModels.Count; i++)
+            foreach (FARWingAerodynamicModel w in _legacyWingModels)
             {
-                FARWingAerodynamicModel w = _legacyWingModels[i];
                 w.NUFAR_SetExposedAreaFactor();
             }
-            for (int i = 0; i < _legacyWingModels.Count; i++)
+            foreach (FARWingAerodynamicModel w in _legacyWingModels)
             {
-                FARWingAerodynamicModel w = _legacyWingModels[i];
                 w.NUFAR_UpdateShieldingStateFromAreaFactor();
             }
             return _legacyWingModels;
@@ -384,9 +381,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
                     _partWorldToLocalMatrixDict.Clear();
 
-                    for (int i = 0; i < _currentGeoModules.Count; i++)
+                    foreach (GeometryPartModule g in _currentGeoModules)
                     {
-                        GeometryPartModule g = _currentGeoModules[i];
                         _partWorldToLocalMatrixDict.Add(g.part, new PartTransformInfo(g.part.partTransform));
                         if (updateGeometryPartModules)
                             g.UpdateTransformMatrixList(_worldToLocalMatrix);
@@ -460,36 +456,34 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             bool hasPartsForAxis = false;
 
-            for (int i = 0; i < _vehiclePartList.Count; i++)
+            foreach (Part p in _vehiclePartList)
             {
-                Part p = _vehiclePartList[i];
-
                 if (p == null || hitParts.Contains(p))
                     continue;
 
-                GeometryPartModule geoModule = null;
+                GeometryPartModule geoModule;
 
                 geoModule = p.Modules.GetModule<GeometryPartModule>(); // Could be left null if a launch clamp
 
                 hitParts.Add(p);
 
                 Vector3 tmpCandVector = Vector3.zero;
-                Vector3 candVector = Vector3.zero;
+                Vector3 candVector    = Vector3.zero;
 
-                if (p.Modules.Contains<ModuleResourceIntake>())      //intakes are probably pointing in the direction we're gonna be going in
+                if (p.Modules.Contains<ModuleResourceIntake>()) //intakes are probably pointing in the direction we're gonna be going in
                 {
-                    ModuleResourceIntake intake = p.Modules.GetModule<ModuleResourceIntake>();
-                    Transform intakeTrans = p.FindModelTransform(intake.intakeTransformName);
+                    ModuleResourceIntake intake      = p.Modules.GetModule<ModuleResourceIntake>();
+                    Transform            intakeTrans = p.FindModelTransform(intake.intakeTransformName);
                     if (!(intakeTrans is null))
                         candVector = intakeTrans.TransformDirection(Vector3.forward);
                 }
-                else if (geoModule == null || geoModule.IgnoreForMainAxis || p.Modules.Contains<FARWingAerodynamicModel>() || p.Modules.Contains<FARControllableSurface>() || p.Modules.Contains<ModuleWheelBase>() || p.Modules.Contains("KSPWheelBase"))      //aggregate wings for later calc...
+                else if (geoModule == null || geoModule.IgnoreForMainAxis || p.Modules.Contains<FARWingAerodynamicModel>() || p.Modules.Contains<FARControllableSurface>() || p.Modules.Contains<ModuleWheelBase>() || p.Modules.Contains("KSPWheelBase")) //aggregate wings for later calc...
                 {
                     continue;
                 }
                 else
                 {
-                    if (p.srfAttachNode != null && p.srfAttachNode.attachedPart != null)// && p.attachRules.allowSrfAttach)
+                    if (p.srfAttachNode != null && p.srfAttachNode.attachedPart != null) // && p.attachRules.allowSrfAttach)
                     {
                         tmpCandVector = p.srfAttachNode.orientation;
                         tmpCandVector = new Vector3(0, Math.Abs(tmpCandVector.x) + Math.Abs(tmpCandVector.z), Math.Abs(tmpCandVector.y));
@@ -511,35 +505,33 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     candVector = p.partTransform.TransformDirection(tmpCandVector);
                 }
 
-                for (int j = 0; j < p.symmetryCounterparts.Count; j++)
+                foreach (Part q in p.symmetryCounterparts)
                 {
-                    Part q = p.symmetryCounterparts[j];
-
                     if (q == null || hitParts.Contains(q))
                         continue;
 
                     hitParts.Add(q);
 
-                    if (q.Modules.Contains<ModuleResourceIntake>())      //intakes are probably pointing in the direction we're gonna be going in
+                    if (q.Modules.Contains<ModuleResourceIntake>()) //intakes are probably pointing in the direction we're gonna be going in
                     {
-                        ModuleResourceIntake intake = q.Modules.GetModule<ModuleResourceIntake>();
-                        Transform intakeTrans = q.FindModelTransform(intake.intakeTransformName);
+                        ModuleResourceIntake intake      = q.Modules.GetModule<ModuleResourceIntake>();
+                        Transform            intakeTrans = q.FindModelTransform(intake.intakeTransformName);
                         if (!(intakeTrans is null))
                             candVector += intakeTrans.TransformDirection(Vector3.forward);
                     }
                     else
                         candVector += q.partTransform.TransformDirection(tmpCandVector);
                 }
-                hasPartsForAxis = true;     //set that we will get a valid axis out of this operation
+                hasPartsForAxis = true; //set that we will get a valid axis out of this operation
 
-                candVector = _worldToLocalMatrix.MultiplyVector(candVector);
+                candVector   = _worldToLocalMatrix.MultiplyVector(candVector);
                 candVector.x = Math.Abs(candVector.x);
                 candVector.y = Math.Abs(candVector.y);
                 candVector.z = Math.Abs(candVector.z);
 
                 Vector3 size = geoModule.overallMeshBounds.size;
 
-                axis += size.x * size.y * size.z * candVector;// *(1 + p.symmetryCounterparts.Count);    //scale part influence by approximate size
+                axis += size.x * size.y * size.z * candVector; // *(1 + p.symmetryCounterparts.Count);    //scale part influence by approximate size
             }
 
             if (axis == Vector3.zero)
@@ -830,18 +822,16 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             //double* areaAdjustment = stackalloc double[vehicleCrossSection.Length];
 
-            for (int i = 0; i < geometryModules.Count; i++)
+            foreach (GeometryPartModule g in geometryModules)
             {
-                GeometryPartModule g = geometryModules[i];
                 g.GetICrossSectionAdjusters(activeAdjusters, _worldToLocalMatrix, _vehicleMainAxis);
             }
 
             double intakeArea = 0;
             double engineExitArea = 0;
 
-            for (int i = 0; i < activeAdjusters.Count; i++)    //get all forward facing engines / intakes
+            foreach (ICrossSectionAdjuster adjuster in activeAdjusters)
             {
-                ICrossSectionAdjuster adjuster = activeAdjusters[i];
                 if (adjuster is AirbreathingEngineCrossSectonAdjuster)
                     engineExitArea += Math.Abs(adjuster.AreaRemovedFromCrossSection());
                 if (adjuster is IntakeCrossSectionAdjuster)
@@ -849,7 +839,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 if (adjuster is IntegratedIntakeEngineCrossSectionAdjuster)
                 {
                     engineExitArea += Math.Abs(adjuster.AreaRemovedFromCrossSection());
-                    intakeArea += Math.Abs(adjuster.AreaRemovedFromCrossSection());
+                    intakeArea     += Math.Abs(adjuster.AreaRemovedFromCrossSection());
                 }
             }
 
@@ -871,10 +861,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     //and all the intakes / engines
                     if (i >= front && i <= back)
                     {
-                        for (int j = 0; j < activeAdjusters.Count; j++)
+                        foreach (ICrossSectionAdjuster adjuster in activeAdjusters)
                         {
-                            ICrossSectionAdjuster adjuster = activeAdjusters[j];
-
                             if (adjuster.IntegratedCrossSectionIncreaseDecrease())
                                 continue;
 
@@ -975,10 +963,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     double actualArea = 0;      //area based on intake and engine data
 
                     //and all the intakes / engines
-                    for (int j = 0; j < activeAdjusters.Count; j++)
+                    foreach (ICrossSectionAdjuster adjuster in activeAdjusters)
                     {
-                        ICrossSectionAdjuster adjuster = activeAdjusters[j];
-
                         if (!adjuster.IntegratedCrossSectionIncreaseDecrease())
                             continue;
 
@@ -990,7 +976,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
                             ductedArea += val.crossSectionalAreaCount;
                             actualArea += adjuster.AreaRemovedFromCrossSection();
                         }
-                        //ThreadSafeDebugLogger.Instance.RegisterMessage(ductedArea.ToString());
                     }
 
                     ductedArea *= _voxelElementSize * _voxelElementSize * 0.75;
@@ -1433,9 +1418,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     ++aeroSectionIndex;
                 }
 
-                for (int j = 0; j < includedModules.Count; j++)
+                foreach (FARAeroPartModule a in includedModules)
                 {
-                    FARAeroPartModule a = includedModules[j];
                     tmpAeroModules.Add(a);
                 }
 
@@ -1495,12 +1479,12 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             VoxelizationThreadpool.Instance.RunOnMainThread(() =>
             {
-                for (int i = 0; i < _currentGeoModules.Count; i++)
+                foreach (GeometryPartModule geoModule in _currentGeoModules)
                 {
-                    if (!_currentGeoModules[i])
+                    if (!geoModule)
                         continue;
 
-                    FARAeroPartModule aeroModule = _currentGeoModules[i].GetComponent<FARAeroPartModule>();
+                    FARAeroPartModule aeroModule = geoModule.GetComponent<FARAeroPartModule>();
                     if (aeroModule != null && !tmpAeroModules.Contains(aeroModule))
                         _newUnusedAeroModules.Add(aeroModule);
                 }
@@ -1515,9 +1499,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             Vector3 worldMainAxis = _localToWorldMatrix.MultiplyVector(_vehicleMainAxis);
             worldMainAxis.Normalize();
 
-            for (int i = 0; i < _newAeroSections.Count; i++)
+            foreach (FARAeroSection a in _newAeroSections)
             {
-                FARAeroSection a = _newAeroSections[i];
                 a.PredictionCalculateAeroForces(2f, 1f, 50000f, 0, 0.005f, worldMainAxis, center);
             }
 

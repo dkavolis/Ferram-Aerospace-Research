@@ -74,16 +74,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
             HashSet<string> intakeResourceNames = new HashSet<string>();
 
 
-            for (int i = 0; i < allUsedAeroModules.Count; i++)       //get all exposed intakes
+            foreach (FARAeroPartModule aeroModule in allUsedAeroModules)
             {
-                FARAeroPartModule aeroModule = allUsedAeroModules[i];
                 if (aeroModule == null)
                     continue;
                 Part p = aeroModule.part;
 
-                for (int j = 0; j < p.Modules.Count; j++)
+                foreach (PartModule m in p.Modules)
                 {
-                    PartModule m = p.Modules[j];
                     if (m is ModuleResourceIntake intake)
                     {
                         if (intake.node != null && intake.node.attachedPart != null)
@@ -99,17 +97,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
             }
 
 
-            for (int i = 0; i < allUsedAeroModules.Count; i++)       //get all exposed engines
+            foreach (FARAeroPartModule aeroModule in allUsedAeroModules)
             {
-                FARAeroPartModule aeroModule = allUsedAeroModules[i];
                 if (aeroModule == null)
                     continue;
                 Part p = aeroModule.part;
 
-                for (int j = 0; j < p.Modules.Count; j++)
+                foreach (PartModule m in p.Modules)
                 {
-                    PartModule m = p.Modules[j];
-
                     if (m is ModuleEngines e)
                     {
                         if (FARAeroUtil.AJELoaded)
@@ -119,9 +114,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                                 continue;
                             }
 
-                        for (int k = 0; k < e.propellants.Count; k++)
+                        foreach (Propellant prop in e.propellants)
                         {
-                            Propellant prop = e.propellants[k];
                             if (intakeResourceNames.Contains(prop.name))
                             {
                                 _airBreathingEngines.Add(e);
@@ -143,9 +137,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
         {
             float currentThrottle = 0;
 
-            for (int i = 0; i < _airBreathingEngines.Count; i++)
+            foreach (ModuleEngines engine in _airBreathingEngines)
             {
-                ModuleEngines engine = _airBreathingEngines[i];
                 if (engine.manuallyOverridden)
                     currentThrottle++;
                 else

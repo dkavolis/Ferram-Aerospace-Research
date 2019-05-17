@@ -194,10 +194,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
                 LoadPartModuleTransformStrings();
 
             // ReSharper disable once PossibleNullReferenceException
-            for (int i = 0; i < ignorePartModuleTransforms.Count; ++i)
+            foreach (List<string> currentPartModuleTransforms in ignorePartModuleTransforms)
             {
-                List<string> currentPartModuleTransforms = ignorePartModuleTransforms[i];
-
                 //The first index of each list is the name of the part module; the rest are the transforms
                 if(p.Modules.Contains(currentPartModuleTransforms[0]))
                 {
@@ -213,8 +211,6 @@ namespace FerramAerospaceResearch.FARPartGeometry
                                                : p.FindModelComponents<Transform>(currentPartModuleTransforms[j]));
                     }
                 }
-                //if (Transform.Count > 0)
-                //    FARLogger.Info("Total exempt transforms: " + Transform.Count);
             }
             foreach (Transform t in p.FindModelComponents<Transform>())
             {

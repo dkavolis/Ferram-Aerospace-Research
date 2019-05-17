@@ -201,16 +201,15 @@ namespace ferram4
             double sum = NUFAR_areaExposedFactor;
             double totalExposedSum = NUFAR_totalExposedAreaFactor;
 
-            for (int i = 0; i < counterparts.Count; i++)
+            foreach (Part p in counterparts)
             {
-                Part p = counterparts[i];
                 if (p == null)
                     continue;
                 FARWingAerodynamicModel model;
                 model = this is FARControllableSurface ? p.Modules.GetModule<FARControllableSurface>() : p.Modules.GetModule<FARWingAerodynamicModel>();
 
                 ++counterpartsCount;
-                sum += model.NUFAR_areaExposedFactor;
+                sum             += model.NUFAR_areaExposedFactor;
                 totalExposedSum += model.NUFAR_totalExposedAreaFactor;
             }
             double tmp = 1 / (counterpartsCount);
@@ -220,15 +219,14 @@ namespace ferram4
             NUFAR_areaExposedFactor = sum;
             NUFAR_totalExposedAreaFactor = totalExposedSum;
 
-            for (int i = 0; i < counterparts.Count; i++)
+            foreach (Part p in counterparts)
             {
-                Part p = counterparts[i];
                 if (p == null)
                     continue;
                 FARWingAerodynamicModel model;
                 model = this is FARControllableSurface ? p.Modules.GetModule<FARControllableSurface>() : p.Modules.GetModule<FARWingAerodynamicModel>();
 
-                model.NUFAR_areaExposedFactor = sum;
+                model.NUFAR_areaExposedFactor      = sum;
                 model.NUFAR_totalExposedAreaFactor = totalExposedSum;
             }
 
@@ -831,15 +829,13 @@ namespace ferram4
         {
             refAreaChildren = 0;
 
-            for(int i = 0; i < part.children.Count; i++)
+            foreach (Part p in part.children)
             {
-                Part p = part.children[i];
                 FARWingAerodynamicModel childWing = p.GetComponent<FARWingAerodynamicModel>();
                 if (childWing is null)
                     continue;
 
-                refAreaChildren += (childWing.refAreaChildren + childWing.S) * 0.33333333333333333333;//Take 1/3 of the area of the child wings
-                //refAreaChildren += childWing.refAreaChildren + childWing.S;
+                refAreaChildren += (childWing.refAreaChildren + childWing.S) * 0.33333333333333333333; //Take 1/3 of the area of the child wings
             }
 
             if (!(parentWing is null))

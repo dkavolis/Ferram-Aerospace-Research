@@ -89,13 +89,12 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             _LEGACY_currentWingAeroModel = legacyWingModels;
             wingArea = 0;
             useWingArea = false;
-            for (int i = 0; i < legacyWingModels.Count; i++)
+            foreach (FARWingAerodynamicModel w in legacyWingModels)
             {
-                FARWingAerodynamicModel w = legacyWingModels[i];
                 if (!(w is null))
                 {
-                    useWingArea = true;
-                    wingArea += w.S;
+                    useWingArea =  true;
+                    wingArea    += w.S;
                 }
             }
         }
@@ -132,9 +131,8 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 
             if (_currentAeroModules != null)
             {
-                for (int i = 0; i < _currentAeroModules.Count; i++)
+                foreach (FARAeroPartModule m in _currentAeroModules)
                 {
-                    FARAeroPartModule m = _currentAeroModules[i];
                     if (!(m is null)) {
                         aeroForces.AddForce(m.transform.position, m.totalWorldSpaceAeroForce);
                         aeroForces.AddTorque(m.worldSpaceTorque);
@@ -257,20 +255,17 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 
 
             List<Part> partsList = _vessel.Parts;
-            for (int i = 0; i < partsList.Count; i++)
+            foreach (Part p in partsList)
             {
-                Part p = partsList[i];
-
                 Rigidbody rb = p.rb;
                 if (rb != null)
                 {
                     vesselInfo.fullMass += rb.mass;
-                    vesselInfo.dryMass += p.mass;
+                    vesselInfo.dryMass  += p.mass;
                 }
 
-                for (int j = 0; j < p.Modules.Count; j++)
+                foreach (PartModule m in p.Modules)
                 {
-                    PartModule m = p.Modules[j];
                     if (m is ModuleEngines e)
                     {
                         FuelConsumptionFromEngineModule(e, ref totalThrust, ref totalThrust_Isp, ref fuelConsumptionVol, ref airDemandVol, invDeltaTime);
@@ -280,7 +275,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
                     {
                         if (intake.intakeEnabled)
                         {
-                            airAvailableVol += intake.airFlow * intakeAirDensity / invDeltaTime;
+                            airAvailableVol     += intake.airFlow * intakeAirDensity / invDeltaTime;
                             vesselInfo.fullMass -= p.Resources[intake.resourceName].amount * intakeAirDensity;
                         }
                     }
@@ -324,10 +319,8 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             {
                 totalThrust += e.finalThrust;
                 totalThrust_Isp += e.finalThrust * e.realIsp;
-                for (int i = 0; i < e.propellants.Count; i++)
+                foreach (Propellant v in e.propellants)
                 {
-                    Propellant v = e.propellants[i];
-
                     if (v.id == intakeAirId)
                         airDemandVol += v.currentRequirement;
 
@@ -357,11 +350,9 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 
         private void CalculateStallFraction()
         {
-            for (int i = 0; i < _LEGACY_currentWingAeroModel.Count; i++)
+            foreach (FARWingAerodynamicModel w in _LEGACY_currentWingAeroModel)
             {
-                FARWingAerodynamicModel w = _LEGACY_currentWingAeroModel[i];
                 vesselInfo.stallFraction += w.GetStall() * w.S;
-
             }
 
             vesselInfo.stallFraction /= wingArea;

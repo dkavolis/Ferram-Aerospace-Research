@@ -264,10 +264,10 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             double newMinBounds = double.PositiveInfinity;
             double newMaxBounds = double.NegativeInfinity;
 
-            for(int i = 0; i < data.yValues.Count; i++)
+            foreach (double[] yValues in data.yValues)
             {
-                newMinBounds = Math.Min(newMinBounds, data.yValues[i].Min());
-                newMaxBounds = Math.Max(newMaxBounds, data.yValues[i].Max());
+                newMinBounds = Math.Min(newMinBounds, yValues.Min());
+                newMaxBounds = Math.Max(newMaxBounds, yValues.Max());
             }
 
             // To allow switching between two graph setups to observe differences,

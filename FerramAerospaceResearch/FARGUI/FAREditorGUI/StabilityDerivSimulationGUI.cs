@@ -277,10 +277,10 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             double minBounds = double.PositiveInfinity;
             double maxBounds = double.NegativeInfinity;
 
-            for (int i = 0; i < data.yValues.Count; i++)
+            foreach (double[] yValues in data.yValues)
             {
-                minBounds = Math.Min(minBounds, data.yValues[i].Min());
-                maxBounds = Math.Max(maxBounds, data.yValues[i].Max());
+                minBounds = Math.Min(minBounds, yValues.Min());
+                maxBounds = Math.Max(maxBounds, yValues.Max());
             }
             minBounds *= 2;
             maxBounds *= 2;

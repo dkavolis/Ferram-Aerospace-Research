@@ -77,9 +77,9 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 
         private void OnGUI()
         {
-            for(int i = 0 ; i < activeGUIs.Count; ++i)
+            foreach (FlightGUI activeGui in activeGUIs)
             {
-                activeGUIs[i].DrawGUI();
+                activeGui.DrawGUI();
             }
         }
     }

@@ -91,12 +91,11 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             Derivs[22] = Lr + Derivs[26] / Derivs[0] * Nr;
             Derivs[23] = Nr + Derivs[26] / Derivs[2] * Lr;
 
-            for (int k = 0; k < Derivs.Length; k++)
+            foreach (double f in Derivs)
             {
-                double f = Derivs[k];
                 if (num < 15)
                 {
-                    num++;              //Avoid Ix, Iy, Iz and long derivs
+                    num++; //Avoid Ix, Iy, Iz and long derivs
                     continue;
                 }
 
@@ -112,7 +111,6 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                     j = 0;
                     i++;
                 }
-
             }
             A.Add(_instantCondition.CalculateAccelerationDueToGravity(vehicleData.body, vehicleData.altitude) * Math.Cos(vehicleData.stableAoA * Math.PI / 180) / vehicleData.nominalVelocity, 3, 0);
             A.Add(1, 1, 3);
@@ -175,12 +173,11 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             int j = 0;
             int num = 0;
 
-            for (int k = 0; k < vehicleData.stabDerivs.Length; k++)
+            foreach (double f in vehicleData.stabDerivs)
             {
-                double f = vehicleData.stabDerivs[k];
                 if (num < 3 || num >= 15)
                 {
-                    num++;              //Avoid Ix, Iy, Iz
+                    num++; //Avoid Ix, Iy, Iz
                     continue;
                 }
 
@@ -200,7 +197,6 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                     j = 0;
                     i++;
                 }
-
             }
             A.Add(-_instantCondition.CalculateAccelerationDueToGravity(vehicleData.body, vehicleData.altitude), 3, 1);
             A.Add(1, 2, 3);

@@ -45,6 +45,7 @@ Copyright 2019, Michael Ferrara, aka Ferram4
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using FerramAerospaceResearch.FARGUI.FAREditorGUI;
@@ -93,9 +94,9 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                 double value = 0;
 
-                for(int i = 0; i < crossSectionAdjusters.Count; i++)
+                foreach (ICrossSectionAdjuster adjuster in crossSectionAdjusters)
                 {
-                    double tmp = Math.Abs(crossSectionAdjusters[i].AreaRemovedFromCrossSection());
+                    double tmp = Math.Abs(adjuster.AreaRemovedFromCrossSection());
                     if (tmp > value)
                         value = tmp;
                 }
@@ -354,10 +355,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
         private Bounds SetBoundsFromMeshes()
         {
             Vector3 upper = Vector3.one * float.NegativeInfinity, lower = Vector3.one * float.PositiveInfinity;
-            for (int i = 0; i < meshDataList.Count; ++i)
+            foreach (GeometryMesh geoMesh in meshDataList)
             {
-                GeometryMesh geoMesh = meshDataList[i];
-
                 if (!geoMesh.valid)
                     continue;
 
@@ -408,10 +407,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
             if (field != null)        //This handles stock and Firespitter deployment animations
             {
                 string animationName = (string)field.GetValue(m);
-                for (int i = 0; i < animations.Length; ++i)
+                foreach (Animation anim in animations)
                 {
-                    Animation anim = animations[i];
-
                     if (anim != null)
                     {
                         AnimationState state = anim[animationName];
@@ -436,21 +433,18 @@ namespace FerramAerospaceResearch.FARPartGeometry
             if(part.Modules.Contains<ModuleProceduralFairing>())
             {
                 List<ModuleProceduralFairing> fairings = part.Modules.GetModules<ModuleProceduralFairing>();
-                for (int i = 0; i < fairings.Count; ++i)
+                foreach (ModuleProceduralFairing fairing in fairings)
                 {
-                    ModuleProceduralFairing fairing = fairings[i];
-
                     StockProcFairingGeoUpdater fairingUpdater = new StockProcFairingGeoUpdater(fairing, this);
                     geometryUpdaters.Add(fairingUpdater);
                 }
             }
             if(part.Modules.Contains<ModuleJettison>())
+
             {
                 List<ModuleJettison> engineFairings = part.Modules.GetModules<ModuleJettison>();
-                for (int i = 0; i < engineFairings.Count; ++i)
+                foreach (ModuleJettison engineFairing in engineFairings)
                 {
-                    ModuleJettison engineFairing = engineFairings[i];
-
                     StockJettisonTransformGeoUpdater fairingUpdater = new StockJettisonTransformGeoUpdater(engineFairing, this);
                     geometryUpdaters.Add(fairingUpdater);
                 }
@@ -523,15 +517,9 @@ namespace FerramAerospaceResearch.FARPartGeometry
                 if (engineType == "ModuleEnginesAJEJet")
                     airBreather = true;
                 else
-                    for(int i = 0; i < engines.propellants.Count; ++i)
+                    if (engines.propellants.Any(p => p.name == "IntakeAir"))
                     {
-                        Propellant p = engines.propellants[i];
-                        if (p.name == "IntakeAir")
-                        {
-                            airBreather = true;
-                            break;
-                        }
-
+                        airBreather = true;
                     }
 
                 if (airBreather)
@@ -545,11 +533,11 @@ namespace FerramAerospaceResearch.FARPartGeometry
         public void RunIGeometryUpdaters()
         {
             if (HighLogic.LoadedSceneIsEditor)
-                for (int i = 0; i < geometryUpdaters.Count; ++i)
-                    geometryUpdaters[i].EditorGeometryUpdate();
+                foreach (IGeometryUpdater geoUpdater in geometryUpdaters)
+                    geoUpdater.EditorGeometryUpdate();
             else if (HighLogic.LoadedSceneIsFlight)
-                for (int i = 0; i < geometryUpdaters.Count; ++i)
-                    geometryUpdaters[i].FlightGeometryUpdate();
+                foreach (IGeometryUpdater geoUpdater in geometryUpdaters)
+                    geoUpdater.FlightGeometryUpdate();
         }
 
         public void GetICrossSectionAdjusters(List<ICrossSectionAdjuster> activeAdjusters, Matrix4x4 basis, Vector3 vehicleMainAxis)
@@ -557,9 +545,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
             if (crossSectionAdjusters == null)
                 return;
 
-            for(int i = 0; i < crossSectionAdjusters.Count; ++i)
+            foreach (ICrossSectionAdjuster adjuster in crossSectionAdjusters)
             {
-                ICrossSectionAdjuster adjuster = crossSectionAdjusters[i];
                 //adjuster.TransformBasis(basis);
 
                 if (!adjuster.AreaRemovedFromCrossSection(vehicleMainAxis).NearlyEqual(0))
@@ -675,9 +662,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
             }
             if(crossSectionAdjusters != null)
             {
-                for(int i = 0; i < crossSectionAdjusters.Count; ++i)
+                foreach (ICrossSectionAdjuster adjuster in crossSectionAdjusters)
                 {
-                    ICrossSectionAdjuster adjuster = crossSectionAdjusters[i];
                     adjuster.SetThisToVesselMatrixForTransform();
                     adjuster.TransformBasis(worldToVesselMatrix);
                     adjuster.UpdateArea();
@@ -835,9 +821,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
                 bool variants = part.Modules.Contains<ModulePartVariants>();
                 List<ModuleJettison> jettisons = part.Modules.GetModules<ModuleJettison>();
                 HashSet<string> jettisonTransforms = new HashSet<string>();
-                for(int i = 0; i < jettisons.Count; i++)
+                foreach (ModuleJettison j in jettisons)
                 {
-                    ModuleJettison j = jettisons[i];
                     if (j.jettisonTransform == null)
                         continue;
 

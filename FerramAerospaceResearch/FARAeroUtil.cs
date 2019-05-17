@@ -464,9 +464,8 @@ namespace FerramAerospaceResearch
             {
                 RecursePartList(list, EditorLogic.SelectedPart);
 
-                for (int i = 0; i < EditorLogic.SelectedPart.symmetryCounterparts.Count; i++)
+                foreach (Part sym in EditorLogic.SelectedPart.symmetryCounterparts)
                 {
-                    Part sym = EditorLogic.SelectedPart.symmetryCounterparts[i];
                     RecursePartList(list, sym);
                 }
             }
@@ -479,9 +478,8 @@ namespace FerramAerospaceResearch
             List<Part> list = CurEditorParts;
 
             List<FARWingAerodynamicModel> wings = new List<FARWingAerodynamicModel>();
-            for(int i = 0; i < list.Count; i++)
+            foreach (Part p in list)
             {
-                Part p = list[i];
                 FARWingAerodynamicModel wing = p.GetComponent<FARWingAerodynamicModel>();
                 if (!(wing is null))
                     wings.Add(wing);
@@ -492,9 +490,8 @@ namespace FerramAerospaceResearch
         private static void RecursePartList(List<Part> list, Part part)
         {
             list.Add(part);
-            for (int i = 0; i < part.children.Count; i++)
+            foreach (Part p in part.children)
             {
-                Part p = part.children[i];
                 RecursePartList(list, p);
             }
         }
@@ -571,9 +568,8 @@ namespace FerramAerospaceResearch
         {
             double density = 0;
             double counter = 0;
-            for (int i = 0; i < v.parts.Count; i++)
+            foreach (Part p in v.parts)
             {
-                Part p = v.parts[i];
                 if (p.physicalSignificance == Part.PhysicalSignificance.NONE)
                     continue;
 

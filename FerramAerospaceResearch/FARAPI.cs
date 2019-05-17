@@ -260,9 +260,8 @@ namespace FerramAerospaceResearch
         /// </summary>
         public static void VesselIncreaseFlapDeflection(Vessel v)
         {
-            for(int i = 0; i < v.parts.Count; i++)
+            foreach (Part p in v.parts)
             {
-                Part p = v.parts[i];
                 if(p.Modules.Contains<FARControllableSurface>())
                 {
                     FARControllableSurface surface = p.Modules.GetModule<FARControllableSurface>();
@@ -276,9 +275,8 @@ namespace FerramAerospaceResearch
         /// </summary>
         public static void VesselDecreaseFlapDeflection(Vessel v)
         {
-            for(int i = 0; i < v.parts.Count; i++)
+            foreach (Part p in v.parts)
             {
-                Part p = v.parts[i];
                 if (p.Modules.Contains<FARControllableSurface>())
                 {
                     FARControllableSurface surface = p.Modules.GetModule<FARControllableSurface>();
@@ -294,9 +292,8 @@ namespace FerramAerospaceResearch
         /// <returns>Flap setting; 0 - 3 indicates no to full flap deflections; -1 indicates lack of any control surface parts</returns>
         public static int VesselFlapSetting(Vessel v)
         {
-            for (int i = 0; i < v.parts.Count; i++)
+            foreach (Part p in v.parts)
             {
-                Part p = v.parts[i];
                 if (p.Modules.Contains<FARControllableSurface>())
                 {
                     FARControllableSurface surface = p.Modules.GetModule<FARControllableSurface>();
@@ -313,9 +310,8 @@ namespace FerramAerospaceResearch
         /// </summary>
         public static void VesselSetSpoilers(Vessel v, bool spoilerActive)
         {
-            for(int i = 0; i < v.parts.Count; i++)
+            foreach (Part p in v.parts)
             {
-                Part p = v.parts[i];
                 if (p.Modules.Contains<FARControllableSurface>())
                 {
                     FARControllableSurface surface = p.Modules.GetModule<FARControllableSurface>();
@@ -331,9 +327,8 @@ namespace FerramAerospaceResearch
         /// <returns>Spoiler setting; true indicates active spoilers, false indicates inactive or no spoilers in existence</returns>
         public static bool VesselSpoilerSetting(Vessel v)
         {
-            for (int i = 0; i < v.parts.Count; i++)
+            foreach (Part p in v.parts)
             {
-                Part p = v.parts[i];
                 if (p.Modules.Contains<FARControllableSurface>())
                 {
                     FARControllableSurface surface = p.Modules.GetModule<FARControllableSurface>();
@@ -427,9 +422,8 @@ namespace FerramAerospaceResearch
                 return false;
 
             FARVesselAero vesselAeroModule = null;
-            for(int i =0; i < vessel.vesselModules.Count; ++i)
+            foreach (VesselModule vM in vessel.vesselModules)
             {
-                VesselModule vM = vessel.vesselModules[i];
                 if(vM is FARVesselAero vesselAero)
                 {
                     vesselAeroModule = vesselAero;
@@ -455,9 +449,8 @@ namespace FerramAerospaceResearch
                 return false;
 
             FARVesselAero vesselAeroModule = null;
-            for(int i =0; i < vessel.vesselModules.Count; ++i)
+            foreach (VesselModule vM in vessel.vesselModules)
             {
-                VesselModule vM = vessel.vesselModules[i];
                 if(vM is FARVesselAero vesselAero)
                 {
                     vesselAeroModule = vesselAero;

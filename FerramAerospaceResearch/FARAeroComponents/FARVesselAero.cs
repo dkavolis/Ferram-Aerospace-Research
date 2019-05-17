@@ -116,12 +116,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 return;
             }*/
 
-            for (int i = 0; i < vessel.parts.Count; i++)
+            foreach (Part p in vessel.parts)
             {
-                Part p = vessel.parts[i];
                 p.maximum_drag = 0;
                 p.minimum_drag = 0;
-                p.angularDrag = 0;
+                p.angularDrag  = 0;
 
                 /*p.dragModel = Part.DragModel.NONE;
                 p.dragReferenceVector = Vector3.zero;
@@ -217,20 +216,16 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 _flightGUI.UpdateAeroModules(_currentAeroModules, _legacyWingModels);
                 //FARLogger.Info("Updating " + _vessel.vesselName + " aero properties\n\rCross-Sectional Area: " + _vehicleAero.MaxCrossSectionArea + " Crit Mach: " + _vehicleAero.CriticalMach + "\n\rUnusedAeroCount: " + _unusedAeroModules.Count + " UsedAeroCount: " + _currentAeroModules.Count + " sectCount: " + _currentAeroSections.Count);
 
-                for (int i = 0; i < _unusedAeroModules.Count; i++)
+                foreach (FARAeroPartModule a in _unusedAeroModules)
                 {
-                    FARAeroPartModule a = _unusedAeroModules[i];
                     a.SetShielded(true);
                     a.ForceLegacyAeroUpdates();
-                    //FARLogger.Info("" + a.part.partInfo.title + " shielded, area: " + a.ProjectedAreas.totalArea);
                 }
 
-                for (int i = 0; i < _currentAeroModules.Count; i++)
+                foreach (FARAeroPartModule a in _currentAeroModules)
                 {
-                    FARAeroPartModule a = _currentAeroModules[i];
                     a.SetShielded(false);
                     a.ForceLegacyAeroUpdates();
-                    //FARLogger.Info("" + a.part.partInfo.title + " unshielded, area: " + a.ProjectedAreas.totalArea);
                 }
 
                 _vesselIntakeRamDrag.UpdateAeroData(_currentAeroModules);
@@ -287,14 +282,13 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     m.UpdateVelocityAndAngVelocity(frameVel);
                 }*/
 
-            for (int i = 0; i < _currentAeroSections.Count; i++)
-                _currentAeroSections[i].FlightCalculateAeroForces((float)MachNumber, (float)(ReynoldsNumber / Length), pseudoKnudsenNumber, skinFrictionDragCoefficient);
+            foreach (FARAeroSection aeroSection in _currentAeroSections)
+                aeroSection.FlightCalculateAeroForces((float)MachNumber, (float)(ReynoldsNumber / Length), pseudoKnudsenNumber, skinFrictionDragCoefficient);
 
             _vesselIntakeRamDrag.ApplyIntakeRamDrag((float)MachNumber, vessel.srf_velocity.normalized);
 
-            for (int i = 0; i < _currentAeroModules.Count; i++)
+            foreach (FARAeroPartModule m in _currentAeroModules)
             {
-                FARAeroPartModule m = _currentAeroModules[i];
                 m.ApplyForces();
             }
         }
@@ -333,15 +327,13 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             if (_currentAeroSections != null)
             {
-                for (int i = 0; i < _currentAeroSections.Count; i++)
+                foreach (FARAeroSection curSection in _currentAeroSections)
                 {
-                    FARAeroSection curSection = _currentAeroSections[i];
                     curSection?.PredictionCalculateAeroForces(density, machNumber, reynoldsPerLength, pseudoKnudsenNumber, skinFriction, velocityWorldVector, center);
                 }
 
-                for (int i = 0; i < _legacyWingModels.Count; i++)
+                foreach (FARWingAerodynamicModel curWing in _legacyWingModels)
                 {
-                    FARWingAerodynamicModel curWing = _legacyWingModels[i];
                     if (!(curWing is null))
                         center.AddForce(curWing.transform.position, curWing.PrecomputeCenterOfLift(velocityWorldVector, machNumber, density, dummy));
                 }
@@ -354,8 +346,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private void TriggerIGeometryUpdaters()
         {
-            for (int i = 0; i < _currentGeoModules.Count; i++)
-                _currentGeoModules[i].RunIGeometryUpdaters();
+            foreach (GeometryPartModule geoModule in _currentGeoModules)
+                geoModule.RunIGeometryUpdaters();
         }
 
         private void CheckGeoModulesReady()
@@ -438,9 +430,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
              {
                  _currentGeoModules.Clear();
                  geoModulesReady = 0;
-                 for (int i = 0; i < vessel.Parts.Count; i++)
+                 foreach (Part p in vessel.Parts)
                  {
-                     Part p = vessel.Parts[i];
                      GeometryPartModule g = p.Modules.GetModule<GeometryPartModule>();
                      if (!(g is null))
                      {

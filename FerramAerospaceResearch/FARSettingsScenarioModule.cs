@@ -154,9 +154,9 @@ namespace FerramAerospaceResearch
             FlightGUI.SaveActiveData();
             ConfigNode flightGUINode = new ConfigNode("FlightGUISettings");
             FARLogger.Info("Saving FAR Data");
-            for (int i = 0; i < flightGUISettings.Count; i++)
+            foreach (ConfigNode configNode in flightGUISettings)
             {
-                flightGUINode.AddNode(flightGUISettings[i]);
+                flightGUINode.AddNode(configNode);
             }
             node.AddNode(flightGUINode);
 

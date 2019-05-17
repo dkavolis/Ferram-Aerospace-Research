@@ -99,8 +99,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
             //_size = 0;
             offset = 0;
             lowerCorner = Vector3d.zero;
-            for (int i = 0; i < voxelPoints.Length; i++)
-                voxelPoints[i].Clear();
+            foreach (PartSizePair voxelPoint in voxelPoints)
+                voxelPoint.Clear();
 
             overridingParts = null;
         }

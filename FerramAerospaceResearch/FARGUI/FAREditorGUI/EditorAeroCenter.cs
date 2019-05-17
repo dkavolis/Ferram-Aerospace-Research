@@ -98,9 +98,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
             Vector3 vel = (vel_base - vel_fuzz).normalized;
 
-            for(int i = 0; i < _currentAeroSections.Count; i++)
+            foreach (FARAeroSection section in _currentAeroSections)
             {
-                FARAeroSection section = _currentAeroSections[i];
                 section.PredictionCalculateAeroForces(1, 0.5f, 100000, 0, 0.005f, vel, aeroSection);
             }
 
@@ -108,12 +107,11 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
             Vector3 pos = Vector3.zero;//rootPartTrans.position;
             float mass = 0;
-            for(int i = 0; i < EditorLogic.SortedShipList.Count; i++)
+            foreach (Part p in EditorLogic.SortedShipList)
             {
-                Part p = EditorLogic.SortedShipList[i];
                 float tmpMass = p.mass + p.GetResourceMass();
                 mass += tmpMass;
-                pos += p.partTransform.position * tmpMass;
+                pos  += p.partTransform.position * tmpMass;
             }
             pos /= mass;
 
@@ -131,9 +129,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
             vel = (vel_base + vel_fuzz).normalized;
 
-            for (int i = 0; i < _currentAeroSections.Count; i++)
+            foreach (FARAeroSection section in _currentAeroSections)
             {
-                FARAeroSection section = _currentAeroSections[i];
                 section.PredictionCalculateAeroForces(1, 0.5f, 100000, 0, 0.005f, vel, aeroSection);
             }
 

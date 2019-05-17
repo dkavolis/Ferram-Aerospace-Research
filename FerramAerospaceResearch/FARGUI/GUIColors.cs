@@ -128,9 +128,8 @@ namespace FerramAerospaceResearch.FARGUI
 
             int curIndex = 0;
             Color color = new Color {a = 1};
-            for (int i = 0; i < splitValues.Length; i++)
+            foreach (string s in splitValues)
             {
-                string s = splitValues[i];
                 if (s.Length > 0)
                 {
                     if (float.TryParse(s, out float val))

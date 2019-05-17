@@ -44,6 +44,7 @@ Copyright 2019, Michael Ferrara, aka Ferram4
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FerramAerospaceResearch.FARUtils;
 using KSP.Localization;
 using UnityEngine;
@@ -279,13 +280,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         {
             List<ConfigNode> flightGUISettings = FARSettingsScenarioModule.FlightGUISettings;
 
-            ConfigNode node = null;
-            for (int i = 0; i < flightGUISettings.Count; i++)
-                if (flightGUISettings[i].name == "StabilityAugmentationSettings")
-                {
-                    node = flightGUISettings[i];
-                    break;
-                }
+            ConfigNode node = flightGUISettings.FirstOrDefault(t => t.name == "StabilityAugmentationSettings");
 
             if (systemTemplates == null)
             {
@@ -399,13 +394,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
                 FARLogger.Error("Could not save Stability Augmentation Settings because settings config list was null");
                 return;
             }
-            ConfigNode node = null;
-            for (int i = 0; i < flightGUISettings.Count; i++)
-                if (flightGUISettings[i].name == "StabilityAugmentationSettings")
-                {
-                    node = flightGUISettings[i];
-                    break;
-                }
+            ConfigNode node = flightGUISettings.FirstOrDefault(t => t.name == "StabilityAugmentationSettings");
 
             Vessel active_vessel = null;
 

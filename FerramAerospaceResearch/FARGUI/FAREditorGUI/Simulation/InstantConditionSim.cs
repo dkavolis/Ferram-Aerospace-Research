@@ -105,10 +105,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 
             double mass = 0;
             List<Part> partsList = EditorLogic.SortedShipList;
-            for (int i = 0; i < partsList.Count; i++)
+            foreach (Part p in partsList)
             {
-                Part p = partsList[i];
-
                 if (FARAeroUtil.IsNonphysical(p))
                     continue;
 
@@ -118,7 +116,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 
                 //partMass += p.GetModuleMass(p.mass);
                 // If you want to use GetModuleMass, you need to start from p.partInfo.mass, not p.mass
-                CoM += partMass * (Vector3d)p.transform.TransformPoint(p.CoMOffset);
+                CoM  += partMass * (Vector3d)p.transform.TransformPoint(p.CoMOffset);
                 mass += partMass;
             }
             CoM /= mass;
@@ -165,9 +163,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             angVel += up * (sinPhi * alphaDot - cosAlpha * cosPhi * betaDot);
 
 
-            for (int i = 0; i < _wingAerodynamicModel.Count; i++)
+            foreach (FARWingAerodynamicModel w in _wingAerodynamicModel)
             {
-                FARWingAerodynamicModel w = _wingAerodynamicModel[i];
                 if (!(w && w.part))
                     continue;
 
@@ -196,8 +193,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 
                 Vector3d moment = -Vector3d.Cross(relPos, force);
 
-                output.Cm += Vector3d.Dot(moment, sideways);
-                output.Cn += Vector3d.Dot(moment, liftDown);
+                output.Cm     += Vector3d.Dot(moment, sideways);
+                output.Cn     += Vector3d.Dot(moment, liftDown);
                 output.C_roll += Vector3d.Dot(moment, velocity);
 
                 //w.ComputeClCdEditor(vel.normalized, input.machNumber);
@@ -211,14 +208,14 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                 output.Cn += tmpCd * Vector3d.Dot((relPos), sideways) + tmpCl * Vector3d.Dot((relPos), velocity) * -Vector3d.Dot(w.GetLiftDirection(), sideways);
                 output.C_roll += tmpCl * Vector3d.Dot((relPos), sideways) * -Vector3d.Dot(w.GetLiftDirection(), liftVector);*/
                 area += w.S;
-                MAC += w.GetMAC() * w.S;
-                b_2 += w.Getb_2() * w.S;
+                MAC  += w.GetMAC() * w.S;
+                b_2  += w.Getb_2() * w.S;
             }
 
             FARCenterQuery center = new FARCenterQuery();
-            for (int i = 0; i < _currentAeroSections.Count; i++)
+            foreach (FARAeroSection aeroSection in _currentAeroSections)
             {
-                _currentAeroSections[i].PredictionCalculateAeroForces(2, (float)input.machNumber, 10000, 0, 0.005f, velocity.normalized, center);
+                aeroSection.PredictionCalculateAeroForces(2, (float)input.machNumber, 10000, 0, 0.005f, velocity.normalized, center);
             }
 
             Vector3d centerForce = center.force * 1000;
@@ -289,9 +286,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
             iterationInput.phi = 0;
             iterationInput.phiDot = 0;
 
-            for (int i = 0; i < _wingAerodynamicModel.Count; i++)
+            foreach (FARWingAerodynamicModel w in _wingAerodynamicModel)
             {
-                FARWingAerodynamicModel w = _wingAerodynamicModel[i];
                 if (w.isShielded)
                     continue;
 

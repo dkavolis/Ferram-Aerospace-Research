@@ -200,12 +200,10 @@ namespace ferram4
         }
         private void UpdateFlapDeflect()
         {
-            for (int i = 0; i < part.symmetryCounterparts.Count; i++)
+            foreach (Part p in part.symmetryCounterparts)
             {
-                Part p = part.symmetryCounterparts[i];
-                for (int j = 0; j < p.Modules.Count; j++)
+                foreach (PartModule m in p.Modules)
                 {
-                    PartModule m = p.Modules[j];
                     if (m is FARControllableSurface controllableSurface)
                         controllableSurface.SetDeflection(flapDeflectionLevel);
                 }
@@ -406,13 +404,10 @@ namespace ferram4
 
             Vector3 CoM = Vector3.zero;
             float mass = 0;
-            for (int i = 0; i < VesselPartList.Count; i++)
+            foreach (Part p in VesselPartList)
             {
-                Part p = VesselPartList[i];
-
-                CoM += p.transform.position * p.mass;
+                CoM  += p.transform.position * p.mass;
                 mass += p.mass;
-
             }
             CoM /= mass;
 

@@ -44,6 +44,7 @@ Copyright 2019, Michael Ferrara, aka Ferram4
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using ferram4;
 using FerramAerospaceResearch.FARThreading;
@@ -171,10 +172,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
             overridingParts = new HashSet<Part>(ObjectReferenceEqualityComparer<Part>.Default);
             //Determine bounds and "overriding parts" from geoModules
-            for (int i = 0; i < geoModules.Count; i++)
+            foreach (GeometryPartModule m in geoModules)
             {
-                GeometryPartModule m = geoModules[i];
-
                 if (!(m is null))
                 {
                     bool cont = true;
@@ -411,18 +410,15 @@ namespace FerramAerospaceResearch.FARPartGeometry
             //for (int i = 0; i < geoModules.Count; i++)
             //    threadsQueued += geoModules[i].meshDataList.Count;      //Doing this out here allows us to get rid of the lock, which should reduce sync costs for many meshes
             if (!multiThreaded)
-                for (int i = 0; i < geoModules.Count; i++)       //Go through it backwards; this ensures that children (and so interior to cargo bay parts) are handled first
+                //Go through it backwards; this ensures that children (and so interior to cargo bay parts) are handled first
+                foreach (GeometryPartModule m in geoModules)
                 {
-                    GeometryPartModule m = geoModules[i];
                     if(m.Valid)
-                        for (int j = 0; j < m.meshDataList.Count; j++)
+                        foreach (GeometryMesh mesh in m.meshDataList)
                         {
-                            GeometryMesh mesh = m.meshDataList[j];
-
                             if(mesh.valid && mesh.gameObjectActiveInHierarchy)
                                 UpdateFromMesh(mesh, m.part);
                         }
-
                 }
             else
             {
@@ -1693,19 +1689,16 @@ namespace FerramAerospaceResearch.FARPartGeometry
                             if (module == null || !module.Valid || module.meshDataList == null)
                                 continue;
 
-                            for (int j = 0; j < module.meshDataList.Count; j++)
+                            foreach (GeometryMesh mesh in module.meshDataList)
                             {
-                                GeometryMesh mesh = module.meshDataList[j];
                                 lock (mesh)
                                     if (mesh.meshTransform != null && mesh.gameObjectActiveInHierarchy && mesh.valid)
                                         meshes.Add(mesh);
                             }
                         }
                     });
-                    for (int i = 0; i < meshes.Count; i++)
+                    foreach (GeometryMesh mesh in meshes)
                     {
-                        GeometryMesh mesh = meshes[i];
-
                         UpdateFromMesh(mesh, mesh.part);
                     }
                 }
@@ -1718,9 +1711,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
                         if (module == null || !module.Valid || module.meshDataList == null)
                             continue;
 
-                        for (int j = 0; j < module.meshDataList.Count; j++)
+                        foreach (GeometryMesh mesh in module.meshDataList)
                         {
-                            GeometryMesh mesh = module.meshDataList[j];
                             bool updateFromMesh = false;
                             lock (mesh)
                                 if (mesh.meshTransform != null && mesh.gameObjectActiveInHierarchy && mesh.valid)
@@ -2538,26 +2530,18 @@ namespace FerramAerospaceResearch.FARPartGeometry
                 else
                     neighboringSweepPlanePts[3] = null;
 
-                bool remove = false;
-                for (int m = 0; m < neighboringSweepPlanePts.Length; m++)// (SweepPlanePoint neighbor in neighboringSweepPlanePts)//Check if the active point is surrounded by all 4 neighbors
-                {
-                    SweepPlanePoint neighbor = neighboringSweepPlanePts[m];
-                    if (neighbor == null || neighbor.mark == SweepPlanePoint.MarkingType.Clear) //If any of them are null or marked clear, this active point is not an interior point
-                    {                                                                       //In that case, it should be set to be removed
-                        remove = true;
-                        break;
-                    }
-                }
+                //Check if the active point is surrounded by all 4 neighbors
+                bool remove = neighboringSweepPlanePts.Any(neighbor => neighbor == null || neighbor.mark == SweepPlanePoint.MarkingType.Clear);
                 if (remove) //If it is set to be removed...
                 {
-                    for (int m = 0; m < neighboringSweepPlanePts.Length; m++)// //Go through all the neighboring points
+                    //Go through all the neighboring points
+                    foreach (SweepPlanePoint neighbor in neighboringSweepPlanePts)
                     {
-                        SweepPlanePoint neighbor = neighboringSweepPlanePts[m];
                         if (neighbor != null && neighbor.mark == SweepPlanePoint.MarkingType.InactiveInterior) //For the ones that exist, and are inactive interior...
                         {
-                            inactiveInteriorPts.Remove(neighbor); //remove them from inactiveInterior
+                            inactiveInteriorPts.Remove(neighbor);               //remove them from inactiveInterior
                             neighbor.mark = SweepPlanePoint.MarkingType.Active; //...mark them active
-                            activePts.Add(neighbor); //And add them to the end of activePts
+                            activePts.Add(neighbor);                            //And add them to the end of activePts
                         }
                     }
                     SweepPlanePoint pt = sweepPlane[activeInteriorPt.i, activeInteriorPt.k];

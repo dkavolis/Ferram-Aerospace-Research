@@ -65,20 +65,19 @@ namespace FerramAerospaceResearch
                         List<Collider> partColliders = new List<Collider>();
                         HashSet<Collider> excludedCollidersHash = new HashSet<Collider>();      //We'll use a hash to make this fast
 
-                        for (int i = 0; i < part.children.Count; i++)
+                        foreach (Part p in part.children)
                         {
-                            Part p = part.children[i];
-                            Collider[] excludedColliders = p.GetComponentsInChildren<Collider>();   //All the colliders associated with the immediate child of this part AND their children
+                            Collider[] excludedColliders = p.GetComponentsInChildren<Collider>(); //All the colliders associated with the immediate child of this part AND their children
 
-                            if (!excludedCollidersHash.Contains(excludedColliders[0]))  //The first collider _must_ be part of the immediate child; because it is closer to the parent, it will appear earlier in tmpColliderArray
-                                excludedCollidersHash.Add(excludedColliders[0]);        //That means we only ever need the first collider for our purposes
+                            if (!excludedCollidersHash.Contains(excludedColliders[0])) //The first collider _must_ be part of the immediate child; because it is closer to the parent, it will appear earlier in tmpColliderArray
+                                excludedCollidersHash.Add(excludedColliders[0]);       //That means we only ever need the first collider for our purposes
                         }
 
-                        for (int i = 0; i < tmpColliderArray.Length; i++)
-                            if (!excludedCollidersHash.Contains(tmpColliderArray[i]))   //If the collider isn't in the hash, that means that it must belong to _this_ part, because it doesn't belong to any child parts
-                                partColliders.Add(tmpColliderArray[i]);
+                        foreach (Collider collider in tmpColliderArray)
+                            if (!excludedCollidersHash.Contains(collider)) //If the collider isn't in the hash, that means that it must belong to _this_ part, because it doesn't belong to any child parts
+                                partColliders.Add(collider);
                             else
-                                break;  //Once we find something that is in the hash, we're out of the colliders associated with the parent part and can escape
+                                break; //Once we find something that is in the hash, we're out of the colliders associated with the parent part and can escape
 
                         colliders = partColliders.ToArray();
                     }
@@ -116,9 +115,9 @@ namespace FerramAerospaceResearch
                     Matrix4x4 matrix = partMatrix * t.localToWorldMatrix;
 
                     if (m.vertices.Length < excessiveVerts)
-                        for (int j = 0; j < m.vertices.Length; j++)
+                        foreach (Vector3 vertex in m.vertices)
                         {
-                            newBounds.Encapsulate(matrix.MultiplyPoint(m.vertices[j]));
+                            newBounds.Encapsulate(matrix.MultiplyPoint(vertex));
                         }
                     else
                     {

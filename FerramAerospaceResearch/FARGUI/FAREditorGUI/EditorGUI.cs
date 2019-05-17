@@ -185,14 +185,14 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             editorReportUpdate = EngineersReport.Instance.GetType().GetMethod("OnCraftModified", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
             _customDesignConcerns.Add(new AreaRulingConcern(_vehicleAero));
             //_customDesignConcerns.Add(new AeroStabilityConcern(_instantSim, EditorDriver.editorFacility == EditorFacility.SPH ? EditorFacilities.SPH : EditorFacilities.VAB));
-            for (int i = 0; i < _customDesignConcerns.Count; i++)
-                EngineersReport.Instance.AddTest(_customDesignConcerns[i]);
+            foreach (IDesignConcern designConcern in _customDesignConcerns)
+                EngineersReport.Instance.AddTest(designConcern);
         }
 
         private void RemoveDesignConcerns()
         {
-            for (int i = 0; i < _customDesignConcerns.Count; i++)
-                EngineersReport.Instance.RemoveTest(_customDesignConcerns[i]);
+            foreach (IDesignConcern designConcern in _customDesignConcerns)
+                EngineersReport.Instance.RemoveTest(designConcern);
         }
 
         private void OnDestroy()
@@ -234,8 +234,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             if (EditorLogic.RootPart != null)
             {
                 List<Part> partsList = EditorLogic.SortedShipList;
-                for (int i = 0; i < partsList.Count; i++)
-                    UpdateGeometryModule(partsList[i]);
+                foreach (Part part in partsList)
+                    UpdateGeometryModule(part);
             }
 
             RequestUpdateVoxel();
@@ -303,9 +303,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
         {
             List<Part> partsList = EditorLogic.SortedShipList;
             _wingAerodynamicModel.Clear();
-            for (int i = 0; i < partsList.Count; i++)
+            foreach (Part p in partsList)
             {
-                Part p = partsList[i];
                 if(p != null)
                     if (p.Modules.Contains<FARWingAerodynamicModel>())
                     {
@@ -399,9 +398,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
             _currentGeometryModules.Clear();
 
-            for (int i = 0; i < partList.Count; i++)
+            foreach (Part p in partList)
             {
-                Part p = partList[i];
                 if (p.Modules.Contains<GeometryPartModule>())
                 {
                     GeometryPartModule g = p.Modules.GetModule<GeometryPartModule>();
@@ -412,7 +410,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
                         else
                         {
                             _updateRateLimiter = FARSettingsScenarioModule.VoxelSettings.minPhysTicksPerUpdate - 2;
-                            _updateQueued = true;
+                            _updateQueued      = true;
                             //FARLogger.Info("We're not ready!");
                             return;
                         }
@@ -437,8 +435,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
         private void TriggerIGeometryUpdaters()
         {
-            for (int i = 0; i < _currentGeometryModules.Count; i++)
-                _currentGeometryModules[i].RunIGeometryUpdaters();
+            foreach (GeometryPartModule geoModule in _currentGeometryModules)
+                geoModule.RunIGeometryUpdaters();
         }
 
         private void UpdateCrossSections()
@@ -453,9 +451,9 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             double[] xAxis = new double[areas.Length];
 
             double maxValue = 0;
-            for (int i = 0; i < areas.Length; i++)
+            foreach (double area in areas)
             {
-                maxValue = Math.Max(maxValue, areas[i]);
+                maxValue = Math.Max(maxValue, area);
             }
 
             for (int i = 0; i < xAxis.Length; i++)
@@ -684,9 +682,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
         private void ToggleGear()
         {
             List<Part> partsList = EditorLogic.SortedShipList;
-            for(int i = 0; i < partsList.Count; i++)
+            foreach (Part p in partsList)
             {
-                Part p = partsList[i];
                 if (p.Modules.Contains<ModuleWheelDeployment>())
                 {
                     ModuleWheelDeployment l = p.Modules.GetModule<ModuleWheelDeployment>();
@@ -694,7 +691,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
                 }
                 if(p.Modules.Contains("FSwheel"))
                 {
-                    var m = p.Modules["FSwheel"];
+                    var m      = p.Modules["FSwheel"];
                     var method = m.GetType().GetMethod("animate", BindingFlags.Instance | BindingFlags.NonPublic);
                     if (method == null)
                         FARLogger.Error("FSwheel does not have method 'animate");
@@ -703,7 +700,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
                 }
                 if (p.Modules.Contains("FSBDwheel"))
                 {
-                    var m = p.Modules["FSBDwheel"];
+                    var m      = p.Modules["FSBDwheel"];
                     var method = m.GetType().GetMethod("animate", BindingFlags.Instance | BindingFlags.NonPublic);
                     if (method == null)
                         FARLogger.Error("FSBDwheel does not have method 'animate");
@@ -712,7 +709,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
                 }
                 if (p.Modules.Contains("KSPWheelAdjustableGear"))
                 {
-                    PartModule m = p.Modules["KSPWheelAdjustableGear"];
+                    PartModule m      = p.Modules["KSPWheelAdjustableGear"];
                     MethodInfo method = m.GetType().GetMethod("deploy", BindingFlags.Instance | BindingFlags.Public);
                     try
                     {
@@ -723,7 +720,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
                     }
                     catch(Exception e)
                     {
-                        FARLogger.Exception(e);      //we just catch and print this ourselves to allow things to continue working, since there seems to be a bug in KSPWheels as of this writing
+                        FARLogger.Exception(e); //we just catch and print this ourselves to allow things to continue working, since there seems to be a bug in KSPWheels as of this writing
                     }
                 }
             }
