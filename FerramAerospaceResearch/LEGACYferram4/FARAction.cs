@@ -119,9 +119,9 @@ namespace ferram4
             {
                 try
                 {
-                    id2actionGroup[i] = (KSPActionGroup)Enum.Parse(typeof(KSPActionGroup), config.GetValue(configKeys[i], id2actionGroup[i].ToString()));
-                    currentGuiStrings[i] = id2actionGroup[i].ToString(); // don't forget to initialize the gui
-                    FARLogger.Info(String.Format("Loaded AG {0} as {1}", configKeys[i], id2actionGroup[i]));
+                    string currentGuiString = currentGuiStrings[i] = id2actionGroup[i].ToString(); // don't forget to initialize the gui
+                    id2actionGroup[i] = (KSPActionGroup)Enum.Parse(typeof(KSPActionGroup), config.GetValue(configKeys[i], currentGuiString));
+                    FARLogger.Info($"Loaded AG {configKeys[i]} as {currentGuiString}");
                 }
                 catch (Exception e)
                 {
@@ -146,7 +146,7 @@ namespace ferram4
             PluginConfiguration config = FARDebugAndSettings.config;
             for (int i = 0; i < ACTION_COUNT; ++i)
             {
-                FARLogger.Info(String.Format("Save AG {0} as {1}", configKeys[i], id2actionGroup[i]));
+                FARLogger.Info($"Save AG {configKeys[i]} as {id2actionGroup[i].ToString()}");
                 config.SetValue(configKeys[i], id2actionGroup[i].ToString());
             }
         }
