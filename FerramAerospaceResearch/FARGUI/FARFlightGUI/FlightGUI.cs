@@ -171,20 +171,16 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             }
             _physicsCalcs = null;
 
-            if(_flightDataGUI != null)
-                _flightDataGUI.SaveSettings();
+            _flightDataGUI?.SaveSettings();
             _flightDataGUI = null;
 
-            if(_stabilityAugmentation != null)
-                _stabilityAugmentation.SaveAndDestroy();
+            _stabilityAugmentation?.SaveAndDestroy();
             _stabilityAugmentation = null;
 
-            if(_airSpeedGUI != null)
-                _airSpeedGUI.SaveSettings();
+            _airSpeedGUI?.SaveSettings();
             _airSpeedGUI = null;
 
-            if (_aeroVizGUI != null)
-                _aeroVizGUI.SaveSettings();
+            _aeroVizGUI?.SaveSettings();
 
             _flightStatusGUI = null;
             settingsWindow = null;
@@ -206,14 +202,10 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             if (_vessel == FlightGlobals.ActiveVessel)
             {
                 SaveConfigs();
-                if(_airSpeedGUI != null)
-                    _airSpeedGUI.SaveSettings();
-                if(_stabilityAugmentation != null)
-                    _stabilityAugmentation.SaveSettings();
-                if(_flightDataGUI != null)
-                    _flightDataGUI.SaveSettings();
-                if(_aeroVizGUI != null)
-                    _aeroVizGUI.SaveSettings();
+                _airSpeedGUI?.SaveSettings();
+                _stabilityAugmentation?.SaveSettings();
+                _flightDataGUI?.SaveSettings();
+                _aeroVizGUI?.SaveSettings();
             }
         }
         public static void SaveActiveData()
@@ -236,8 +228,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         // ReSharper disable once UnusedMember.Local
         private void AerodynamicFailureStatus()
         {
-            if(_flightStatusGUI != null)
-                _flightStatusGUI.AerodynamicFailureStatus();
+            _flightStatusGUI?.AerodynamicFailureStatus();
         }
 
         #region PhysicsAndOrientationBlock

@@ -336,8 +336,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 for (int i = 0; i < _currentAeroSections.Count; i++)
                 {
                     FARAeroSection curSection = _currentAeroSections[i];
-                    if(curSection != null)
-                        curSection.PredictionCalculateAeroForces(density, machNumber, reynoldsPerLength, pseudoKnudsenNumber, skinFriction, velocityWorldVector, center);
+                    curSection?.PredictionCalculateAeroForces(density, machNumber, reynoldsPerLength, pseudoKnudsenNumber, skinFriction, velocityWorldVector, center);
                 }
 
                 for (int i = 0; i < _legacyWingModels.Count; i++)

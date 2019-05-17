@@ -61,8 +61,7 @@ namespace ferram4
 
         public void ForceOnVesselPartsChange()
         {
-            if(OnVesselPartsChange != null)
-                OnVesselPartsChange();
+            OnVesselPartsChange?.Invoke();
         }
 
         public void Start()

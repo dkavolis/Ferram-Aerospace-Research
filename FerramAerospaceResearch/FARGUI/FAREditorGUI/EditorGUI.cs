@@ -222,8 +222,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             _editorGraph = null;
             _stabDeriv = null;
 
-            if (_vehicleAero != null)
-                _vehicleAero.ForceCleanup();
+            _vehicleAero?.ForceCleanup();
             _vehicleAero = null;
         }
 

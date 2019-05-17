@@ -1672,10 +1672,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
             //{
                 section = voxelChunks[iSec, jSec, kSec];
             //}
-            if (section == null)
-                return null;
 
-            return section.GetVoxelPartGlobalIndex(i + j * 8 + k * 64);
+            return section?.GetVoxelPartGlobalIndex(i + j * 8 + k * 64);
         }
 
         // ReSharper disable once UnusedMember.Local
@@ -2503,10 +2501,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
                 for (int k = 0; k < lengthZ; k++)
                 {
                     SweepPlanePoint pt = sweepPlane[i, k];
-                    if(pt != null)
-                    {
-                        pt.Clear();
-                    }
+                    pt?.Clear();
                 }
         }
 

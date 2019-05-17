@@ -156,8 +156,7 @@ namespace FerramAerospaceResearch
             }
             else
             {
-                if (FARDebugButtonBlizzy != null)
-                    FARDebugButtonBlizzy.Destroy();
+                FARDebugButtonBlizzy?.Destroy();
             }
         }
 
@@ -490,8 +489,7 @@ namespace FerramAerospaceResearch
 
                 if (tmp != FARDebugValues.useBlizzyToolbar)
                 {
-                    if (FARDebugButtonBlizzy != null)
-                        FARDebugButtonBlizzy.Destroy();
+                    FARDebugButtonBlizzy?.Destroy();
 
                     if (FARDebugValues.useBlizzyToolbar)
                     {
@@ -623,8 +621,7 @@ namespace FerramAerospaceResearch
             //SaveConfigs();
             GameEvents.onGameSceneSwitchRequested.Remove(OnSceneChange);
 
-            if (FARDebugButtonBlizzy != null)
-                FARDebugButtonBlizzy.Destroy();
+            FARDebugButtonBlizzy?.Destroy();
         }
     }
 

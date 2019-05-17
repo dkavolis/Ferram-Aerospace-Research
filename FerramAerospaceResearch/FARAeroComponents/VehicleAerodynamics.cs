@@ -396,10 +396,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     //If the voxel still exists, cleanup everything so we can continue;
                     visualizing = false;
 
-                    if (_voxel != null)
-                    {
-                        _voxel.CleanupVoxel();
-                    }
+                    _voxel?.CleanupVoxel();
 
                     //set flag so that this function can't run again before voxelizing completes and queue voxelizing thread
                     voxelizing = true;
