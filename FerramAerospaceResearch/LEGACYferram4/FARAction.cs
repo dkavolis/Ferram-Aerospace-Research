@@ -68,7 +68,7 @@ namespace ferram4
 
 
 
-    public class FARActionGroupConfiguration
+    public static class FARActionGroupConfiguration
     {
         public const int ID_SPOILER = 0;
         public const int ID_INCREASE_FLAP_DEFLECTION = 1;
