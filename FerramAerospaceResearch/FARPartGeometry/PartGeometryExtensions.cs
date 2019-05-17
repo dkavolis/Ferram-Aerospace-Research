@@ -65,7 +65,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
             Vector3 lower = Vector3.one * float.PositiveInfinity;
             Vector3 upper = Vector3.one * float.NegativeInfinity;
 
-            int ignoreLayers = ignoreLayers = LayerMask.NameToLayer("TransparentFX");
+            int ignoreLayers = LayerMask.NameToLayer("TransparentFX");
 
 
             for (int i = transforms.Count - 1; i >= 0; --i)
@@ -206,7 +206,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                     for (int j = 1; j < currentPartModuleTransforms.Count; ++j)
                     {
-                        string transformString = "";
+                        string transformString;
                         transformString = (string)module.GetType().GetField(currentPartModuleTransforms[j]).GetValue(module);
                         if (transformString != "")
                             Transform.AddRange(p.FindModelComponents<Transform>(transformString));
@@ -241,7 +241,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
             ModuleAsteroid asteroid = (ModuleAsteroid)p.Modules["ModuleAsteroid"];
             FieldInfo[] fields = asteroid.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-            PAsteroid procAsteroid = null;
+            PAsteroid procAsteroid;
 
             /*for (int i = 0; i < fields.Length; ++i)
             {
@@ -255,9 +255,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
                 }
             }*/
             procAsteroid = (PAsteroid)fields[2].GetValue(asteroid);
-            int count = transformList.Count;
             GetChildTransforms(transformList, procAsteroid.gameObject.transform.Find(""));
-            count = transformList.Count - count;
 
             //FARLogger.Info("New transforms: " + count);
         }
