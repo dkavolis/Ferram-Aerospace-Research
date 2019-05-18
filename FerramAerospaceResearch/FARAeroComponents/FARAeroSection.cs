@@ -177,28 +177,18 @@ namespace FerramAerospaceResearch.FARAeroComponents
             if (mergeFactor >= 10)
                 return false;       //only merge up to 10 sections
 
-            bool merge = true;
-
             float flatnessRelDiff = flatnessRatio - otherSection.flatnessRatio;
             flatnessRelDiff *= invFlatnessRatio;
 
             if (flatnessRelDiff < 0.05)  //allow for 5% rel difference for merging
-                if ((flatnessRatio - 1) < 0.05)  //if it's within 5% of 1, it's good
-                    merge &= true;
-                else if (Math.Abs(Vector3.Dot(worldNormalVector, otherSection.worldNormalVector)) > 0.999)    //allow 5 degrees error for flatnessRatio
-                    merge &= true;
-                else
-                    merge &= false;         //too different in out-of-roundness, don't merge
+                if (flatnessRatio >= 1.05)  //if it's within 5% of 1, it's good
+                    if (Math.Abs(Vector3.Dot(worldNormalVector, otherSection.worldNormalVector)) <= 0.999)    //allow 5 degrees error for flatnessRatio
+                        return false;         //too different in out-of-roundness, don't merge
 
             float diameterRelDiff = diameter - otherSection.diameter;
             diameterRelDiff /= diameter;
 
-            if (diameterRelDiff < 0.05)
-                merge &= true;
-            else
-                merge &= false;
-
-            return merge;
+            return diameterRelDiff < 0.05;
         }
 
         public void MergeAeroSection(FARAeroSection otherSection)
