@@ -1623,13 +1623,13 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             double cutoff = maxCrossSection * 2;//Math.Min(maxCrossSection * 0.1, vehicleCrossSection[index].area * 0.25);
 
-            double tmp1, tmp2;
+            double tmp1;
             tmp1 = indexSqrt[index - (front - 2)];
             for (int i = front - 1; i <= index; i++)
             {
                 double tmp;
                 //tmp2 = Math.Sqrt(tmp);
-                tmp2 = indexSqrt[index - i];
+                double tmp2 = indexSqrt[index - i];
                 tmp = tmp1 - tmp2;
                 tmp1 = tmp2;
 
@@ -1662,13 +1662,13 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             double cutoff = maxCrossSection * 2;//Math.Min(maxCrossSection * 0.1, vehicleCrossSection[index].area * 0.25);
 
-            double tmp1, tmp2;
+            double tmp1;
             tmp1 = indexSqrt[back + 2 - index];
             for (int i = back + 1; i >= index; i--)
             {
                 double tmp;
                 //tmp2 = Math.Sqrt(tmp);
-                tmp2 = indexSqrt[i - index];
+                double tmp2 = indexSqrt[i - index];
                 tmp = tmp1 - tmp2;
                 tmp1 = tmp2;
 
@@ -1842,13 +1842,12 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private double CalcAllTransonicWaveDrag(VoxelCrossSection[] sections, int front, int numSections, double sectionThickness)
         {
             double drag = 0;
-            double Lj;
 
             for (int j = 0; j < numSections; j++)
             {
                 double accumulator = 0;
 
-                Lj = (j + 0.5) * Math.Log(j + 0.5);
+                double Lj = (j + 0.5) * Math.Log(j + 0.5);
                 if (j > 0)
                     Lj -= (j - 0.5) * Math.Log(j - 0.5);
 

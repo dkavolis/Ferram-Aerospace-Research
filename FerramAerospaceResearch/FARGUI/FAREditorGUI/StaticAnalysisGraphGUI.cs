@@ -237,11 +237,10 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
                 otherInput = double.Parse(input.otherInput);
 
-                GraphData data;
-
                 var sim = simManager.SweepSim;
                 if (sim.IsReady())
                 {
+                    GraphData data;
                     if (isMachMode)
                     {
                         data = sim.MachNumberSweep(otherInput, pitchSetting, lowerBound, upperBound, (int)numPts, input.flapSetting, input.spoilers, bodySettingDropdown.ActiveSelection);

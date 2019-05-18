@@ -415,7 +415,6 @@ namespace ferram4
 
         private FARWingAerodynamicModel ExposureHitDetectionAndWingDetection(RaycastHit[] hits, List<Part> vesselPartList, ref double exposure, double exposureDecreasePerHit)
         {
-            bool gotSomething;
             bool firstHit = true;
             double wingInteractionFactor = 0;
 
@@ -424,7 +423,7 @@ namespace ferram4
             RaycastHit[] sortedHits = SortHitsByDistance(hits);
             foreach (RaycastHit h in sortedHits)
             {
-                gotSomething = false;
+                bool gotSomething = false;
                 if (h.collider != null)
                 {
                     foreach (Part p in vesselPartList)

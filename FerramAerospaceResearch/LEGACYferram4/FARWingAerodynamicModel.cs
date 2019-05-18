@@ -496,11 +496,10 @@ namespace ferram4
 
             if (FARDebugValues.allowStructuralFailures)
             {
-                FARPartStressTemplate template;
                 foreach (FARPartStressTemplate temp in FARAeroStress.StressTemplates)
                     if (temp.name == "wingStress")
                     {
-                        template = temp;
+                        FARPartStressTemplate template = temp;
 
                         YmaxForce = template.YmaxStress;    //in MPa
                         YmaxForce *= S;

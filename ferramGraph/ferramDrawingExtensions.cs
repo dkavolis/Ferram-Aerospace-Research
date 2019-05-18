@@ -52,10 +52,9 @@ namespace ferram4
         {
             int elements = raw.Length;
             double[] pixels = new double[elements];
-            double tmp;
             for (int i = 0; i < elements; i++)
             {
-                tmp = raw[i] * scale;
+                double tmp = raw[i] * scale;
                 tmp -= zeroValue;
                 tmp *= scaling;
 

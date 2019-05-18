@@ -293,11 +293,10 @@ namespace ferram4
 
             if (FARDebugValues.allowStructuralFailures)
             {
-                FARPartStressTemplate template;
                 foreach (FARPartStressTemplate temp in FARAeroStress.StressTemplates)
                     if (temp.name == "ctrlSurfStress")
                     {
-                        template = temp;
+                        FARPartStressTemplate template = temp;
                         double maxForceMult = Math.Pow(massMultiplier, FARAeroUtil.massStressPower);
 
                         YmaxForce *= 1 - ctrlSurfFrac;

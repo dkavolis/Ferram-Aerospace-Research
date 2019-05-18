@@ -240,7 +240,6 @@ namespace FerramAerospaceResearch.FARPartGeometry
                 for (int j = 0; j < 8; j++)
                     for (int k = 0; k < 8; k++)
                     {
-                        DebugVisualVoxel vx;
                         //if(voxelPoints[i,j,k] != null)
                         PartSizePair pair = voxelPoints[i + 8 * j + 64 * k];
                         if ((object) pair.part != null)
@@ -250,7 +249,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
                                 elementSize = 1;
 
                             elementSize *= _size * 0.5f;
-                            vx = new DebugVisualVoxel(vesselLocalToWorldMatrix.MultiplyPoint3x4(lowerCorner + new Vector3d(i, j, k) * _size), elementSize);
+                            var vx = new DebugVisualVoxel(vesselLocalToWorldMatrix.MultiplyPoint3x4(lowerCorner + new Vector3d(i, j, k) * _size), elementSize);
                             voxelMesh.DebugVoxels.Add(vx);
                             visualVoxels[i, j, k] = vx;
                         }
