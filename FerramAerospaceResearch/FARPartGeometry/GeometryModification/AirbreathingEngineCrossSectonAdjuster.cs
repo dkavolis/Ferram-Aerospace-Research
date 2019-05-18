@@ -51,7 +51,7 @@ namespace FerramAerospaceResearch.FARPartGeometry.GeometryModification
     {
         private Vector3 vehicleBasisForwardVector;
 
-        private double exitArea;
+        private readonly double exitArea;
         private int sign = 1;
 
         private Matrix4x4 thisToVesselMatrix;
@@ -59,7 +59,7 @@ namespace FerramAerospaceResearch.FARPartGeometry.GeometryModification
 
         public ModuleEngines EngineModule { get; }
 
-        private Part part;
+        private readonly Part part;
         public Part GetPart()
         {
             return part;

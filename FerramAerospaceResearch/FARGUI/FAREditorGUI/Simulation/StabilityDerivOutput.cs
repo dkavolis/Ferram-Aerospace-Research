@@ -46,7 +46,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
 	internal class StabilityDerivOutput
     {
-        public double[] stabDerivs = new double[27];
+        public readonly double[] stabDerivs = new double[27];
         public double b;
         public double MAC;
         public double area;

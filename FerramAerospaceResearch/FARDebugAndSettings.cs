@@ -81,13 +81,13 @@ namespace FerramAerospaceResearch
             AtmComposition
         }
 
-        private static string[] MenuTab_str = {
+        private static readonly string[] MenuTab_str = {
             "Difficulty and Debug",
             "Aerodynamic Failure",
             "Atm Composition"
         };
 
-        public static string[] FlowMode_str = {
+        public static readonly string[] FlowMode_str = {
             "NO_FLOW",
             "ALL_VESSEL",
             "STAGE_PRIORITY_FLOW",

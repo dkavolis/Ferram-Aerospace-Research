@@ -53,9 +53,9 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 {
     internal class StabilityAugmentation
     {
-        private Vessel _vessel;
+        private readonly Vessel _vessel;
 
-        private static string[] systemLabel = {
+        private static readonly string[] systemLabel = {
             Localizer.Format("FARFlightStabAugLabel0"),
             Localizer.Format("FARFlightStabAugLabel1"),
             Localizer.Format("FARFlightStabAugLabel2"),
@@ -73,7 +73,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         };
 
         private static ControlSystem[] systemTemplates;
-        private ControlSystem[] systemInstances;
+        private readonly ControlSystem[] systemInstances;
 
         private static double aoALowLim, aoAHighLim;
         private static double scalingDynPres;
@@ -81,7 +81,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 
         private GUIStyle buttonStyle;
         private GUIStyle boxStyle;
-        private GUIDropDown<int> systemDropdown;
+        private readonly GUIDropDown<int> systemDropdown;
 
         public StabilityAugmentation(Vessel vessel)
         {

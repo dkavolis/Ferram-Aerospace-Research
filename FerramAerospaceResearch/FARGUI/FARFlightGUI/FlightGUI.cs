@@ -70,7 +70,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         private static int frameCountForSaving;
         public static Dictionary<Vessel, FlightGUI> vesselFlightGUI;
 
-        private StringBuilder _strBuilder = new StringBuilder();
+        private readonly StringBuilder _strBuilder = new StringBuilder();
 
         private PhysicsCalcs _physicsCalcs;
         private VesselFlightInfo infoParameters;

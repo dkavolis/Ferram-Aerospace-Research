@@ -50,10 +50,10 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 	internal class GraphData
     {
         public double[] xValues;
-        public List<double[]> yValues;
-        public List<string> lineNames;
-        public List<bool> lineNameVisible;
-        public List<Color> lineColors;
+        public readonly List<double[]> yValues;
+        public readonly List<string> lineNames;
+        public readonly List<bool> lineNameVisible;
+        public readonly List<Color> lineColors;
 
         public GraphData()
         {

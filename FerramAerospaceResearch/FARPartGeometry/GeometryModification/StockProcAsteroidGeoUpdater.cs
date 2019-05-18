@@ -48,7 +48,7 @@ namespace FerramAerospaceResearch.FARPartGeometry.GeometryModification
 {
 	internal class StockProcAsteroidGeoUpdater : IGeometryUpdater
     {
-	    private GeometryPartModule geoModule;
+	    private readonly GeometryPartModule geoModule;
 	    private bool hasLoaded;
 
         public StockProcAsteroidGeoUpdater(GeometryPartModule geoModule)

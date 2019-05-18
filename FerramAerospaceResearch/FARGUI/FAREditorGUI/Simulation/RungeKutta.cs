@@ -50,18 +50,18 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
     internal class RungeKutta4
     {
 //        Vector4 a = new Vector4(0, 0.5f, 0.5f, 1);
-private Vector4 c = new Vector4(1f / 6, 1f / 3, 1f / 3, 1f / 6);
+private readonly Vector4 c = new Vector4(1f / 6, 1f / 3, 1f / 3, 1f / 6);
 
 //        FARMatrix b = new FARMatrix(3, 4);
 
-private double dt;
-private double endTime;
-private double[] initCond;
+private readonly double dt;
+private readonly double endTime;
+private readonly double[] initCond;
 
-private SimMatrix stateEquations;
+private readonly SimMatrix stateEquations;
 
-        public double[,] soln;
-        public double[] time;
+        public readonly double[,] soln;
+        public readonly double[] time;
 
         public RungeKutta4(double endTime, double dt, SimMatrix eqns, double[] initCond)
         {

@@ -55,7 +55,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
     public class AirspeedSettingsGUI
     {
         public static bool allEnabled = true;
-        private Vessel _vessel;
+        private readonly Vessel _vessel;
         private GUIStyle buttonStyle;
         public bool enabled
         {
@@ -79,7 +79,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             MACH
         }
 
-        private string[] surfModel_str =
+        private readonly string[] surfModel_str =
         {
             Localizer.Format("FARFlightAirspeedGroundspeed"),
             Localizer.Format("FARFlightAirspeedIndicated"),
@@ -95,7 +95,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             KM_H
         }
 
-        private string[] surfUnit_str =
+        private readonly string[] surfUnit_str =
         {
             Localizer.Format("FARFlightAirspeedMeterPerSec"),
             Localizer.Format("FARFlightAirspeedKnots"),

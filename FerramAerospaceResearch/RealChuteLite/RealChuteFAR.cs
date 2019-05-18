@@ -42,14 +42,17 @@ namespace FerramAerospaceResearch.RealChuteLite
 
         #region Constants
         //Material constants
-        public static string materialName = Localizer.Format("RCLMatNylon");
+        public static readonly string materialName = Localizer.Format("RCLMatNylon");
         public const float areaDensity = 5.65E-5f, areaCost = 0.075f, staticCd = 1;     //t/m², and F/m² for the first two
         public const double startTemp = 300, maxTemp = 493.15;                          //In °K
         public const double specificHeat = 1700, absoluteZero = -273.15;                //Specific heat in J/kg*K
 
         //More useful constants
         public const int maxSpares = 5;
-        public static string stowed = Localizer.Format("RCLStatusStowed"), predeployed = Localizer.Format("RCLStatusPreDep"), deployed = Localizer.Format("RCLStatusDep"), cut = Localizer.Format("RCLStatusCut");
+        public static readonly string stowed = Localizer.Format("RCLStatusStowed");
+        public static readonly string predeployed = Localizer.Format("RCLStatusPreDep");
+        public static readonly string deployed = Localizer.Format("RCLStatusDep");
+        public static readonly string cut = Localizer.Format("RCLStatusCut");
         public static readonly string[] cubeNames = { "STOWED", "RCDEPLOYED", "DEPLOYED", "SEMIDEPLOYED", "PACKED" };
 
         //Quick enum parsing/tostring dictionaries

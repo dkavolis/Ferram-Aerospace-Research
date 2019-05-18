@@ -78,9 +78,9 @@ namespace FerramAerospaceResearch
             }
         }
 
-        private Vector3d[] controlPoints;
-        private CubicSection[] sections;
-        private int centerIndex;
+        private readonly Vector3d[] controlPoints;
+        private readonly CubicSection[] sections;
+        private readonly int centerIndex;
 
         public FARFloatCurve(int numControlPoints)
         {

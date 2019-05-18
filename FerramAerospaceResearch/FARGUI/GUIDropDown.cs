@@ -54,8 +54,8 @@ namespace FerramAerospaceResearch.FARGUI
         private bool toggleBtnState;
         private Vector2 scrollPos;
 
-        private string[] stringOptions;
-        private T[] typeOptions;
+        private readonly string[] stringOptions;
+        private readonly T[] typeOptions;
 
         public T ActiveSelection
         {

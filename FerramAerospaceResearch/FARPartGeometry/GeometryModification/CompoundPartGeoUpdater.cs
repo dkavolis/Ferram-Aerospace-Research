@@ -46,8 +46,8 @@ namespace FerramAerospaceResearch.FARPartGeometry.GeometryModification
 {
     internal class CompoundPartGeoUpdater : IGeometryUpdater
     {
-        private CompoundPart part;
-        private GeometryPartModule geoModule;
+        private readonly CompoundPart part;
+        private readonly GeometryPartModule geoModule;
         private CompoundPart.AttachState lastAttachState;
         private Part lastTarget;
 

@@ -52,7 +52,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
     internal class StabilityDerivCalculator
     {
-        private InstantConditionSim _instantCondition;
+        private readonly InstantConditionSim _instantCondition;
 
         public StabilityDerivCalculator(InstantConditionSim instantConditionSim)
         {

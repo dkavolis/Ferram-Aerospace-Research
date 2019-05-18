@@ -51,7 +51,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
     {
         //private Part[] voxelPoints = null;
         //private float[] voxelSize = null;
-        private PartSizePair[] voxelPoints;
+        private readonly PartSizePair[] voxelPoints;
         private DebugVisualVoxel[, ,] visualVoxels;
         private HashSet<Part> overridingParts;
 

@@ -56,7 +56,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
     internal class VehicleAerodynamics
     {
         private static double[] indexSqrt = new double[1];
-        private static object _commonLocker = new object();
+        private static readonly object _commonLocker = new object();
 
         private VehicleVoxel _voxel;
         private VoxelCrossSection[] _vehicleCrossSection = new VoxelCrossSection[1];
@@ -108,8 +108,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private List<Part> _vehiclePartList;
 
         private List<GeometryPartModule> _currentGeoModules;
-        private Dictionary<Part, PartTransformInfo> _partWorldToLocalMatrixDict = new Dictionary<Part, PartTransformInfo>(ObjectReferenceEqualityComparer<Part>.Default);
-        private Dictionary<FARAeroPartModule, FARAeroPartModule.ProjectedArea> _moduleAndAreasDict = new Dictionary<FARAeroPartModule, FARAeroPartModule.ProjectedArea>(ObjectReferenceEqualityComparer<FARAeroPartModule>.Default);
+        private readonly Dictionary<Part, PartTransformInfo> _partWorldToLocalMatrixDict = new Dictionary<Part, PartTransformInfo>(ObjectReferenceEqualityComparer<Part>.Default);
+        private readonly Dictionary<FARAeroPartModule, FARAeroPartModule.ProjectedArea> _moduleAndAreasDict = new Dictionary<FARAeroPartModule, FARAeroPartModule.ProjectedArea>(ObjectReferenceEqualityComparer<FARAeroPartModule>.Default);
 
         private List<FARAeroPartModule> _currentAeroModules = new List<FARAeroPartModule>();
         private List<FARAeroPartModule> _newAeroModules = new List<FARAeroPartModule>();
@@ -126,8 +126,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
         //Dictionary<Part, double> adjusterAreaPerVoxelDict = new Dictionary<Part, double>();
         //Dictionary<Part, ICrossSectionAdjuster> adjusterPartDict = new Dictionary<Part, ICrossSectionAdjuster>();
 
-        private List<FARAeroPartModule> includedModules = new List<FARAeroPartModule>();
-        private List<float> weighting = new List<float>();
+        private readonly List<FARAeroPartModule> includedModules = new List<FARAeroPartModule>();
+        private readonly List<float> weighting = new List<float>();
         private static Stack<FARAeroSection> currentlyUnusedSections;
 
         private int validSectionCount;

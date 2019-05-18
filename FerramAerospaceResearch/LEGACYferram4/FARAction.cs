@@ -76,17 +76,17 @@ namespace ferram4
         public const int ACTION_COUNT = 3;
 
         // private lookup tables
-        private static KSPActionGroup[] id2actionGroup = { KSPActionGroup.Brakes, KSPActionGroup.None, KSPActionGroup.None };
+        private static readonly KSPActionGroup[] id2actionGroup = { KSPActionGroup.Brakes, KSPActionGroup.None, KSPActionGroup.None };
         // keys in the configuration file
-        private static string[] configKeys = {  "actionGroupSpoiler",
+        private static readonly string[] configKeys = {  "actionGroupSpoiler",
                                         "actionGroupIncreaseFlapDeflection",
                                         "actionGroupDecreaseFlapDeflection" };
         // for the gui
-        private static string[] guiLabels = { Localizer.Format("FARActionSpoilers"),
+        private static readonly string[] guiLabels = { Localizer.Format("FARActionSpoilers"),
                                       Localizer.Format("FARActionIncreaseFlap"),
                                       Localizer.Format("FARActionDecreaseFlap") };
 
-        private static string[] currentGuiStrings = { id2actionGroup[0].ToString(),
+        private static readonly string[] currentGuiStrings = { id2actionGroup[0].ToString(),
                                               id2actionGroup[1].ToString(),
                                               id2actionGroup[2].ToString() };
 

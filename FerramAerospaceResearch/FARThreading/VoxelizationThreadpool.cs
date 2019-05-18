@@ -60,7 +60,7 @@ namespace FerramAerospaceResearch.FARThreading
 
         public class Task
         {
-            public Action Action;
+            public readonly Action Action;
             public bool Executed;
 
             public Task(Action action)
@@ -70,10 +70,10 @@ namespace FerramAerospaceResearch.FARThreading
             }
         }
 
-        private Queue<Task> queuedMainThreadTasks;
+        private readonly Queue<Task> queuedMainThreadTasks;
 
-        private Thread[] _threads;
-        private Queue<Action> queuedVoxelizations;
+        private readonly Thread[] _threads;
+        private readonly Queue<Action> queuedVoxelizations;
         private const int THREAD_COUNT = 8;
 
         public static bool RunInMainThread = false;

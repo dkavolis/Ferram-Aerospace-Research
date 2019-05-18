@@ -48,7 +48,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
     internal class SweepSim
     {
-        private InstantConditionSim _instantCondition;
+        private readonly InstantConditionSim _instantCondition;
 
         public SweepSim(InstantConditionSim instantConditionSim)
         {

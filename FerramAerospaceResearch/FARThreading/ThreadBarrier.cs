@@ -51,8 +51,8 @@ namespace FerramAerospaceResearch.FARThreading
     // ReSharper disable once UnusedMember.Global
     public class ThreadBarrier
     {
-        private object _lockerObject = new object();
-        private int _threadParticipatingCount;
+        private readonly object _lockerObject = new object();
+        private readonly int _threadParticipatingCount;
 
         private int currentCountOdd;
         private int currentCountEven;

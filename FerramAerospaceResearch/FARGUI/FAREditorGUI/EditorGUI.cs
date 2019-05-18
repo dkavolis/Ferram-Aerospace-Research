@@ -71,7 +71,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
         private bool _updateQueued = true;
 
         private static bool showGUI;
-        private bool useKSPSkin = true;
+        private readonly bool useKSPSkin = true; // currenly cannot be changed from outside
         private Rect guiRect;
         public static Rect GUIRect
         {
@@ -81,9 +81,9 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
         private static IButton blizzyEditorGUIButton;
 
         private VehicleAerodynamics _vehicleAero;
-        private List<GeometryPartModule> _currentGeometryModules = new List<GeometryPartModule>();
-        private List<FARWingAerodynamicModel> _wingAerodynamicModel = new List<FARWingAerodynamicModel>();
-        private Stopwatch voxelWatch = new Stopwatch();
+        private readonly List<GeometryPartModule> _currentGeometryModules = new List<GeometryPartModule>();
+        private readonly List<FARWingAerodynamicModel> _wingAerodynamicModel = new List<FARWingAerodynamicModel>();
+        private readonly Stopwatch voxelWatch = new Stopwatch();
 
         private int prevPartCount;
         private bool partMovement;
@@ -96,7 +96,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
         private StabilityDerivGUI _stabDeriv;
         private StabilityDerivSimulationGUI _stabDerivLinSim;
 
-        private List<IDesignConcern> _customDesignConcerns = new List<IDesignConcern>();
+        private readonly List<IDesignConcern> _customDesignConcerns = new List<IDesignConcern>();
 
         private MethodInfo editorReportUpdate;
 
@@ -116,7 +116,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             AREA_RULING
         }
 
-        private static string[] FAReditorMode_str =
+        private static readonly string[] FAReditorMode_str =
         {
             Localizer.Format("FAREditorModeStatic"),
             Localizer.Format("FAREditorModeDataStab"),

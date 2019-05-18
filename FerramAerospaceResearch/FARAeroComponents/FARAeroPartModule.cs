@@ -77,7 +77,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private ProjectedArea projectedArea;
 
-        private bool partStressOverride = false;
+        private readonly bool partStressOverride = false; // currently not changed
         private double partStressMaxY = double.MaxValue;
         private double partStressMaxXZ = double.MaxValue;
         private double partForceMaxY = double.MaxValue;

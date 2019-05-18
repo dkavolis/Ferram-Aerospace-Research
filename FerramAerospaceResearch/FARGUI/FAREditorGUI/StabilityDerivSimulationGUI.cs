@@ -58,7 +58,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
         private SimMode simMode = 0;
 
         private EditorSimManager simManager;
-        private InitialConditions lonConditions, latConditions;
+        private readonly InitialConditions lonConditions;
+        private readonly InitialConditions latConditions;
         private ferramGraph _graph = new ferramGraph(400, 200);
 
         // ReSharper disable once UnusedMember.Local
@@ -68,7 +69,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
             LAT
         }
 
-        private static string[] SimMode_str =
+        private static readonly string[] SimMode_str =
         {
             Localizer.Format("FAREditorSimModeLong"),
             Localizer.Format("FAREditorSimModeLat")
@@ -312,9 +313,9 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
         private class InitialConditions
         {
-            public string[] inits;
-            public string[] names;
-            public double[] scaling;
+            public readonly string[] inits;
+            public readonly string[] names;
+            public readonly double[] scaling;
 
             public string dt;
             public string maxTime;

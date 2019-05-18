@@ -319,7 +319,8 @@ namespace FerramAerospaceResearch
         public double gaussianVehicleLengthFractionForSmoothing = 0.015;
         public int numAreaSmoothingPasses = 2;
         public int numDerivSmoothingPasses = 1;
-        public int index;
+        // TODO: index should be the index in the list, allow multiple custom settings
+        public readonly int index;
 
 
         public FARDifficultyAndExactnessSettings(int index)

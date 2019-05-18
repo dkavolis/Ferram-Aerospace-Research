@@ -56,7 +56,7 @@ namespace FerramAerospaceResearch.FARUtils
     public static class FARLogger
     {
 
-        public static string defaultTag = $"[FAR {FARVersion.String}] ";
+        public static readonly string defaultTag = $"[FAR {FARVersion.String}] ";
         private static readonly string[] separators = {"\r\n", "\r", "\n"};
 
         public static string Tag { get; } = defaultTag;

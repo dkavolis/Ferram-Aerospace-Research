@@ -55,14 +55,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private const float AVG_NOZZLE_VEL_RELATIVE_TO_FREESTREAM = 0.25f;       //assume value approximately for turbojets
         private const float AVG_NOZZLE_VEL_FACTOR = AVG_NOZZLE_VEL_RELATIVE_TO_FREESTREAM * (1 - AVG_NOZZLE_VEL_RELATIVE_TO_FREESTREAM);
 
-        private static int AJE_JET_CLASS_ID = "ModuleEnginesAJEJet".GetHashCode();
-        private static int AJE_PROP_CLASS_ID = "ModuleEnginesAJEPropeller".GetHashCode();
+        private static readonly int AJE_JET_CLASS_ID = "ModuleEnginesAJEJet".GetHashCode();
+        private static readonly int AJE_PROP_CLASS_ID = "ModuleEnginesAJEPropeller".GetHashCode();
 
 
-        private List<FARAeroPartModule> _aeroModulesWithIntakes = new List<FARAeroPartModule>();
-        private List<ModuleResourceIntake> _intakeModules = new List<ModuleResourceIntake>();
-        private List<Transform> _intakeTransforms = new List<Transform>();
-        private List<ModuleEngines> _airBreathingEngines = new List<ModuleEngines>();
+        private readonly List<FARAeroPartModule> _aeroModulesWithIntakes = new List<FARAeroPartModule>();
+        private readonly List<ModuleResourceIntake> _intakeModules = new List<ModuleResourceIntake>();
+        private readonly List<Transform> _intakeTransforms = new List<Transform>();
+        private readonly List<ModuleEngines> _airBreathingEngines = new List<ModuleEngines>();
 
         public void UpdateAeroData(List<FARAeroPartModule> allUsedAeroModules)
         {

@@ -497,7 +497,7 @@ namespace FerramAerospaceResearch
         }
 
         private static int RaycastMaskVal, RaycastMaskEdit;
-        private static String[] RaycastLayers = {
+        private static readonly String[] RaycastLayers = {
             "Default", "TransparentFX", "Local Scenery", "Disconnected Parts"
         };
 

@@ -50,7 +50,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.DesignConcerns
 {
     internal class AreaRulingConcern : DesignConcernBase
     {
-        private VehicleAerodynamics _vesselAero;
+        private readonly VehicleAerodynamics _vesselAero;
 
         public AreaRulingConcern(VehicleAerodynamics vesselAero)
         {

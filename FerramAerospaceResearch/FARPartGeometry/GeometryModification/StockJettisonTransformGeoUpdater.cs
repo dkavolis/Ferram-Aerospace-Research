@@ -48,8 +48,8 @@ namespace FerramAerospaceResearch.FARPartGeometry.GeometryModification
 {
     internal class StockJettisonTransformGeoUpdater : IGeometryUpdater
     {
-        private ModuleJettison engineFairing;
-        private GeometryPartModule geoModule;
+        private readonly ModuleJettison engineFairing;
+        private readonly GeometryPartModule geoModule;
         private bool fairingVisible;
 
         public StockJettisonTransformGeoUpdater(ModuleJettison engineFairing, GeometryPartModule geoModule)

@@ -54,8 +54,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
         // limit of vertices in each mesh imposed by Unity
         public const int MaxVerticesPerSubmesh = 65000;
         public const int MaxVoxelsPerSubmesh = MaxVerticesPerSubmesh / 4;
-        private List<DebugVisualVoxel> debugVoxels = new List<DebugVisualVoxel>();
-        private List<DebugVisualVoxelSubmesh> submeshes = new List<DebugVisualVoxelSubmesh>();
+        private readonly List<DebugVisualVoxel> debugVoxels = new List<DebugVisualVoxel>();
+        private readonly List<DebugVisualVoxelSubmesh> submeshes = new List<DebugVisualVoxelSubmesh>();
         private bool active;
 
         public DebugVisualVoxelMeshController(Transform parent = null)

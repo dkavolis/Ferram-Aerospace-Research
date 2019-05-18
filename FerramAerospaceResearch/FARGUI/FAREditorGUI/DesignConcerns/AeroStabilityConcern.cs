@@ -51,9 +51,9 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.DesignConcerns
     // ReSharper disable once UnusedMember.Global
     internal class AeroStabilityConcern : DesignConcernBase
     {
-        private InstantConditionSim _instantSim;
-        private InstantConditionSimInput _simInput;
-        private EditorFacilities _editorFacility;
+        private readonly InstantConditionSim _instantSim;
+        private readonly InstantConditionSimInput _simInput;
+        private readonly EditorFacilities _editorFacility;
 
         public AeroStabilityConcern(InstantConditionSim instantSim, EditorFacilities editorFacility)
         {

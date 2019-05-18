@@ -57,7 +57,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
     {
         private static int MAX_CHUNKS_IN_QUEUE = 4500;
         private const int MAX_SWEEP_PLANES_IN_QUEUE = 8;
-        private static Stack<VoxelChunk> clearedChunks = new Stack<VoxelChunk>();
+        private static readonly Stack<VoxelChunk> clearedChunks = new Stack<VoxelChunk>();
         private static Stack<SweepPlanePoint[,]> clearedPlanes;
 
         private static int MAX_CHUNKS_ALLOWED;
@@ -75,12 +75,12 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private double invElementSize;
         private VoxelChunk[, , ] voxelChunks;
-        private DebugVisualVoxelMeshController voxelMesh;
+        private readonly DebugVisualVoxelMeshController voxelMesh;
         private HashSet<Part> overridingParts;
         private int xLength, yLength, zLength;
         private int xCellLength, yCellLength, zCellLength;
         private int threadsQueued;
-        private object _locker = new object();
+        private readonly object _locker = new object();
 
         private Vector3d lowerRightCorner;
         public Vector3d LocalLowerRightCorner
@@ -2586,7 +2586,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
         private class SweepPlanePoint
         {
             public Part part;
-            public int i, k;
+            public readonly int i;
+            public readonly int k;
             public int jLastInactive;
             public bool ductingParts;
 
@@ -2620,9 +2621,9 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private struct VoxelSolidParams
         {
-            public int lowJ;
-            public int highJ;
-            public bool increasingJ;
+            public readonly int lowJ;
+            public readonly int highJ;
+            public readonly bool increasingJ;
 
             public VoxelSolidParams(int lowJ, int highJ, bool increasingJ)
             {
@@ -2634,9 +2635,9 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private struct VoxelShellMeshParams
         {
-            public List<GeometryPartModule> modules;
-            public int lowerIndex;
-            public int upperIndex;
+            public readonly List<GeometryPartModule> modules;
+            public readonly int lowerIndex;
+            public readonly int upperIndex;
 
             public VoxelShellMeshParams(int lowerIndex, int upperIndex, List<GeometryPartModule> modules)
             {

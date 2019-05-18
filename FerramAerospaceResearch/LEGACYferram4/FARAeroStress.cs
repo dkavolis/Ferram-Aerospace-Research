@@ -48,7 +48,7 @@ namespace FerramAerospaceResearch
 {
     public static class FARAeroStress
     {
-        public static List<FARPartStressTemplate> StressTemplates = new List<FARPartStressTemplate>();
+        public static readonly List<FARPartStressTemplate> StressTemplates = new List<FARPartStressTemplate>();
         public static bool loaded;
 
 

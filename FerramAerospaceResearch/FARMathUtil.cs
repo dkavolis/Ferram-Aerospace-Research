@@ -371,8 +371,8 @@ namespace FerramAerospaceResearch
 
         public class MirroredFunction
         {
-            private Func<double, double> F;
-            private bool mirror;
+            private readonly Func<double, double> F;
+            private readonly bool mirror;
 
             public MirroredFunction(Func<double, double> original, bool mirrored)
             {

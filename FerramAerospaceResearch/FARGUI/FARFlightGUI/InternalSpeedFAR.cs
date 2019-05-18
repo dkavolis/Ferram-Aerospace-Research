@@ -53,7 +53,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
      */
     public class InternalSpeedFAR : InternalSpeed
     {
-        private string[] shortCaptions = {
+        private readonly string[] shortCaptions = {
             Localizer.Format("FARFlightInternalAirspeedGroundspeed"),
             Localizer.Format("FARFlightInternalAirspeedIndicated"),
             Localizer.Format("FARFlightInternalAirspeedEquivalent"),

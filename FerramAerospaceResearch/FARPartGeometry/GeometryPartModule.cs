@@ -126,7 +126,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private static int ignoreLayer0 = -1;
 
-        private float currentScaleFactor = 1;
+        private readonly float currentScaleFactor = 1;
 
         [SerializeField] private bool forceUseColliders;
         [SerializeField] private bool forceUseMeshes;
@@ -139,7 +139,9 @@ namespace FerramAerospaceResearch.FARPartGeometry
 #if DEBUG
         private class DebugInfoBuilder
         {
-            public List<string> meshes, colliders, noRenderer;
+            public readonly List<string> meshes;
+            public readonly List<string> colliders;
+            public readonly List<string> noRenderer;
 
             public DebugInfoBuilder()
             {
@@ -178,7 +180,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
             }
         }
 
-        private DebugInfoBuilder debugInfo = new DebugInfoBuilder();
+        private readonly DebugInfoBuilder debugInfo = new DebugInfoBuilder();
 #endif
 
         [Conditional("DEBUG")]

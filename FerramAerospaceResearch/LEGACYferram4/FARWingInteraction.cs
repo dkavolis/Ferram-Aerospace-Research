@@ -53,13 +53,13 @@ namespace ferram4
 {
     public class FARWingInteraction
     {
-        private static RaycastHitComparer _comparer = new RaycastHitComparer();
+        private static readonly RaycastHitComparer _comparer = new RaycastHitComparer();
 
         private FARWingAerodynamicModel parentWingModule;
         private Part parentWingPart;
-        private Vector3 rootChordMidLocal;
+        private readonly Vector3 rootChordMidLocal;
         private Vector3 rootChordMidPt;
-        private short srfAttachFlipped;
+        private readonly short srfAttachFlipped;
 
         private List<FARWingAerodynamicModel> nearbyWingModulesForwardList = new List<FARWingAerodynamicModel>();
         private List<FARWingAerodynamicModel> nearbyWingModulesBackwardList = new List<FARWingAerodynamicModel>();

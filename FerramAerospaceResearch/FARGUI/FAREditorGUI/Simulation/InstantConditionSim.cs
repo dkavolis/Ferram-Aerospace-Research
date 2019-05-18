@@ -269,7 +269,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 
         private double neededCl;
 
-        private InstantConditionSimInput iterationInput = new InstantConditionSimInput();
+        private readonly InstantConditionSimInput iterationInput = new InstantConditionSimInput();
         public InstantConditionSimOutput iterationOutput;
 
         public void SetState(double machNumber, double Cl, Vector3d CoM, double pitch, int flapSetting, bool spoilers)

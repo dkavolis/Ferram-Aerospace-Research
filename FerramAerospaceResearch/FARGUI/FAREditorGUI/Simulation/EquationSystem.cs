@@ -49,9 +49,9 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
 {
     internal class SimMatrix
     {
-        private double[,] matrix;
-        public int m;
-        public int n;
+        private readonly double[,] matrix;
+        public readonly int m;
+        public readonly int n;
 
         public SimMatrix(int m, int n)
         {

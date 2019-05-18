@@ -54,10 +54,10 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
 {
     internal class FlightDataGUI
     {
-        private bool[] activeFlightDataSections = { true, true, true, true, true, true, true, true, true };
-        private bool[] oldFlightDataSections = { false, false, false, false, false, false, false, false, false };
+        private readonly bool[] activeFlightDataSections = { true, true, true, true, true, true, true, true, true };
+        private readonly bool[] oldFlightDataSections = { false, false, false, false, false, false, false, false, false };
 
-        private string[] flightDataOptionLabels = {
+        private readonly string[] flightDataOptionLabels = {
             Localizer.Format("FARFlightDataOption0"),
             Localizer.Format("FARFlightDataOption1"),
             Localizer.Format("FARFlightDataOption2"),
@@ -70,8 +70,8 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
         };
 
         private VesselFlightInfo infoParameters;
-        private StringBuilder dataStringBuilder = new StringBuilder();
-        private StringBuilder labelStringBuilder = new StringBuilder();
+        private readonly StringBuilder dataStringBuilder = new StringBuilder();
+        private readonly StringBuilder labelStringBuilder = new StringBuilder();
 
         private GUIStyle buttonStyle;
         private GUIStyle boxStyle;

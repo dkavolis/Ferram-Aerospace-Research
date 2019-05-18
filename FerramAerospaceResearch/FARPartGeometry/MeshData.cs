@@ -48,10 +48,10 @@ namespace FerramAerospaceResearch.FARPartGeometry
 {
     public class MeshData
     {
-        public Vector3[] vertices;
-        public int[] triangles;
+        public readonly Vector3[] vertices;
+        public readonly int[] triangles;
         public Bounds bounds;
-        public bool isSkinned;
+        public readonly bool isSkinned;
 
         public MeshData(Vector3[] vertices, int[] tris, Bounds bounds, bool isSkinned = false)
         {
