@@ -382,17 +382,13 @@ namespace FerramAerospaceResearch.FARPartGeometry
                 return false;
 
             PartModuleList modules = g.part.Modules;
-            bool returnVal = false;
+            bool returnVal = modules.Contains<FARControllableSurface>() ||
+                             modules.Contains<ModuleRCS>() ||
+                             modules.Contains<ModuleEngines>() ||
+                             modules.Contains<ModuleProceduralFairing>() ||
+                             modules.Contains("ProceduralFairingBase") ||
+                             modules.Contains("ProceduralFairingSide");
 
-            if(modules.Contains<FARControllableSurface>() ||
-                modules.Contains<ModuleRCS>() ||
-                modules.Contains<ModuleEngines>() ||
-                modules.Contains<ModuleProceduralFairing>() ||
-                modules.Contains("ProceduralFairingBase") ||
-                modules.Contains("ProceduralFairingSide"))
-            {
-                returnVal = true;
-            }
             if (g.HasCrossSectionAdjusters)
             {
                 returnVal |= g.MaxCrossSectionAdjusterArea > 0;
@@ -657,13 +653,13 @@ namespace FerramAerospaceResearch.FARPartGeometry
                                 {
                                     sect2 = voxelChunks[iSect, jSect2, kSect];
                                     if (sect2 != null && sect2 != sect1)
-                                        validSects |= true;
+                                        validSects = true;
                                 }
                                 if (!(jSect3 >= yLength))
                                 {
                                     sect3 = voxelChunks[iSect, jSect3, kSect];
                                     if (sect3 != null && (sect3 != sect2 && sect3 != sect1))
-                                        validSects |= true;
+                                        validSects = true;
                                 }
 
                                 if (!validSects)
@@ -912,14 +908,14 @@ namespace FerramAerospaceResearch.FARPartGeometry
                                 {
                                     sect2 = voxelChunks[iSect2, jSect, kSect];
                                     if (sect2 != null && sect2 != sect1)
-                                        validSects |= true;
+                                        validSects = true;
                                 }
 
                                 if (!(iSect3 >= xLength))
                                 {
                                     sect3 = voxelChunks[iSect3, jSect, kSect];
                                     if (sect3 != null && (sect3 != sect2 && sect3 != sect1))
-                                        validSects |= true;
+                                        validSects = true;
                                 }
 
                                 if (!validSects)
@@ -1173,13 +1169,13 @@ namespace FerramAerospaceResearch.FARPartGeometry
                                 {
                                     sect2 = voxelChunks[iSect, jSect, kSect2];
                                     if (sect2 != null && sect2 != sect1)
-                                        validSects |= true;
+                                        validSects = true;
                                 }
                                 if (!(kSect3 >= zLength))
                                 {
                                     sect3 = voxelChunks[iSect, jSect, kSect3];
                                     if (sect3 != null && (sect3 != sect2 && sect3 != sect1))
-                                        validSects |= true;
+                                        validSects = true;
                                 }
 
                                 if (!validSects)

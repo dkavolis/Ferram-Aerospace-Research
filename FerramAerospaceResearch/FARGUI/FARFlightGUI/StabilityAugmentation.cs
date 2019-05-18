@@ -369,7 +369,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
             if (systemNode.HasValue("active"))
             {
                 bool.TryParse(systemNode.GetValue("active"), out sys.active);
-                sysExists |= true;
+                sysExists = true;
             }
 
             if (systemNode.HasValue("zeroPoint"))
