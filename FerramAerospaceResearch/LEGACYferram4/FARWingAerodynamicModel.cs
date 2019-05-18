@@ -58,7 +58,7 @@ namespace ferram4
     /// <summary>
     /// This calculates the lift and drag on a wing in the atmosphere
     ///
-    /// It uses Prandtl lifting line theory to calculate the basic lift and drag coefficients and includes compressibility corrections for subsonic and supersonic flows; transsonic regime has placeholder
+    /// It uses Prandtl lifting line theory to calculate the basic lift and drag coefficients and includes compressibility corrections for subsonic and supersonic flows; transonic regime has placeholder
     /// </summary>
     public class FARWingAerodynamicModel : FARBaseAerodynamics, IRescalable<FARWingAerodynamicModel>, IPartMassModifier
     {
@@ -812,7 +812,7 @@ namespace ferram4
         {
             float supportedArea = (float)(refAreaChildren + S);
             if (!(parentWing is null))
-                supportedArea *= 0.66666667f;   //if any supported area has been transfered to another part, we must remove it from here
+                supportedArea *= 0.66666667f;   //if any supported area has been transferred to another part, we must remove it from here
             curWingMass = supportedArea * (float)FARAeroUtil.massPerWingAreaSupported * massMultiplier;
 
             desiredMass = curWingMass * wingBaseMassMultiplier;
@@ -1236,7 +1236,7 @@ namespace ferram4
             double CosPartAngle = Vector3.Dot(sweepPerpLocal, ParallelInPlaneLocal).Clamp(-1, 1);
             double tmp = Vector3.Dot(sweepPerp2Local, ParallelInPlaneLocal).Clamp(-1, 1);
 
-            //Based on perp vector find which line is the right one
+            //Based on perpendicular vector find which line is the right one
             double sweepHalfChord = Math.Abs(CosPartAngle) > Math.Abs(tmp) ? CosPartAngle : tmp;
 
             //if (sweepHalfChord > Math.PI * 0.5)

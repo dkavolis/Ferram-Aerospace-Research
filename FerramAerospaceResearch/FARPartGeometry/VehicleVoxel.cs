@@ -512,7 +512,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
             Matrix4x4 sectionNormalToVesselCoords = Matrix4x4.TRS(Vector3.zero, Quaternion.FromToRotation(new Vector3(0, 0, 1), orientationVector), Vector3.one);
             Matrix4x4 vesselToSectionNormal = sectionNormalToVesselCoords.inverse;
 
-            //Code has multiple optimizations to take advantage of the limited rnage of values that are included.  They are listed below
+            //Code has multiple optimizations to take advantage of the limited range of values that are included.  They are listed below
             //(int)Math.Ceiling(x) -> (int)(x + 1)      for x > 0
             //(int)Math.Round(x) -> (int)(x + 0.5f)     for x > 0
             //(int)Math.Floor(x) -> (int)(x)            for x > 0
@@ -1022,7 +1022,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
                     principalAxis = sectionNormalToVesselCoords.MultiplyVector(principalAxis);
 
                     crossSections[m].centroid = centroid * elementSize + lowerRightCorner;
-                    //crossSections[m].additonalUnshadowedCentroid = unshadowedCentroid * elementSize + lowerRightCorner;
+                    //crossSections[m].additionalUnshadowedCentroid = unshadowedCentroid * elementSize + lowerRightCorner;
 
                     if (double.IsNaN(areaCount))
                         ThreadSafeDebugLogger.Instance.RegisterMessage("FAR VOXEL ERROR: areacount is NaN at section " + m);
@@ -1283,7 +1283,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
                     principalAxis = sectionNormalToVesselCoords.MultiplyVector(principalAxis);
 
                     crossSections[m].centroid = centroid * elementSize + lowerRightCorner;
-                    //crossSections[m].additonalUnshadowedCentroid = unshadowedCentroid * elementSize + lowerRightCorner;
+                    //crossSections[m].additionalUnshadowedCentroid = unshadowedCentroid * elementSize + lowerRightCorner;
 
                     if (double.IsNaN(areaCount))
                         ThreadSafeDebugLogger.Instance.RegisterMessage("FAR VOXEL ERROR: areacount is NaN at section " + m);

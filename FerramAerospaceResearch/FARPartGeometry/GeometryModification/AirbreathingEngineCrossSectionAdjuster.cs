@@ -47,7 +47,7 @@ using UnityEngine;
 
 namespace FerramAerospaceResearch.FARPartGeometry.GeometryModification
 {
-    internal class AirbreathingEngineCrossSectonAdjuster : ICrossSectionAdjuster
+    internal class AirbreathingEngineCrossSectionAdjuster : ICrossSectionAdjuster
     {
         private Vector3 vehicleBasisForwardVector;
 
@@ -70,7 +70,7 @@ namespace FerramAerospaceResearch.FARPartGeometry.GeometryModification
             return false;
         }
 
-        public AirbreathingEngineCrossSectonAdjuster(ModuleEngines engine, Matrix4x4 worldToVesselMatrix)
+        public AirbreathingEngineCrossSectionAdjuster(ModuleEngines engine, Matrix4x4 worldToVesselMatrix)
         {
             vehicleBasisForwardVector = Vector3.forward;
             //for (int i = 0; i < engine.thrustTransforms.Count; i++)

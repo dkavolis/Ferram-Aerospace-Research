@@ -71,7 +71,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
         private bool _updateQueued = true;
 
         private static bool showGUI;
-        private readonly bool useKSPSkin = true; // currenly cannot be changed from outside
+        private readonly bool useKSPSkin = true; // currently cannot be changed from outside
         private Rect guiRect;
         public static Rect GUIRect
         {
@@ -560,7 +560,7 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
                 try
                 {
                     // even with no root parts in the editor, neither RootPart or its partTransform are null
-                    // but trying to get locaToWorldMatrix throws NRE
+                    // but trying to get localToWorldMatrix throws NRE
                     localToWorldMatrix = EditorLogic.RootPart.partTransform.localToWorldMatrix;
                 }
                 catch (NullReferenceException)

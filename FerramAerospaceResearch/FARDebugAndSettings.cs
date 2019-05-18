@@ -293,7 +293,7 @@ namespace FerramAerospaceResearch
 
             GUILayout.EndVertical();
             GUILayout.BeginVertical();
-            GUILayout.Label("Celestial Body Atmosperic Properties");
+            GUILayout.Label("Celestial Body Atmospheric Properties");
 
             GUILayout.BeginHorizontal();
 
@@ -605,7 +605,7 @@ namespace FerramAerospaceResearch
 
             FARAeroUtil.SaveCustomAeroDataToConfig();
             FARAeroStress.SaveCustomStressTemplates();
-            FARActionGroupConfiguration.SaveConfigruration();
+            FARActionGroupConfiguration.SaveConfiguration();
             GUIColors.Instance.SaveColors();
             config.save();
         }

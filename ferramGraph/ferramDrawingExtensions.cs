@@ -17,7 +17,7 @@ Copyright 2019, Daumantas Kavolis, aka dkavolis
     You should have received a copy of the GNU General Public License
     along with FerramGraph.  If not, see <http://www.gnu.org/licenses/>. *
 
- * Disclaimer: You use this at your own risk; this is an alpha plugin for an alpha game; if your computer disintigrates, it's not my fault. :P
+ * Disclaimer: You use this at your own risk; this is an alpha plugin for an alpha game; if your computer disintegrates, it's not my fault. :P
  *
  *
  */

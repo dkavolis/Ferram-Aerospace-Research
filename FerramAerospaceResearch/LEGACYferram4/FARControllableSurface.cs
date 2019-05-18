@@ -165,13 +165,13 @@ namespace ferram4
         private Transform lastReferenceTransform;
 
 
-        [FARAction("FARCtrlActionSpoiler", FARActionGroupConfiguration.ID_SPOILER)] // use our new FARAction for configurable action group assignemnt
+        [FARAction("FARCtrlActionSpoiler", FARActionGroupConfiguration.ID_SPOILER)] // use our new FARAction for configurable action group assignment
         public void ActivateSpoiler(KSPActionParam param)
         {
             brake = !(param.type > 0);
         }
 
-        [FARAction("FARCtrlActionIncFlap", FARActionGroupConfiguration.ID_INCREASE_FLAP_DEFLECTION)] // use our new FARAction for configurable action group assignemnt
+        [FARAction("FARCtrlActionIncFlap", FARActionGroupConfiguration.ID_INCREASE_FLAP_DEFLECTION)] // use our new FARAction for configurable action group assignment
         public void IncreaseDeflect(KSPActionParam param)
         {
             param.Cooldown = 0.25f;
@@ -185,7 +185,7 @@ namespace ferram4
             UpdateFlapDeflect();
         }
 
-        [FARAction("FARCtrlActionDecFlap", FARActionGroupConfiguration.ID_DECREASE_FLAP_DEFLECTION)] // use our new FARAction for configurable action group assignemnt
+        [FARAction("FARCtrlActionDecFlap", FARActionGroupConfiguration.ID_DECREASE_FLAP_DEFLECTION)] // use our new FARAction for configurable action group assignment
         public void DecreaseDeflect(KSPActionParam param)
         {
             param.Cooldown = 0.25f;
@@ -512,7 +512,7 @@ namespace ferram4
             return Math.Asin(PerpVelocity.Clamp(-1, 1));
         }
 
-        //DaMichel: Factored the time evolution for deflection AoA into this function. This one results into an exponential asympotic
+        //DaMichel: Factored the time evolution for deflection AoA into this function. This one results into an exponential asymptotic
         //"decay" towards the desired value. Good for stick inputs, i suppose, and the original method.
         private static double BlendDeflectionExp(double current, double desired, double blendTimeConstant, bool forceSetToDesired)
         {
@@ -527,7 +527,7 @@ namespace ferram4
             return current;
         }
 
-        //DaMichel: Similarly, this is used for constant rate movment towards the desired value. I presume it is more realistic for
+        //DaMichel: Similarly, this is used for constant rate movement towards the desired value. I presume it is more realistic for
         //for slow moving flaps and spoilers. It looks better anyways.
         //ferram4: The time constant specifies the time it would take for a first-order system to reach its steady-state value,
         //assuming that it was proportional to only the initial error, not the error as a function of time

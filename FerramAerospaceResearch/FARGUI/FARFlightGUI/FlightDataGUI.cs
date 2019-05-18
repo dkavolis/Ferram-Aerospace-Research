@@ -110,7 +110,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
                 labelStringBuilder.AppendLine(Localizer.Format("FARFlightData0"));
                 labelStringBuilder.AppendLine();
             }
-            if (activeFlightDataSections[1])        //AoA and sidelip
+            if (activeFlightDataSections[1])        //AoA and sideslip
             {
                 labelStringBuilder.AppendLine(Localizer.Format("FARFlightData1"));
                 labelStringBuilder.AppendLine();
@@ -167,7 +167,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
                 dataStringBuilder.AppendLine(Localizer.Format("FARUnitDeg"));
                 dataStringBuilder.AppendLine();
             }
-            if (activeFlightDataSections[1])        //AoA and sidelip
+            if (activeFlightDataSections[1])        //AoA and sideslip
             {
                 dataStringBuilder.Concat((float)(infoParameters.aoA),1);
                 dataStringBuilder.AppendLine(Localizer.Format("FARUnitDeg"));
@@ -224,7 +224,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
                     dataStringBuilder.Concat((float)(infoParameters.intakeAirFrac * 100),1); //Note: Originally this was output using P1 format, leading to an effective factor of 100*100.
                     dataStringBuilder.AppendLine(Localizer.Format("FARUnitPercent"));
                 }
-                dataStringBuilder.Concat((float)(infoParameters.specExcessPower),2); //this is a noticable change to original code: Here N2 format was used...
+                dataStringBuilder.Concat((float)(infoParameters.specExcessPower),2); //this is a noticeable change to original code: Here N2 format was used...
                 dataStringBuilder.Append(" ");
                 dataStringBuilder.AppendLine(Localizer.Format("FARUnitSpecPower"));
                 dataStringBuilder.AppendLine();
@@ -234,7 +234,7 @@ namespace FerramAerospaceResearch.FARGUI.FARFlightGUI
                 dataStringBuilder.Concat((float)(infoParameters.endurance),2);
                 dataStringBuilder.Append(" ");
                 dataStringBuilder.AppendLine(Localizer.Format("FARUnitHr"));
-                dataStringBuilder.Concat((float)(infoParameters.range), 2); //also here: originall N2 format.
+                dataStringBuilder.Concat((float)(infoParameters.range), 2); //also here: original N2 format.
                 dataStringBuilder.Append(" ");
                 dataStringBuilder.AppendLine(Localizer.Format("FARUnitkM"));
                 dataStringBuilder.AppendLine();

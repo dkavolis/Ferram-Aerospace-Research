@@ -387,7 +387,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 Vector3 nRefVector = data.nRefVectorPartSpace;
 
                 Vector3 velLocal = forceContext.LocalVelocity(data);
-                // Rejects both negligable speed and invalid simulation cases
+                // Rejects both negligible speed and invalid simulation cases
                 if (velLocal.sqrMagnitude.NearlyEqual(0.0f))
                 {
                     continue;

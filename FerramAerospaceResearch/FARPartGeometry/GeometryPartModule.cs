@@ -524,7 +524,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                 if (airBreather)
                 {
-                    AirbreathingEngineCrossSectonAdjuster engineAdjuster = new AirbreathingEngineCrossSectonAdjuster(engines, worldToVesselMatrix);
+                    AirbreathingEngineCrossSectionAdjuster engineAdjuster = new AirbreathingEngineCrossSectionAdjuster(engines, worldToVesselMatrix);
                     crossSectionAdjusters.Add(engineAdjuster);
                 }
             }

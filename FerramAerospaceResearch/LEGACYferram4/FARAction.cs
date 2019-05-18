@@ -141,7 +141,7 @@ namespace ferram4
             }
         }
 
-        public static void SaveConfigruration()
+        public static void SaveConfiguration()
         {
             PluginConfiguration config = FARDebugAndSettings.config;
             for (int i = 0; i < ACTION_COUNT; ++i)

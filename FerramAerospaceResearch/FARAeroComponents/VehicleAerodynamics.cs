@@ -826,7 +826,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             foreach (ICrossSectionAdjuster adjuster in activeAdjusters)
             {
-                if (adjuster is AirbreathingEngineCrossSectonAdjuster)
+                if (adjuster is AirbreathingEngineCrossSectionAdjuster)
                     engineExitArea += Math.Abs(adjuster.AreaRemovedFromCrossSection());
                 if (adjuster is IntakeCrossSectionAdjuster)
                     intakeArea += Math.Abs(adjuster.AreaRemovedFromCrossSection());
@@ -1062,9 +1062,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             double finenessRatio = _sectionThickness * numSections * 0.5 * invMaxRadFactor;       //vehicle length / max diameter, as calculated from sect thickness * num sections / (2 * max radius)
 
-            int extraLowFinessRatioDerivSmoothingPasses = (int)Math.Round((5f - finenessRatio) * 0.5f) * FARSettingsScenarioModule.Settings.numDerivSmoothingPasses;
-            if (extraLowFinessRatioDerivSmoothingPasses < 0)
-                extraLowFinessRatioDerivSmoothingPasses = 0;
+            int extraLowFinenessRatioDerivSmoothingPasses = (int)Math.Round((5f - finenessRatio) * 0.5f) * FARSettingsScenarioModule.Settings.numDerivSmoothingPasses;
+            if (extraLowFinenessRatioDerivSmoothingPasses < 0)
+                extraLowFinenessRatioDerivSmoothingPasses = 0;
 
             int extraAreaSmoothingPasses = (int)Math.Round((gridFillednessFactor / 25.0 - 0.5) * 4.0);
             if (extraAreaSmoothingPasses < 0)
@@ -1075,7 +1075,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             AdjustCrossSectionForAirDucting(_vehicleCrossSection, _currentGeoModules, front, back, ref _maxCrossSectionArea);
 
-            GaussianSmoothCrossSections(_vehicleCrossSection, stdDevCutoff, FARSettingsScenarioModule.Settings.gaussianVehicleLengthFractionForSmoothing, _sectionThickness, _length, front, back, FARSettingsScenarioModule.Settings.numAreaSmoothingPasses + extraAreaSmoothingPasses, FARSettingsScenarioModule.Settings.numDerivSmoothingPasses + extraLowFinessRatioDerivSmoothingPasses);
+            GaussianSmoothCrossSections(_vehicleCrossSection, stdDevCutoff, FARSettingsScenarioModule.Settings.gaussianVehicleLengthFractionForSmoothing, _sectionThickness, _length, front, back, FARSettingsScenarioModule.Settings.numAreaSmoothingPasses + extraAreaSmoothingPasses, FARSettingsScenarioModule.Settings.numDerivSmoothingPasses + extraLowFinenessRatioDerivSmoothingPasses);
 
             CalculateSonicPressure(_vehicleCrossSection, front, back, _sectionThickness);
 
@@ -1148,14 +1148,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 FARFloatCurve xForcePressureAoA180 = currentSection.xForcePressureAoA180;
                 FARFloatCurve xForceSkinFriction = currentSection.xForceSkinFriction;
 
-                //Potential and Viscous lift calcs
+                //Potential and Viscous lift calculations
                 float potentialFlowNormalForce;
                 if (i == 0)
                     potentialFlowNormalForce = (float)(nextArea - curArea);
                 else if (i == numSections)
                     potentialFlowNormalForce = (float)(curArea - prevArea);
                 else
-                    potentialFlowNormalForce = (float)(nextArea - prevArea) * 0.5f;      //calcualted from area change
+                    potentialFlowNormalForce = (float)(nextArea - prevArea) * 0.5f;      //calculated from area change
 
                 float areaChangeMax = (float)Math.Min(Math.Min(nextArea, prevArea) * 0.1, _length * 0.01);
 
@@ -1383,9 +1383,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
                 float viscCrossflowDrag = (float)(Math.Sqrt(curArea / Math.PI) * _sectionThickness * 2d);
 
-                xForceSkinFriction.SetPoint(0, new Vector3d(0, (surfaceArea * viscousDragFactor), 0));   //subsonic incomp visc drag
-                xForceSkinFriction.SetPoint(1, new Vector3d(1, (surfaceArea * viscousDragFactor), 0));   //transonic visc drag
-                xForceSkinFriction.SetPoint(2, new Vector3d(2, (float)surfaceArea, 0));                     //above Mach 1.4, visc is purely surface drag, no pressure-related components simulated
+                xForceSkinFriction.SetPoint(0, new Vector3d(0, (surfaceArea * viscousDragFactor), 0));   //subsonic incompressible viscous drag
+                xForceSkinFriction.SetPoint(1, new Vector3d(1, (surfaceArea * viscousDragFactor), 0));   //transonic viscous drag
+                xForceSkinFriction.SetPoint(2, new Vector3d(2, (float)surfaceArea, 0));                     //above Mach 1.4, viscous is purely surface drag, no pressure-related components simulated
 
                 currentSection.UpdateAeroSection(potentialFlowNormalForce, viscCrossflowDrag
                     , viscCrossflowDrag / (float)(_sectionThickness), (float)flatnessRatio, hypersonicMomentForward, hypersonicMomentBackward,

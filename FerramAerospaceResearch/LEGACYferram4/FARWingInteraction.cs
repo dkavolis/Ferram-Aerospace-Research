@@ -220,7 +220,7 @@ namespace ferram4
             ClInterferenceFactor = ClCdInterference;
         }
 
-        //This updates the interactions of all wings near this one; call this one when somethign changes rather than all of them at once
+        //This updates the interactions of all wings near this one; call this one when something changes rather than all of them at once
         // ReSharper disable once UnusedMember.Global
         public HashSet<FARWingAerodynamicModel> UpdateNearbyWingInteractions(HashSet<FARWingAerodynamicModel> wingsHandled)
         {
@@ -290,7 +290,7 @@ namespace ferram4
 
         private double WingInterference(Vector3 rayDirection, List<Part> PartList, float dist)
         {
-            double interferencevalue = 1;
+            double interferenceValue = 1;
 
             Ray ray = new Ray
             {
@@ -331,7 +331,7 @@ namespace ferram4
                                     tmp = tmp.Clamp(0, 1);
                                     double tmp2 = Math.Abs(Vector3.Dot(parentWingPart.partTransform.forward, w.part.partTransform.forward));
                                     tmp               = 1 - (1 - tmp) * tmp2;
-                                    interferencevalue = Math.Min(tmp, interferencevalue);
+                                    interferenceValue = Math.Min(tmp, interferenceValue);
                                     gotSomething      = true;
 
                                     break;
@@ -342,7 +342,7 @@ namespace ferram4
                     }
                 }
             }
-            return interferencevalue;
+            return interferenceValue;
         }
 
         #region StandardWingExposureDetection

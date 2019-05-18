@@ -34,7 +34,7 @@ namespace FerramAerospaceResearch.RealChuteLite
         #endregion
 
         #region Methods
-        //Retreives an "apparent" diameter from a DragCube
+        //Retrieves an "apparent" diameter from a DragCube
         private static float GetApparentDiameter(DragCube cube)
         {
             float area = 0;

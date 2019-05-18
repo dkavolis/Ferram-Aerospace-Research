@@ -238,14 +238,14 @@ namespace FerramAerospaceResearch
                 else
                     condition4 = false;
 
-                bool conditon5;
+                bool condition5;
 
                 if (!flag && c_d <= delta)
-                    conditon5 = true;
+                    condition5 = true;
                 else
-                    conditon5 = false;
+                    condition5 = false;
 
-                if (condition1 || condition2 || condition3 || condition4 || conditon5)
+                if (condition1 || condition2 || condition3 || condition4 || condition5)
                 {
                     s = a + b;
                     s *= 0.5;

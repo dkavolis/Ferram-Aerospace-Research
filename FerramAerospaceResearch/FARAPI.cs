@@ -387,7 +387,7 @@ namespace FerramAerospaceResearch
         /// <param name="vessel">Vessel in question</param>
         /// <param name="aeroForce">Total aerodynamic force at CoM, in kN</param>
         /// <param name="aeroTorque">Total aerodynamic torque at CoM, in kN * m</param>
-        /// <param name="velocityWorldVector">Velocity vector in worldspace relative to the atmosphere for CURRENT vessel orientation, m/s</param>
+        /// <param name="velocityWorldVector">Velocity vector in world space relative to the atmosphere for CURRENT vessel orientation, m/s</param>
         /// <param name="altitude">Vessel altitude, in m</param>
         public static void CalculateVesselAeroForces(Vessel vessel, out Vector3 aeroForce, out Vector3 aeroTorque, Vector3 velocityWorldVector, double altitude)
         {

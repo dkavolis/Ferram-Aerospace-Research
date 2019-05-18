@@ -473,7 +473,7 @@ namespace FerramAerospaceResearch.RealChuteLite
             print("[RealChute]: " + part.partInfo.name + " was activated in stage " + part.inverseStage);
         }
 
-        //Deactiates the parachute
+        //Deactivates the parachute
         public void DeactivateRC()
         {
             staged = false;
@@ -481,7 +481,7 @@ namespace FerramAerospaceResearch.RealChuteLite
         }
 
         //Copies stats from the info window to the symmetry counterparts
-        private void CopyToCouterparts()
+        private void CopyToCounterparts()
         {
             foreach (Part p in part.symmetryCounterparts)
             {
@@ -800,7 +800,7 @@ namespace FerramAerospaceResearch.RealChuteLite
             b.AppendLine(Localizer.Format("RCLGUI2", part.TotalMass().ToString("F3")));
             GUILayout.Label(b.ToString());
 
-            //Beggining scroll
+            //Beginning scroll
             scroll = GUILayout.BeginScrollView(scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box);
             GUILayout.Space(5);
             GUILayout.Label(Localizer.Format("RCLGUI3"), BoldLabel, GUILayout.Width(120));
@@ -869,7 +869,7 @@ namespace FerramAerospaceResearch.RealChuteLite
             //Copy button if in flight
             if (HighLogic.LoadedSceneIsFlight && part.symmetryCounterparts.Count > 0)
             {
-                CenteredButton(Localizer.Format("RCLGUICopy"), CopyToCouterparts);
+                CenteredButton(Localizer.Format("RCLGUICopy"), CopyToCounterparts);
             }
 
             //Close button

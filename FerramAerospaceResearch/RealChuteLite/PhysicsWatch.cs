@@ -15,7 +15,7 @@ namespace FerramAerospaceResearch.RealChuteLite
     {
         #region Constants
         /// <summary>
-        /// The amound of ticks in a second
+        /// The amount of ticks in a second
         /// </summary>
         private const long ticksPerSecond = 10000000L;
 

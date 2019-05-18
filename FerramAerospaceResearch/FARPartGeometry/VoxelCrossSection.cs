@@ -55,10 +55,10 @@ namespace FerramAerospaceResearch.FARPartGeometry
         public double flatnessRatio;            //ratio of the longest distance to shortest distance of the cross-section.  Used in calculating body lift and drag
         public Vector3d flatNormalVector;       //unit vector indicating the direction perpendicular to the longest distance on the cross-section
 
-        //public double additionalUnshadowedArea;        //area added to this crosssection that has no area ahead of it
-        //public Vector3d additonalUnshadowedCentroid;     //centroid of unshadowedArea
+        //public double additionalUnshadowedArea;        //area added to this cross section that has no area ahead of it
+        //public Vector3d additionalUnshadowedCentroid;     //centroid of unshadowedArea
 
-        //public double removedArea;               //area removed from this particular crosssection, compared to the one in front of it
+        //public double removedArea;               //area removed from this particular cross section, compared to the one in front of it
         //public Vector3d removedCentroid;          //centroid of removedArea
 
         public Dictionary<Part, SideAreaValues> partSideAreaValues;

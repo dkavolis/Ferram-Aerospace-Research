@@ -87,7 +87,7 @@
     <Compile Include="FARKSPAddonSpaceCenterScene.cs" />
     <Compile Include="FARPartExtensions.cs" />
     <Compile Include="FARPartGeometry\FARAnimOverrides.cs" />
-    <Compile Include="FARPartGeometry\GeometryModification\AirbreathingEngineCrossSectonAdjuster.cs" />
+    <Compile Include="FARPartGeometry\GeometryModification\AirbreathingEngineCrossSectionAdjuster.cs" />
     <Compile Include="FARPartGeometry\GeometryModification\CompoundPartGeoUpdater.cs" />
     <Compile Include="FARPartGeometry\GeometryModification\ICrossSectionAdjuster.cs" />
     <Compile Include="FARPartGeometry\GeometryModification\IntakeCrossSectionAdjuster.cs" />

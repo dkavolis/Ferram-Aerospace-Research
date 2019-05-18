@@ -84,7 +84,7 @@ namespace FerramAerospaceResearch.FARGUI
             FARGUIDropDownDisplay display = FARGUIDropDownDisplay.Instance;
             toggleBtnState = GUILayout.Toggle(toggleBtnState, "▼ " + stringOptions[selectedOption] + " ▼", toggleBtnStyle, guiOptions);
 
-            // Calcuate absolute regions for the button and dropdown list, this only works when
+            // Calculate absolute regions for the button and dropdown list, this only works when
             // Event.current.type == EventType.Repaint
             Vector2 relativePos = GUIUtility.GUIToScreenPoint(new Vector2(0, 0));
             Rect btnRect = GUILayoutUtility.GetLastRect();
@@ -99,7 +99,7 @@ namespace FerramAerospaceResearch.FARGUI
             }
             else if (isActive && (!toggleBtnState || !display.ContainsMouse()))
             {
-                // User deactivated the downdown or moved the mouse cursor away
+                // User deactivated the dropdown or moved the mouse cursor away
                 HideList();
             }
         }

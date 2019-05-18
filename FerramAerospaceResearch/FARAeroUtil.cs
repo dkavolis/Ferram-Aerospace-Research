@@ -303,7 +303,7 @@ namespace FerramAerospaceResearch
             get{
                 if (prandtlMeyerMach == null)
                 {
-                    FARLogger.Info("Prandlt-Meyer Expansion Curves Initialized");
+                    FARLogger.Info("Prandtl-Meyer Expansion Curves Initialized");
                     prandtlMeyerMach = new FloatCurve();
                     prandtlMeyerAngle = new FloatCurve();
                     double M = 1;
@@ -357,7 +357,7 @@ namespace FerramAerospaceResearch
             {
                 if (prandtlMeyerAngle == null)
                 {
-                    FARLogger.Info("Prandlt-Meyer Expansion Curves Initialized");
+                    FARLogger.Info("Prandtl-Meyer Expansion Curves Initialized");
                     prandtlMeyerMach = new FloatCurve();
                     prandtlMeyerAngle = new FloatCurve();
                     double M = 1;
