@@ -408,8 +408,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 double cosHalfAoA = Math.Sqrt(0.5 + 0.5 * Math.Abs(cosAoA));
 
 
-                double nForce;
-                nForce = potentialFlowNormalForce * Math.Sign(cosAoA) * cosHalfAoA * sin2AoA; //potential flow normal force
+                //potential flow normal force
+                double nForce = potentialFlowNormalForce * Math.Sign(cosAoA) * cosHalfAoA * sin2AoA;
                 if (nForce < 0)                                                               //potential flow is not significant over the rear face of things
                     nForce = 0;
 
@@ -422,9 +422,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 normalForceFactor = invFlatnessRatio * (1 - normalForceFactor) + flatnessRatio * normalForceFactor; //accounts for changes in relative flatness of shape
 
 
-                float crossFlowMach, crossFlowReynolds;
-                crossFlowMach     = machNumber * (float)sinAoA;
-                crossFlowReynolds = reynoldsPerUnitLength * diameter * (float)sinAoA / normalForceFactor;
+                float crossFlowMach = machNumber * (float)sinAoA;
+                float crossFlowReynolds = reynoldsPerUnitLength * diameter * (float)sinAoA / normalForceFactor;
 
                 nForce += viscCrossflowDrag * sinSqrAoA * CalculateCrossFlowDrag(crossFlowMach, crossFlowReynolds); //viscous crossflow normal force
 

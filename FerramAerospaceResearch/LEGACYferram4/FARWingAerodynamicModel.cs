@@ -205,8 +205,7 @@ namespace ferram4
             {
                 if (p == null)
                     continue;
-                FARWingAerodynamicModel model;
-                model = this is FARControllableSurface ? p.Modules.GetModule<FARControllableSurface>() : p.Modules.GetModule<FARWingAerodynamicModel>();
+                FARWingAerodynamicModel model = this is FARControllableSurface ? p.Modules.GetModule<FARControllableSurface>() : p.Modules.GetModule<FARWingAerodynamicModel>();
 
                 ++counterpartsCount;
                 sum             += model.NUFAR_areaExposedFactor;
@@ -223,8 +222,7 @@ namespace ferram4
             {
                 if (p == null)
                     continue;
-                FARWingAerodynamicModel model;
-                model = this is FARControllableSurface ? p.Modules.GetModule<FARControllableSurface>() : p.Modules.GetModule<FARWingAerodynamicModel>();
+                FARWingAerodynamicModel model = this is FARControllableSurface ? p.Modules.GetModule<FARControllableSurface>() : p.Modules.GetModule<FARWingAerodynamicModel>();
 
                 model.NUFAR_areaExposedFactor      = sum;
                 model.NUFAR_totalExposedAreaFactor = totalExposedSum;
@@ -558,14 +556,14 @@ namespace ferram4
                     Vector3d velocity = rb.GetPointVelocity(CurWingCentroid) + Krakensbane.GetFrameVelocity()
                         - FARWind.GetWind(FlightGlobals.currentMainBody, part, rb.position);
 
-                    double machNumber, v_scalar = velocity.magnitude;
+                    double v_scalar = velocity.magnitude;
 
                     if (partVessel.mainBody.ocean)
                         rho = (partVessel.mainBody.oceanDensity * 1000 * part.submergedPortion + part.atmDensity * (1 - part.submergedPortion));
                     else
                         rho = part.atmDensity;
 
-                    machNumber = partVessel.mach;
+                    double machNumber = partVessel.mach;
                     if (rho > 0 && v_scalar > 0.1)
                     {
                         double AoA = CalculateAoA(velocity);
@@ -577,9 +575,8 @@ namespace ferram4
                         if(part.submergedPortion > 0)
                         {
                             Vector3 velNorm = velocity / v_scalar;
-                            Vector3 worldSpaceDragForce, worldSpaceLiftForce;
-                            worldSpaceDragForce = Vector3.Dot(velNorm, force) * velNorm;
-                            worldSpaceLiftForce = worldSpaceForce - worldSpaceDragForce;
+                            Vector3 worldSpaceDragForce = Vector3.Dot(velNorm, force) * velNorm;
+                            Vector3 worldSpaceLiftForce = worldSpaceForce - worldSpaceDragForce;
 
                             Vector3 waterDragForce, waterLiftForce;
                             if (part.submergedPortion < 1)
@@ -735,8 +732,7 @@ namespace ferram4
 
             //Throw AoA into lifting line theory and adjust for part exposure and compressibility effects
 
-            double skinFrictionDrag;
-            skinFrictionDrag = HighLogic.LoadedSceneIsFlight ? FARAeroUtil.SkinFrictionDrag(density, effective_MAC, v_scalar, MachNumber, vessel.externalTemperature, vessel.mainBody.atmosphereAdiabaticIndex) : 0.005;
+            double skinFrictionDrag = HighLogic.LoadedSceneIsFlight ? FARAeroUtil.SkinFrictionDrag(density, effective_MAC, v_scalar, MachNumber, vessel.externalTemperature, vessel.mainBody.atmosphereAdiabaticIndex) : 0.005;
 
 
             skinFrictionDrag *= 1.1;    //account for thickness
@@ -874,12 +870,11 @@ namespace ferram4
             ClIncrementFromRear = 0;
 
             rawAoAmax = CalculateAoAmax(MachNumber);
-            double effectiveUpstreamInfluence;
 
             liftslope = rawLiftSlope;
             wingInteraction.UpdateOrientationForInteraction(ParallelInPlaneLocal);
             wingInteraction.CalculateEffectsOfUpstreamWing(AoA, MachNumber, ParallelInPlaneLocal, ref ACweight, ref ACshift, ref ClIncrementFromRear);
-            effectiveUpstreamInfluence = wingInteraction.EffectiveUpstreamInfluence;
+            double effectiveUpstreamInfluence = wingInteraction.EffectiveUpstreamInfluence;
 
             if (effectiveUpstreamInfluence > 0)
             {
@@ -995,8 +990,7 @@ namespace ferram4
 
                 double supersonicLENormalForceFactor = CalculateSupersonicLEFactor(beta, TanSweep, beta_TanSweep);
 
-                double normalForce;
-                normalForce = GetSupersonicPressureDifference(MachNumber, AoA);
+                double normalForce = GetSupersonicPressureDifference(MachNumber, AoA);
 //                double SinAoA = Math.Sin(AoA);
                 //Cl = coefMult * (normalForce * CosAoA * Math.Sign(AoA) * sonicLEFactor - axialForce * SinAoA);
                 //Cd = coefMult * (Math.Abs(normalForce * SinAoA) * sonicLEFactor + axialForce * CosAoA);
@@ -1043,8 +1037,7 @@ namespace ferram4
                 double supersonicLENormalForceFactor = CalculateSupersonicLEFactor(beta, TanSweep, beta_TanSweep);
 
                 //supScale = 1 - supScale; //Adjust for supersonic code
-                double normalForce;
-                normalForce = GetSupersonicPressureDifference(M, AoA);
+                double normalForce = GetSupersonicPressureDifference(M, AoA);
 
                 double supersonicLiftSlope = coefMult * normalForce * supersonicLENormalForceFactor * supScale;
                 finalLiftSlope += supersonicLiftSlope;
@@ -1129,8 +1122,6 @@ namespace ferram4
 
         private double GetSupersonicPressureDifference(double M, double AoA)
         {
-            double pRatio;
-
             double maxSinBeta = FARAeroUtil.CalculateSinMaxShockAngle(M, FARAeroUtil.CurrentBody.atmosphereAdiabaticIndex);//GetBetaMax(M) * FARMathUtil.deg2rad;
             double minSinBeta = 1 / M;
 
@@ -1140,21 +1131,21 @@ namespace ferram4
 
             double angle1 = halfAngle - AbsAoA;                  //Region 1 is the upper surface ahead of the max thickness
             double M1;
-            double p1;       //pressure ratio wrt to freestream pressure
-            p1 = angle1 >= 0 ? ShockWaveCalculation(angle1, M, out M1, maxSinBeta, minSinBeta) : PMExpansionCalculation(Math.Abs(angle1), M, out M1);
+            //pressure ratio wrt to freestream pressure
+            double p1 = angle1 >= 0 ? ShockWaveCalculation(angle1, M, out M1, maxSinBeta, minSinBeta) : PMExpansionCalculation(Math.Abs(angle1), M, out M1);
 
             //Region 2 is the upper surface behind the max thickness
             double p2 = PMExpansionCalculation(2 * halfAngle, M1) * p1;
 
             double angle3 = halfAngle + AbsAoA;                  //Region 3 is the lower surface ahead of the max thickness
-            double p3;       //pressure ratio wrt to freestream pressure
-            p3 = ShockWaveCalculation(angle3, M, out double M3, maxSinBeta, minSinBeta);
+            //pressure ratio wrt to freestream pressure
+            double p3 = ShockWaveCalculation(angle3, M, out double M3, maxSinBeta, minSinBeta);
 
             //Region 4 is the lower surface behind the max thickness
             double p4 = PMExpansionCalculation(2 * halfAngle, M3) * p3;
 
             //FARLogger.Info("" + p1 + " " + p2 + " " + p3 + " " + p4);
-            pRatio = ((p3 + p4) - (p1 + p2)) * 0.5;
+            double pRatio = ((p3 + p4) - (p1 + p2)) * 0.5;
 
             return pRatio;
         }
@@ -1198,10 +1189,7 @@ namespace ferram4
             }
             outM = FARAeroUtil.PrandtlMeyerAngle.Evaluate((float)nu2);
 
-            double ratio;
-
-            ratio = FARAeroUtil.StagnationPressureCalc(inM) / FARAeroUtil.StagnationPressureCalc(outM);
-            return ratio;
+            return FARAeroUtil.StagnationPressureCalc(inM) / FARAeroUtil.StagnationPressureCalc(outM);
         }
 
         //Calculates pressure ratio due to turning a supersonic flow through a Prandtl-Meyer Expansion
@@ -1219,10 +1207,7 @@ namespace ferram4
             }
             float outM = FARAeroUtil.PrandtlMeyerAngle.Evaluate((float)nu2);
 
-            double ratio;
-
-            ratio = FARAeroUtil.StagnationPressureCalc(inM) / FARAeroUtil.StagnationPressureCalc(outM);
-            return ratio;
+            return FARAeroUtil.StagnationPressureCalc(inM) / FARAeroUtil.StagnationPressureCalc(outM);
         }
 
         #endregion
@@ -1248,13 +1233,11 @@ namespace ferram4
         //Calculates subsonic liftslope
         private double CalculateSubsonicLiftSlope(double MachNumber)
         {
-            double sweepHalfChord;
-
             double CosPartAngle = Vector3.Dot(sweepPerpLocal, ParallelInPlaneLocal).Clamp(-1, 1);
             double tmp = Vector3.Dot(sweepPerp2Local, ParallelInPlaneLocal).Clamp(-1, 1);
 
             //Based on perp vector find which line is the right one
-            sweepHalfChord = Math.Abs(CosPartAngle) > Math.Abs(tmp) ? CosPartAngle : tmp;
+            double sweepHalfChord = Math.Abs(CosPartAngle) > Math.Abs(tmp) ? CosPartAngle : tmp;
 
             //if (sweepHalfChord > Math.PI * 0.5)
             //    sweepHalfChord -= Math.PI;

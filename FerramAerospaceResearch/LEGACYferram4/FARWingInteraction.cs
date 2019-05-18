@@ -537,10 +537,8 @@ namespace ferram4
         public void CalculateEffectsOfUpstreamWing(double thisWingAoA, double thisWingMachNumber, Vector3d parallelInPlaneLocal,
             ref double ACweight, ref double ACshift, ref double ClIncrementFromRear)
         {
-            double thisWingMAC, thisWingb_2;
-
-            thisWingMAC = parentWingModule.GetMAC();
-            thisWingb_2 = parentWingModule.Getb_2();
+            double thisWingMAC = parentWingModule.GetMAC();
+            double thisWingb_2 = parentWingModule.Getb_2();
 
             EffectiveUpstreamMAC = 0;
             EffectiveUpstreamb_2 = 0;

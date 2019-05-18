@@ -61,11 +61,9 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         public override float GetSize()
         {
-            int x, y, z;
-
-            x = xPlaneUp + xPlaneDown;
-            y = yPlaneUp + yPlaneDown;
-            z = zPlaneUp + zPlaneDown;
+            int x = xPlaneUp + xPlaneDown;
+            int y = yPlaneUp + yPlaneDown;
+            int z = zPlaneUp + zPlaneDown;
 
             if (x > LENGTH_OF_VOXEL)
                 x -= LENGTH_OF_VOXEL;

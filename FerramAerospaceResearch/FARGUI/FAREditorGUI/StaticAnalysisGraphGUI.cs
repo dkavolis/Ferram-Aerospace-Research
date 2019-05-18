@@ -217,25 +217,23 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
                 input.pitchSetting = Regex.Replace(input.pitchSetting, @"[^-?[0-9]*(\.[0-9]*)?]", "");
                 input.otherInput = Regex.Replace(input.otherInput, @"[^-?[0-9]*(\.[0-9]*)?]", "");
 
-                double lowerBound, upperBound, numPts, pitchSetting, otherInput;
-
-                lowerBound = double.Parse(input.lowerBound);
+                double lowerBound = double.Parse(input.lowerBound);
                 lowerBound = lowerBound.Clamp(-90, 90);
                 input.lowerBound = lowerBound.ToString(CultureInfo.InvariantCulture);
 
-                upperBound = double.Parse(input.upperBound);
+                double upperBound = double.Parse(input.upperBound);
                 upperBound = upperBound.Clamp(lowerBound, 90);
                 input.upperBound = upperBound.ToString(CultureInfo.InvariantCulture);
 
-                numPts = double.Parse(input.numPts);
+                double numPts = double.Parse(input.numPts);
                 numPts = Math.Ceiling(numPts);
                 input.numPts = numPts.ToString(CultureInfo.InvariantCulture);
 
-                pitchSetting = double.Parse(input.pitchSetting);
+                double pitchSetting = double.Parse(input.pitchSetting);
                 pitchSetting = pitchSetting.Clamp(-1, 1);
                 input.pitchSetting = pitchSetting.ToString(CultureInfo.InvariantCulture);
 
-                otherInput = double.Parse(input.otherInput);
+                double otherInput = double.Parse(input.otherInput);
 
                 var sim = simManager.SweepSim;
                 if (sim.IsReady())

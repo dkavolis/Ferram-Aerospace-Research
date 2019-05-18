@@ -298,16 +298,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
             FARCenterQuery center = new FARCenterQuery();
             FARCenterQuery dummy = new FARCenterQuery();
 
-            float pressure;
-            float density;
-            float temperature;
-            float speedOfSound;
-
             CelestialBody body = vessel.mainBody;      //Calculate main gas properties
-            pressure = (float)body.GetPressure(altitude);
-            temperature = (float)body.GetTemperature(altitude);
-            density = (float)body.GetDensity(pressure, temperature);
-            speedOfSound = (float)body.GetSpeedOfSound(pressure, density);
+            float pressure = (float)body.GetPressure(altitude);
+            float temperature = (float)body.GetTemperature(altitude);
+            float density = (float)body.GetDensity(pressure, temperature);
+            float speedOfSound = (float)body.GetSpeedOfSound(pressure, density);
 
             if(pressure <= 0 || temperature <= 0 || density <= 0 || speedOfSound <= 0)
             {

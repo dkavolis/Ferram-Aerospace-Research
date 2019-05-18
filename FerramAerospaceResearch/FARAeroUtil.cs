@@ -246,8 +246,7 @@ namespace FerramAerospaceResearch
         {
             double gamma = CurrentBody.atmosphereAdiabaticIndex;
 
-            double ratio;
-            ratio = M * M;
+            double ratio = M * M;
             ratio *= (gamma - 1);
             ratio *= 0.5;
             ratio++;
@@ -262,8 +261,8 @@ namespace FerramAerospaceResearch
                 return StagnationPressureCalc(M);
 
             double gamma = CurrentBody.atmosphereAdiabaticIndex;
-            double value;
-            value = (gamma + 1) * M;                  //Rayleigh Pitot Tube Formula; gives max stagnation pressure behind shock
+            //Rayleigh Pitot Tube Formula; gives max stagnation pressure behind shock
+            double value = (gamma + 1) * M;
             value *= value;
             value /= (4 * gamma * M * M - 2 * (gamma - 1));
             value = Math.Pow(value, gamma / (gamma - 1));
@@ -278,8 +277,7 @@ namespace FerramAerospaceResearch
         {
             double gamma = CurrentBody.atmosphereAdiabaticIndex;
 
-            double ratio;
-            ratio = M * M;
+            double ratio = M * M;
             ratio *= 2 * gamma;
             ratio -= (gamma - 1);
             ratio /= (gamma + 1);
@@ -292,8 +290,7 @@ namespace FerramAerospaceResearch
         {
             double gamma = CurrentBody.atmosphereAdiabaticIndex;
 
-            double ratio;
-            ratio = (gamma - 1);
+            double ratio = (gamma - 1);
             ratio *= M * M;
             ratio += 2;
             ratio /= (2 * gamma * M * M - (gamma - 1));

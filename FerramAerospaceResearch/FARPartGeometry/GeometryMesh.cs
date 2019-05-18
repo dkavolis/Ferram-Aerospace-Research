@@ -145,9 +145,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                 //bounds = TransformBounds(bounds, tempMatrix);
 
-                Vector3 low, high;
-                low = Vector3.one * float.PositiveInfinity;
-                high = Vector3.one * float.NegativeInfinity;
+                Vector3 low = Vector3.one * float.PositiveInfinity;
+                Vector3 high = Vector3.one * float.NegativeInfinity;
 
                 for (int i = 0; i < vertices.Length; i++)
                 {
@@ -190,9 +189,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private Bounds TransformBounds(Bounds oldBounds, Matrix4x4 matrix)
         {
-            Vector3 center, extents;
-            center = oldBounds.center; //matrix.MultiplyPoint3x4(m.bounds.center);
-            extents = oldBounds.extents; //matrix.MultiplyVector(m.bounds.size);
+            Vector3 center = oldBounds.center;
+            Vector3 extents = oldBounds.extents;
 
             Vector3 lower = Vector3.one * float.PositiveInfinity;
             Vector3 upper = Vector3.one * float.NegativeInfinity;

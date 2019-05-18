@@ -15,9 +15,8 @@ namespace FerramAerospaceResearch
             {
                 //Creates cubic from x,y,dy/dx data
 
-                double recipXDiff, recipXDiffSq;
-                recipXDiff = 1 / (lowerInputs.x - upperInputs.x);
-                recipXDiffSq = recipXDiff * recipXDiff;
+                double recipXDiff = 1 / (lowerInputs.x - upperInputs.x);
+                double recipXDiffSq = recipXDiff * recipXDiff;
 
                 a = 2 * (upperInputs.y - lowerInputs.y) * recipXDiff;
                 a += upperInputs.z + lowerInputs.z;
@@ -98,10 +97,8 @@ namespace FerramAerospaceResearch
             if (upperIndex <= lowerIndex)
                 return;
 
-            int nextIndex, prevIndex;
-
-            nextIndex = (upperIndex + curIndex + 1) / 2;
-            prevIndex = (lowerIndex + curIndex - 1) / 2;
+            int nextIndex = (upperIndex + curIndex + 1) / 2;
+            int prevIndex = (lowerIndex + curIndex - 1) / 2;
 
             sections[curIndex].nextIndex = nextIndex;
             sections[curIndex].prevIndex = prevIndex;

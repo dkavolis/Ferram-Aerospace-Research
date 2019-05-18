@@ -580,11 +580,9 @@ namespace ferram4
             MovableSection.localRotation = MovableOrig;
             if (!AoAoffset.NearlyEqual(0))
             {
-                Quaternion localRot;
-                localRot = flipAxis ? Quaternion.FromToRotation(deflectedNormal, new Vector3(0, 0, 1)) : Quaternion.FromToRotation(new Vector3(0, 0, 1), deflectedNormal);
+                Quaternion localRot = flipAxis ? Quaternion.FromToRotation(deflectedNormal, new Vector3(0, 0, 1)) : Quaternion.FromToRotation(new Vector3(0, 0, 1), deflectedNormal);
 
                 MovableSection.localRotation *= localRot;
-
             }
             CheckShielded();
         }

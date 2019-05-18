@@ -62,11 +62,9 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         public override float GetSize()
         {
-            int x, y, z;
-
-            x = (xPlane & DOWN_MASK) + (xPlane >> 4);
-            y = (yPlane & DOWN_MASK) + (yPlane >> 4);
-            z = (zPlane & DOWN_MASK) + (zPlane >> 4);
+            int x = (xPlane & DOWN_MASK) + (xPlane >> 4);
+            int y = (yPlane & DOWN_MASK) + (yPlane >> 4);
+            int z = (zPlane & DOWN_MASK) + (zPlane >> 4);
 
             if (x > LENGTH_OF_VOXEL)
                 x -= LENGTH_OF_VOXEL;

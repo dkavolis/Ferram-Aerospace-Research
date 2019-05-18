@@ -201,19 +201,16 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         public Part GetVoxelPartGlobalIndex(int zeroBaseIndex)
         {
-            Part p;
             int index = zeroBaseIndex - offset;
-            p = voxelPoints[index].part;
+            Part p = voxelPoints[index].part;
             return p;
         }
 
         // ReSharper disable once UnusedMember.Global
         public Part GetVoxelPartGlobalIndex(int i, int j, int k)
         {
-            Part p;
-
             int index = i + 8 * j + 64 * k - offset;
-            p = voxelPoints[index].part;
+            Part p = voxelPoints[index].part;
 
             return p;
         }

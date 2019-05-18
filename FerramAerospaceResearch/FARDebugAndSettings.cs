@@ -387,8 +387,6 @@ namespace FerramAerospaceResearch
 
             FARPartStressTemplate activeTemplate = FARAeroStress.StressTemplates[aeroStressIndex];
 
-            string tmp;
-
             GUIUtils.TextEntryField("Name:", 80, ref activeTemplate.name);
 
             activeTemplate.YmaxStress = GUIUtils.TextEntryForDouble("Axial (Y-axis) Max Stress:", 240, activeTemplate.YmaxStress);
@@ -396,7 +394,7 @@ namespace FerramAerospaceResearch
 
             activeTemplate.crewed = GUILayout.Toggle(activeTemplate.crewed, "Requires Crew Compartment");
 
-            tmp = activeTemplate.minNumResources.ToString();
+            string tmp = activeTemplate.minNumResources.ToString();
             GUIUtils.TextEntryField("Min Num Resources:", 80, ref tmp);
                         tmp = Regex.Replace(tmp, @"[^\d]", "");
             activeTemplate.minNumResources = Convert.ToInt32(tmp);

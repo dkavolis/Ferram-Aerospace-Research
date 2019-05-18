@@ -162,9 +162,8 @@ namespace FerramAerospaceResearch
         public static double BrentsMethod(Func<double, double> function, double a, double b, double epsilon = 0.001, int maxIter = int.MaxValue)
         {
             double delta = epsilon * 100;
-            double fa, fb;
-            fa = function(a);
-            fb = function(b);
+            double fa = function(a);
+            double fb = function(b);
 
             if (fa * fb >= 0)
                 return 0;

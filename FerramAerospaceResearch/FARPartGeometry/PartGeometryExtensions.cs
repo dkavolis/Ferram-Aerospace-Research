@@ -121,9 +121,8 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private static void EncapsulateBounds(ref Vector3 lower, ref Vector3 upper, Matrix4x4 matrix, Mesh mesh)
         {
-            Vector3 center, extents;
-            center = mesh.bounds.center;//matrix.MultiplyPoint3x4(m.bounds.center);
-            extents = mesh.bounds.extents;//matrix.MultiplyVector(m.bounds.size);
+            Vector3 center = mesh.bounds.center;
+            Vector3 extents = mesh.bounds.extents;
 
             TransformedPointBounds(matrix, center, +extents.x, +extents.y, +extents.z, ref lower, ref upper);
             TransformedPointBounds(matrix, center, +extents.x, +extents.y, -extents.z, ref lower, ref upper);
@@ -144,7 +143,6 @@ namespace FerramAerospaceResearch.FARPartGeometry
                 Transform t = transforms[i];
 
                 MeshCollider mc = t.GetComponent<MeshCollider>();
-                Mesh m;
                 Matrix4x4 matrix = worldToBasisMatrix * t.localToWorldMatrix;
 
                 if (mc == null)
@@ -158,7 +156,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
                     continue;
                 }
 
-                m = mc.sharedMesh;
+                Mesh m = mc.sharedMesh;
 
                 if (m == null)
                     continue;
@@ -204,8 +202,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
                     for (int j = 1; j < currentPartModuleTransforms.Count; ++j)
                     {
-                        string transformString;
-                        transformString = (string)module.GetType().GetField(currentPartModuleTransforms[j]).GetValue(module);
+                        string transformString = (string)module.GetType().GetField(currentPartModuleTransforms[j]).GetValue(module);
                         Transform.AddRange(string.IsNullOrEmpty(transformString)
                                                ? p.FindModelComponents<Transform>(transformString)
                                                : p.FindModelComponents<Transform>(currentPartModuleTransforms[j]));
@@ -235,8 +232,6 @@ namespace FerramAerospaceResearch.FARPartGeometry
             ModuleAsteroid asteroid = (ModuleAsteroid)p.Modules["ModuleAsteroid"];
             FieldInfo[] fields = asteroid.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-            PAsteroid procAsteroid;
-
             /*for (int i = 0; i < fields.Length; ++i)
             {
                 FieldInfo field = fields[i];
@@ -248,7 +243,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
                     break;
                 }
             }*/
-            procAsteroid = (PAsteroid)fields[2].GetValue(asteroid);
+            var procAsteroid = (PAsteroid)fields[2].GetValue(asteroid);
             GetChildTransforms(transformList, procAsteroid.gameObject.transform.Find(""));
 
             //FARLogger.Info("New transforms: " + count);

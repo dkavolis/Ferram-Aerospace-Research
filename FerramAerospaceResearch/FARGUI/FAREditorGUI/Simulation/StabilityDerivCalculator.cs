@@ -143,13 +143,12 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI.Simulation
                     continue;
                 //This section handles the parallel axis theorem
                 Vector3 relPos = p.transform.TransformPoint(p.CoMOffset) - CoM;
-                double  x2, y2, z2, x, y, z;
-                x2 = relPos.z * relPos.z;
-                y2 = relPos.x * relPos.x;
-                z2 = relPos.y * relPos.y;
-                x  = relPos.z;
-                y  = relPos.x;
-                z  = relPos.y;
+                double x2 = relPos.z * relPos.z;
+                double y2 = relPos.x * relPos.x;
+                double z2 = relPos.y * relPos.y;
+                double x = relPos.z;
+                double y = relPos.x;
+                double z = relPos.y;
 
                 double partMass = p.mass;
                 if (p.Resources.Count > 0)

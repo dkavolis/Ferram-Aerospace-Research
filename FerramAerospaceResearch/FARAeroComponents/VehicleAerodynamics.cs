@@ -461,9 +461,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 if (p == null || hitParts.Contains(p))
                     continue;
 
-                GeometryPartModule geoModule;
-
-                geoModule = p.Modules.GetModule<GeometryPartModule>(); // Could be left null if a launch clamp
+                // Could be left null if a launch clamp
+                var geoModule = p.Modules.GetModule<GeometryPartModule>();
 
                 hitParts.Add(p);
 
@@ -539,11 +538,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             if (hasPartsForAxis)
             {
-                float dotProdX, dotProdY, dotProdZ;
-
-                dotProdX = Math.Abs(Vector3.Dot(axis, Vector3.right));
-                dotProdY = Math.Abs(Vector3.Dot(axis, Vector3.up));
-                dotProdZ = Math.Abs(Vector3.Dot(axis, Vector3.forward));
+                float dotProdX = Math.Abs(Vector3.Dot(axis, Vector3.right));
+                float dotProdY = Math.Abs(Vector3.Dot(axis, Vector3.up));
+                float dotProdZ = Math.Abs(Vector3.Dot(axis, Vector3.forward));
 
                 if (dotProdY > 2 * dotProdX && dotProdY > 2 * dotProdZ)
                     return Vector3.up;
@@ -715,8 +712,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
         //Based on http://www.holoborodko.com/pavel/downloads/NoiseRobustSecondDerivative.pdf
         private unsafe void CalculateCrossSectionSecondDerivs(VoxelCrossSection[] vehicleCrossSection, int oneSidedFilterLength, int frontIndex, int backIndex, double sectionThickness)
         {
-            int M, N;
-
             if (oneSidedFilterLength < 2)
             {
                 oneSidedFilterLength = 2;
@@ -728,8 +723,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 ThreadSafeDebugLogger.Instance.RegisterMessage("Reducing filter length to prevent overflow");
             }
 
-            M = oneSidedFilterLength;
-            N = M * 2 + 1;
+            int M = oneSidedFilterLength;
+            int N = M * 2 + 1;
             long* sK = stackalloc long[M + 1];
             //double* areas = stackalloc double[N + 2];
 
@@ -741,9 +736,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             denom *= sectionThickness * sectionThickness;
             denom = 1 / denom;
 
-            int lowIndex, highIndex;
-            lowIndex = Math.Max(frontIndex - 1, 0);
-            highIndex = Math.Min(backIndex + 1, vehicleCrossSection.Length - 1);
+            int lowIndex = Math.Max(frontIndex - 1, 0);
+            int highIndex = Math.Min(backIndex + 1, vehicleCrossSection.Length - 1);
 
             for (int i = lowIndex + M; i <= highIndex - M; i++)
             {
@@ -1036,11 +1030,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private void CalculateVesselAeroProperties()
         {
-            int numSections;
-
             _voxel.CrossSectionData(_vehicleCrossSection, _vehicleMainAxis, out int front, out int back, out _sectionThickness, out _maxCrossSectionArea);
 
-            numSections = back - front;
+            int numSections = back - front;
             _length = _sectionThickness * numSections;
 
             double voxelVolume = _voxel.Volume;
@@ -1126,9 +1118,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
             {
                 int index = i + front;      //index along the actual body
 
-                double prevArea, curArea, nextArea;
+                double prevArea, nextArea;
 
-                curArea = _vehicleCrossSection[index].area;
+                double curArea = _vehicleCrossSection[index].area;
                 if (i == 0)
                     prevArea = 0;
                 else
@@ -1234,16 +1226,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
                 float sonicAoA0Drag, sonicAoA180Drag;
 
-                double cPSonicForward, cPSonicBackward;
-
-                cPSonicForward = _vehicleCrossSection[index].cpSonicForward;
+                double cPSonicForward = _vehicleCrossSection[index].cpSonicForward;
                 /*if (index > front)
                 {
                     cPSonicForward += _vehicleCrossSection[index - 1].cpSonicForward;
                     cPSonicForward *= 0.5;
                 }*/
 
-                cPSonicBackward = _vehicleCrossSection[index].cpSonicBackward;
+                double cPSonicBackward = _vehicleCrossSection[index].cpSonicBackward;
                 /*if (index < back)
                 {
                     cPSonicBackward += _vehicleCrossSection[index + 1].cpSonicBackward;
@@ -1512,9 +1502,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             if (lowArea >= highArea)
                 return 0;
 
-            double r1, r2;
-            r1 = Math.Sqrt(lowArea / Math.PI);
-            r2 = Math.Sqrt(highArea / Math.PI);
+            double r1 = Math.Sqrt(lowArea / Math.PI);
+            double r2 = Math.Sqrt(highArea / Math.PI);
 
             double moment = r2 * r2 + r1 * r1 + sectionThickness * sectionThickness * 0.5;
             moment *= 2 * Math.PI;
@@ -1623,14 +1612,12 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             double cutoff = maxCrossSection * 2;//Math.Min(maxCrossSection * 0.1, vehicleCrossSection[index].area * 0.25);
 
-            double tmp1;
-            tmp1 = indexSqrt[index - (front - 2)];
+            double tmp1 = indexSqrt[index - (front - 2)];
             for (int i = front - 1; i <= index; i++)
             {
-                double tmp;
                 //tmp2 = Math.Sqrt(tmp);
                 double tmp2 = indexSqrt[index - i];
-                tmp = tmp1 - tmp2;
+                double tmp = tmp1 - tmp2;
                 tmp1 = tmp2;
 
                 if (i >= 0)
@@ -1662,14 +1649,12 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             double cutoff = maxCrossSection * 2;//Math.Min(maxCrossSection * 0.1, vehicleCrossSection[index].area * 0.25);
 
-            double tmp1;
-            tmp1 = indexSqrt[back + 2 - index];
+            double tmp1 = indexSqrt[back + 2 - index];
             for (int i = back + 1; i >= index; i--)
             {
-                double tmp;
                 //tmp2 = Math.Sqrt(tmp);
                 double tmp2 = indexSqrt[i - index];
-                tmp = tmp1 - tmp2;
+                double tmp = tmp1 - tmp2;
                 tmp1 = tmp2;
 
                 if (i < vehicleCrossSection.Length)
@@ -1720,10 +1705,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private double CalcMaxCp(double mach)
         {
-
-            double cP90;
             double machSqr = mach * mach;
-            cP90 = 7.0 * machSqr - 1.0;
+            double cP90 = 7.0 * machSqr - 1.0;
             cP90 = Math.Pow(6.0 / cP90, 2.5);
             cP90 *= Math.Pow(1.2 * machSqr, 3.5);
             cP90--;
@@ -1750,13 +1733,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
             double uI = linCp * -0.5;
             double uO = AdjustVelForFinitePressure(-turnAngle / beta);
 
-            double machI, machO;
-            machI = machNumber * (1.0 + uI);
-            machO = machNumber * (1.0 + uO);
+            double machI = machNumber * (1.0 + uI);
+            double machO = machNumber * (1.0 + uO);
 
-            double nuI, nuO;
-            nuI = PrandtlMeyerExpansionAngle(machI, machNumber);
-            nuO = PrandtlMeyerExpansionAngle(machO, machNumber);
+            double nuI = PrandtlMeyerExpansionAngle(machI, machNumber);
+            double nuO = PrandtlMeyerExpansionAngle(machO, machNumber);
 
             double totalTurnAngle = turnAngle + nuO - nuI;
             return totalTurnAngle;
@@ -1824,9 +1805,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             if (lowArea >= highArea)
                 return 0;
 
-            double r1, r2;
-            r1 = Math.Sqrt(lowArea / Math.PI);
-            r2 = Math.Sqrt(highArea / Math.PI);
+            double r1 = Math.Sqrt(lowArea / Math.PI);
+            double r2 = Math.Sqrt(highArea / Math.PI);
 
             double radDiff = r2 - r1;
             double radDiffSq = radDiff * radDiff;

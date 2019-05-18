@@ -326,8 +326,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
             meshDataList = new List<GeometryMesh>();
 
-            Matrix4x4 worldToVesselMatrix;
-            worldToVesselMatrix = HighLogic.LoadedSceneIsFlight ? vessel.vesselTransform.worldToLocalMatrix : EditorLogic.RootPart.partTransform.worldToLocalMatrix;
+            Matrix4x4 worldToVesselMatrix = HighLogic.LoadedSceneIsFlight ? vessel.vesselTransform.worldToLocalMatrix : EditorLogic.RootPart.partTransform.worldToLocalMatrix;
             for (int i = 0; i < meshTransforms.Count; ++i)
             {
                 MeshData m = geometryMeshes[i];
@@ -460,8 +459,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private void SetupICrossSectionAdjusters()
         {
-            Matrix4x4 worldToVesselMatrix;
-            worldToVesselMatrix = HighLogic.LoadedSceneIsFlight ? vessel.vesselTransform.worldToLocalMatrix : EditorLogic.RootPart.partTransform.worldToLocalMatrix;
+            Matrix4x4 worldToVesselMatrix = HighLogic.LoadedSceneIsFlight ? vessel.vesselTransform.worldToLocalMatrix : EditorLogic.RootPart.partTransform.worldToLocalMatrix;
             crossSectionAdjusters = new List<ICrossSectionAdjuster>();
 
             string intakeType = "", engineType = "";
@@ -613,8 +611,7 @@ namespace FerramAerospaceResearch.FARPartGeometry
 
         private void UpdateShapeWithAnims()
         {
-            Matrix4x4 transformMatrix;
-            transformMatrix = HighLogic.LoadedSceneIsFlight ? vessel.vesselTransform.worldToLocalMatrix : EditorLogic.RootPart.partTransform.worldToLocalMatrix;
+            Matrix4x4 transformMatrix = HighLogic.LoadedSceneIsFlight ? vessel.vesselTransform.worldToLocalMatrix : EditorLogic.RootPart.partTransform.worldToLocalMatrix;
 
             UpdateTransformMatrixList(transformMatrix);
         }

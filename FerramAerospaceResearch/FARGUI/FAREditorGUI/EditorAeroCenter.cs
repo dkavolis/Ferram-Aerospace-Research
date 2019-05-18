@@ -75,9 +75,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
         private void UpdateAerodynamicCenter()
         {
-            FARCenterQuery aeroSection, dummy;
-            aeroSection = new FARCenterQuery();
-            dummy = new FARCenterQuery();
+            var aeroSection = new FARCenterQuery();
+            var dummy = new FARCenterQuery();
 
             if(EditorLogic.RootPart is null)
                 return;
@@ -117,9 +116,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
             Vector3 avgForcePos = Vector3.zero;
 
-            Vector3 force0, moment0;
-            force0 = aeroSection.force;
-            moment0 = aeroSection.TorqueAt(pos);
+            Vector3 force0 = aeroSection.force;
+            Vector3 moment0 = aeroSection.TorqueAt(pos);
             avgForcePos += aeroSection.GetPos();
 
             //aeroSection.force = -aeroSection.force;
@@ -136,9 +134,8 @@ namespace FerramAerospaceResearch.FARGUI.FAREditorGUI
 
             FARBaseAerodynamics.PrecomputeGlobalCenterOfLift(aeroSection, dummy, vel, 1);
 
-            Vector3 force1, moment1;
-            force1 = aeroSection.force;
-            moment1 = aeroSection.TorqueAt(pos);
+            Vector3 force1 = aeroSection.force;
+            Vector3 moment1 = aeroSection.TorqueAt(pos);
             avgForcePos += aeroSection.GetPos();
 
             aeroSection.ClearAll();

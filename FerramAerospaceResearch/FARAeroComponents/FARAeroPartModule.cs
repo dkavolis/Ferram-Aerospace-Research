@@ -475,9 +475,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             }
             else
             {
-                Vector3 worldSpaceDragForce, worldSpaceLiftForce;
-                worldSpaceDragForce = Vector3.Dot(worldSpaceVelNorm, worldSpaceAeroForce) * worldSpaceVelNorm;
-                worldSpaceLiftForce = worldSpaceAeroForce - worldSpaceDragForce;
+                Vector3 worldSpaceDragForce = Vector3.Dot(worldSpaceVelNorm, worldSpaceAeroForce) * worldSpaceVelNorm;
+                Vector3 worldSpaceLiftForce = worldSpaceAeroForce - worldSpaceDragForce;
 
                 Vector3 waterDragForce, waterLiftForce;
                 if (part.submergedPortion < 1)

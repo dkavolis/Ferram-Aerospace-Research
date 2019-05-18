@@ -240,10 +240,8 @@ namespace ferram4
 
         public void SetGridScaleUsingValues(double gridWidth, double gridHeight)
         {
-            int pixelWidth, pixelHeight;
-
-            pixelWidth = (int)Math.Round(((gridWidth * displayRect.width) / (bounds.y - bounds.x)));
-            pixelHeight = (int)Math.Round(((gridHeight * displayRect.height) / (bounds.w - bounds.z)));
+            int pixelWidth = (int)Math.Round(((gridWidth * displayRect.width) / (bounds.y - bounds.x)));
+            int pixelHeight = (int)Math.Round(((gridHeight * displayRect.height) / (bounds.w - bounds.z)));
 
             if (pixelWidth <= 1)
             {
@@ -300,11 +298,8 @@ namespace ferram4
 
         private void GridInit(int widthSize, int heightSize)
         {
-
-            int horizontalAxis, verticalAxis;
-
-            horizontalAxis = (int)Math.Round(-bounds.x * displayRect.width / (bounds.y - bounds.x));
-            verticalAxis = (int)Math.Round(-bounds.z * displayRect.height / (bounds.w - bounds.z));
+            int horizontalAxis = (int)Math.Round(-bounds.x * displayRect.width / (bounds.y - bounds.x));
+            int verticalAxis = (int)Math.Round(-bounds.z * displayRect.height / (bounds.w - bounds.z));
 
             for (int i = 0; i < graph.width; i++)
             {
