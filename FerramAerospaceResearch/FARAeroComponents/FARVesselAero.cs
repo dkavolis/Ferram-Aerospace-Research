@@ -77,6 +77,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             get { return _vehicleAero; }
         }
 
+        public VehicleOcclusion vehicleOcclusion { get; private set; }
+
         public double Length
         {
             get { return _vehicleAero.Length; }
@@ -132,6 +134,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 _currentGeoModules.Add(g);
             }
 
+            vehicleOcclusion = Vessel.gameObject.AddComponent<VehicleOcclusion>();
+            vehicleOcclusion.Setup(this);
+
             RequestUpdateVoxel(false);
 
             enabled = true;
@@ -183,6 +188,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
                                             out _unusedAeroModules,
                                             out _currentAeroSections,
                                             out _legacyWingModels);
+
+                if (vehicleOcclusion is null)
+                {
+                    vehicleOcclusion = Vessel.gameObject.AddComponent<VehicleOcclusion>();
+                    vehicleOcclusion.Setup(this);
+                }
+                vehicleOcclusion.Reset();
+                vehicleOcclusion.SetVehicleBounds(_vehicleAero.VoxelCenter, _vehicleAero.VoxelMeshExtents);
 
                 if (_flightGUI is null)
                     _flightGUI = vessel.GetComponent<FlightGUI>();

@@ -61,8 +61,143 @@ namespace FerramAerospaceResearch.FARAeroComponents
             ModularFlightIntegrator.RegisterCalculateAreaRadiativeOverride(CalculateAreaRadiative);
             ModularFlightIntegrator.RegisterGetSunAreaOverride(CalculateSunArea);
             ModularFlightIntegrator.RegisterGetBodyAreaOverride(CalculateBodyArea);
+            ModularFlightIntegrator.RegisterUpdateOcclusionOverride(UpdateOcclusion);
+            ModularFlightIntegrator.RegisterSetSkinProperties(SetSkinProperties);
             FARLogger.Info("Modular Flight Integrator function registration complete");
             Destroy(this);
+        }
+
+        // This is the primary consumer of DragCube.ExposedArea, so handling this ourselves may
+        // remove the need for any calculation gymnastics we were doing to not interfere with stock handling.
+        private static void SetSkinProperties(ModularFlightIntegrator fi, PartThermalData ptd)
+        {
+            Part part = ptd.part;
+            VehicleOcclusion occlusion = fi.Vessel.GetComponent<VehicleOcclusion>();
+            FARAeroPartModule aeroModule = part.Modules.Contains<FARAeroPartModule>() ? part.Modules.GetModule<FARAeroPartModule>() : null;
+
+            if (occlusion == null || aeroModule == null)
+            {
+                fi.BaseFIetSkinPropertie(ptd);
+                return;
+            }
+
+            part.skinUnexposedTemperature = Math.Max(part.skinTemperature, PhysicsGlobals.SpaceTemperature);
+
+            // This no longer has meaning.
+            double a = Math.Max(part.radiativeArea, 0.001);
+            ptd.radAreaRecip = 1.0 / Math.Max(part.radiativeArea, 0.001);
+
+//            Vector3 localForward = (part.vessel.transform.worldToLocalMatrix * part.vessel.transform.forward);
+//            Vector3 localVel = part.vessel.transform.worldToLocalMatrix * fi.Vel;
+            double areaFraction = 1.0;
+            if (!part.ShieldedFromAirstream && part.atmDensity > 0)
+            {
+                // Stock calculation:
+                //ptd.convectionArea = UtilMath.Lerp(a, part.exposedArea, -PhysicsGlobals.FullConvectionAreaMin + (fi.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / (PhysicsGlobals.FullToCrossSectionLerpEnd - PhysicsGlobals.FullToCrossSectionLerpStart)) * ptd.convectionAreaMultiplier;
+                // Note that part.exposedArea has some scaling based on the mach factor:
+                //float dot = Vector3.Dot(direction, faceDirection);
+                //float num2 = PhysicsGlobals.DragCurveValue(PhysicsGlobals.SurfaceCurves, ((dot + 1.0)/2), machNumber);
+                //retData.exposedArea += this.areaOccluded[index] * num2 / PhysicsGlobals.DragCurveMultiplier.Evaluate(machNumber)
+                // PhysicsGlobals.DragCurveValue scales its transsonic calcs by *= PhysicsGlobals.DragCubeMultiplier.Evaluate(machNumber)
+                // So thermal convection undoes -that- part of the scaling, but leaves:
+                /*
+                DRAG_TIP
+                {
+                    key = 0 1 0 0
+                    key = 0.85 1.19 0.6960422 0.6960422
+                    key = 1.1 2.83 0.730473 0.730473
+                    key = 5 4 0 0
+                }
+                Mach 1.1 - 5 has a multiplier from 2.83 to 4.  Mach 5+ has a multiplier of 4.
+                Does this make sense for convection heating?
+                */
+
+                // VehicleOcclusion's handler might need to be more careful about how it averages values.
+                // Otherwise parts behind same-size shields can tend towards very small convectionArea when it should probably be 0.
+                ptd.convectionArea = occlusion.ConvectionArea(part, fi.Vel);
+                ptd.convectionCoeffMultiplier = PhysicsGlobals.SurfaceCurves.dragCurveTip.Evaluate(Convert.ToSingle(fi.mach));
+
+                double totalAreaInDir = aeroModule.ProjectedAreaLocal(-part.dragVectorDirLocal);
+                double d = (totalAreaInDir > 0) ? ptd.convectionArea / totalAreaInDir : 0;
+                areaFraction = (!double.IsNaN(d) && d > 0.001) ? d : 0;
+                areaFraction = Math.Min(areaFraction, 1);
+            }
+            if (areaFraction > 0)
+            {
+                StockSkinTemperatureHandling(ptd, areaFraction);
+                ptd.exposed = true;
+                part.skinExposedAreaFrac = areaFraction;
+                //part.skinExposedArea = areaFraction * a;  This was stock, and seems incorrect.
+                part.skinExposedArea = ptd.convectionArea;
+            }
+            else
+            {
+                if (ptd.exposed)
+                    fi.UnifySkinTemp(ptd);
+                ptd.exposed = false;
+                ptd.convectionArea = part.skinExposedArea = part.skinUnexposedMassMult = 0.0;
+                part.skinExposedAreaFrac = part.skinExposedMassMult = 1.0;
+            }
+        }
+
+        private static void StockSkinTemperatureHandling(PartThermalData ptd, double areaFraction)
+        {
+            Part part = ptd.part;
+            if (!ptd.exposed || (ptd.exposed && areaFraction != 1.0))
+            {
+                part.skinUnexposedTemperature = part.skinTemperature;
+                ptd.exposed = true;
+            }
+            part.skinExposedMassMult = 1.0 / areaFraction;
+            if (areaFraction < 1.0)
+                part.skinUnexposedMassMult = 1.0 / (1.0 - areaFraction);
+            else
+                part.skinUnexposedMassMult = 0.0;
+
+            // If the area fraction has changed since last calculation
+            if (part.skinExposedAreaFrac != areaFraction)
+            {
+                if (part.skinUnexposedTemperature != part.skinTemperature &&
+                    part.skinExposedAreaFrac > 0.0 &&
+                    part.skinExposedAreaFrac < 1.0 &&
+                    areaFraction < 1.0)
+                {
+                    double unexposedAreaFrac = 1.0 - part.skinExposedAreaFrac;
+                    double thermalEnergyInExposedSkin = part.skinTemperature * part.skinExposedAreaFrac * part.skinThermalMass;
+                    double thermalEnergyInUnexposedSkin = part.skinUnexposedTemperature * unexposedAreaFrac * part.skinThermalMass;
+                    double dAreaFrac = areaFraction - part.skinExposedAreaFrac;
+                    double dThermalEnergy;
+                    if (dAreaFrac > 0.0)
+                    {
+                        dThermalEnergy = dAreaFrac / unexposedAreaFrac * thermalEnergyInUnexposedSkin;
+                    }
+                    else
+                        dThermalEnergy = dAreaFrac / part.skinExposedAreaFrac * thermalEnergyInExposedSkin;
+                    part.skinTemperature = (thermalEnergyInExposedSkin + dThermalEnergy) * part.skinExposedMassMult * part.skinThermalMassRecip;
+                    part.skinUnexposedTemperature = (thermalEnergyInUnexposedSkin - dThermalEnergy) * part.skinUnexposedMassMult * part.skinThermalMassRecip;
+                }
+            }
+        }
+
+        private static void UpdateOcclusion(ModularFlightIntegrator fi, bool all)
+        {
+            VehicleOcclusion occlusion = fi.Vessel.GetComponent<VehicleOcclusion>();
+            if (occlusion == null)
+            {
+                fi.BaseFIUpdateOcclusion(all);
+                return;
+            }
+            fi.BaseFIUpdateOcclusion(all);  // Horrible waste for just updating body occlusion
+                                            // We should do this in VehicleOcclusion also.
+            // UpdateOcclusionConvection(); UpdateOcclusionSolar(); UpdateOcclusionBody();
+            // FAR does its own thing for body occlusion for flight (aero/drag)
+            // New VehicleOcclusion handler can give us direct answers
+            foreach (Part p in fi.Vessel.Parts)
+            {
+                //p.ptd.bodyAreaMultiplier = 1;
+                p.ptd.sunAreaMultiplier = 1;
+                p.ptd.convectionAreaMultiplier = 1;
+            }
         }
 
         private static void UpdateThermodynamicsPre(ModularFlightIntegrator fi)
