@@ -19,6 +19,12 @@ namespace FerramAerospaceResearch.UnityJobs
         }
     }
 
+    public struct RaycastHitWithArea
+    {
+        public RaycastHit hit;
+        public float area;
+    }
+
     public struct EMPTY_STRUCT { }
 
     //http://extremelearning.com.au/how-to-evenly-distribute-points-on-a-sphere-more-effectively-than-the-canonical-fibonacci-lattice/
@@ -73,46 +79,65 @@ namespace FerramAerospaceResearch.UnityJobs
     }
 
     [BurstCompile]
-    public struct FilterCompletedQuaternions : IJob
+    public struct FilterCompletedQuaternions : IJobParallelFor
     {
-        [ReadOnly] public int count;
         [ReadOnly] public NativeArray<SphereDistanceInfo> input;
         [ReadOnly] public NativeHashMap<quaternion, EMPTY_STRUCT> map;
-        [WriteOnly] public NativeList<quaternion> output;
+        [WriteOnly] public NativeQueue<quaternion>.ParallelWriter output;
 
-        public void Execute()
+        public void Execute(int index)
         {
-            for (int i=0; i<count; i++)
+            if (!map.ContainsKey(input[index].q))
+                output.Enqueue(input[index].q);
+        }
+    }
+
+    [BurstCompile]
+    public struct RaycastFilterJob : IJobParallelFor
+    {
+        [ReadOnly] public int count;
+        [ReadOnly] public NativeArray<RaycastHit> hitsIn;
+        [WriteOnly] public NativeQueue<RaycastHit>.ParallelWriter hitsOut;
+
+        public void Execute(int index)
+        {
+            unsafe
             {
-                if (!map.ContainsKey(input[i].q))
-                    output.Add(input[i].q);
+                RaycastHit* array_ptr = (RaycastHit*)hitsIn.GetUnsafeReadOnlyPtr();
+                int collider_id = *(int*)((byte*)&array_ptr[index] + 40);
+                if (collider_id != 0)
+                    hitsOut.Enqueue(array_ptr[index]);
             }
         }
     }
 
     [BurstCompile]
-    public struct RaycastFilterJob : IJob
+    public struct RaycastProcessorJob : IJob
     {
-        [ReadOnly] public int count;
-        [ReadOnly] public NativeArray<RaycastHit> hitsIn;
-        [WriteOnly] public NativeList<RaycastHit> hitsOut;
+        [ReadOnly] public NativeQueue<RaycastHit> hitsIn;
+        [ReadOnly] public float area;
+        [WriteOnly] public NativeHashMap<int, RaycastHitWithArea> hitsOut;
 
+        //        public void Execute(int index, TransformAccess transform)
         public void Execute()
         {
-            unsafe
+            while (hitsIn.TryDequeue(out RaycastHit item))
             {
-                RaycastHit* array_ptr = (RaycastHit*)hitsIn.GetUnsafeReadOnlyPtr();
-                for (int index = 0; index < count; index++)
+                unsafe
                 {
-                    int collider_id = *(int*)((byte*)&array_ptr[index] + 40);
-                    if (collider_id != 0)
-                        hitsOut.Add(array_ptr[index]);
+                    int collider_id = *(int*)((byte*)&item + 40);
+                    if (!hitsOut.ContainsKey(collider_id))
+                        hitsOut.TryAdd(collider_id, new RaycastHitWithArea { area = 0, hit = item });
+                    RaycastHitWithArea i = hitsOut[collider_id];
+                    i.area += area;
+                    hitsOut[collider_id] = i;
                 }
             }
         }
     }
 
-    [BurstCompile]
+
+        [BurstCompile]
     public struct OcclusionRaycastBuilder : IJobParallelFor
     {
         [ReadOnly] public float3 forwardDir;
@@ -123,8 +148,7 @@ namespace FerramAerospaceResearch.UnityJobs
         [ReadOnly] public int dim_x;
         [ReadOnly] public int dim_y;
         [ReadOnly] public float2 interval;
-        public NativeArray<RaycastHit> results;
-        public NativeArray<RaycastCommand> commands;
+        [WriteOnly] public NativeArray<RaycastCommand> commands;
 
         public void Execute(int index)
         {
