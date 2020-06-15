@@ -5,6 +5,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Jobs;
 using UnityEngine.Profiling;
 
 /* Theory of Job Control:
@@ -44,9 +45,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private readonly JobHandle[] setupJobs = new JobHandle[MAX_JOBS];
         private readonly JobHandle[] raycastJobs = new JobHandle[MAX_JOBS];
         private readonly JobHandle[] filterJobs = new JobHandle[MAX_JOBS];
+        private readonly JobHandle[] raycastProcessorJobs = new JobHandle[MAX_JOBS];
         private readonly NativeArray<RaycastHit>[] workHitArrays = new NativeArray<RaycastHit>[MAX_JOBS];
         private readonly NativeArray<RaycastCommand>[] workCommandArrays = new NativeArray<RaycastCommand>[MAX_JOBS];
-        private readonly NativeList<RaycastHit>[] workFilteredHits = new NativeList<RaycastHit>[MAX_JOBS];
+        private readonly NativeQueue<RaycastHit>[] workFilteredHits = new NativeQueue<RaycastHit>[MAX_JOBS];
+        private readonly NativeHashMap<int, RaycastHitWithArea>[] workHitsMap = new NativeHashMap<int, RaycastHitWithArea>[MAX_JOBS];
         private readonly quaternion[] workQuaternions = new quaternion[MAX_JOBS];
         private readonly float[] workAreas = new float[MAX_JOBS];
 
@@ -115,7 +118,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 epsilon = Lattice_epsilon(FIBONACCI_LATTICE_SIZE),
                 results = arr,
             };
-            parallelJob.Run(FIBONACCI_LATTICE_SIZE);
+            JobHandle h = parallelJob.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+            h.Complete();
             arr.CopyTo(Quaternions);
             arr.Dispose();
         }
@@ -144,20 +148,19 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 distance = sunSphereDistances,
             };
 
-            NativeList<quaternion> filteredConvectionQuaternions = new NativeList<quaternion>(Allocator.Temp);
+            NativeQueue<quaternion> filteredConvectionQuaternions = new NativeQueue<quaternion>(Allocator.Temp);
             FilterCompletedQuaternions filterJob = new FilterCompletedQuaternions
             {
-                count = convectionSphereDistances.Length,
                 input = convectionSphereDistances,
                 map = processedQuaternionsMap,
-                output = filteredConvectionQuaternions,
+                output = filteredConvectionQuaternions.AsParallelWriter(),
             };
 
             JobHandle convHandle = convectionJob.Schedule(FIBONACCI_LATTICE_SIZE, 32);
             JobHandle sunHandle = sunJob.Schedule(FIBONACCI_LATTICE_SIZE, 32);
             JobHandle sortedConvectionHandle = NativeSortExtension.SortJob(convectionSphereDistances, convHandle);
             JobHandle sortedSunHandle = NativeSortExtension.SortJob(sunSphereDistances, sunHandle);
-            JobHandle filteredSortedConvectionHandle = filterJob.Schedule(sortedConvectionHandle);
+            JobHandle filteredSortedConvectionHandle = filterJob.Schedule(convectionSphereDistances.Length, 16, sortedConvectionHandle);
             JobHandle.ScheduleBatchedJobs();
             JobHandle.CompleteAll(ref sortedConvectionHandle, ref sortedSunHandle);
 
@@ -175,8 +178,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             filteredSortedConvectionHandle.Complete();
 
-            while (localWorkQueue.Count < suggestedJobs && filteredConvectionQuaternions.Length > 0)
-                localWorkQueue.Enqueue(filteredConvectionQuaternions[0]);
+            while (localWorkQueue.Count < suggestedJobs && filteredConvectionQuaternions.Count > 0)
+                localWorkQueue.Enqueue(filteredConvectionQuaternions.Dequeue());
 
             quats.Dispose();
             convectionSphereDistances.Dispose();
@@ -225,16 +228,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
             return new float2(math.abs(max.x - min.x), math.abs(max.y - min.y));
         }
 
-        public void ProcessRaycastResults(ref NativeList<RaycastHit> hits, Quaternion rotation, float area)
+        public void ProcessRaycastResults(ref NativeHashMap<int, RaycastHitWithArea> hits, Quaternion rotation)
         {
             Profiler.BeginSample("VehicleOcclusion-ProcessRaycastResults");
-            int len = hits.Length;
-            for (int i = 0; i < len; i++)
+            NativeArray<int> keys = hits.GetKeyArray(Allocator.Temp);
+            for (int i=0; i<keys.Length; i++)
             {
-                RaycastHit hit = hits[i];
-                if (hit.collider != null)
+                if (hits.TryGetValue(keys[i], out RaycastHitWithArea info) && info.hit.transform is Transform t)
                 {
-                    Transform t = hit.transform;
                     while (t.parent != null) t = t.parent;
                     if (partsByTransform.ContainsKey(t) && partsByTransform[t] is Part p)
                     {
@@ -247,13 +248,15 @@ namespace FerramAerospaceResearch.FARAeroComponents
                         {
                             occlInfo.convectionArea.Add(rotation, 0);
                         }
-                        occlInfo.convectionArea[rotation] += area;
-                    } else
+                        occlInfo.convectionArea[rotation] += info.area;
+                    }
+                    else
                     {
-                        Debug.LogWarning($"[VehicleOcclusion.ProcessRaycastResults] {hit.transform} ancestor {t} not associated with any part!");
+                        Debug.LogWarning($"[VehicleOcclusion.ProcessRaycastResults] {info.hit.transform} ancestor {t} not associated with any part!");
                     }
                 }
             }
+            keys.Dispose();
             Profiler.EndSample();
         }
 
@@ -288,6 +291,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             if (!farVesselAero.isValid || FlightGlobals.ActiveVessel != Vessel)
                 return;
             HandleJobCompletion();
+            if (!running)
+                Reset();
         }
 
         public void BuildOcclusionJobs(int suggestedJobs = 1)
@@ -300,20 +305,17 @@ namespace FerramAerospaceResearch.FARAeroComponents
             BuildWorkQueue(Vessel.transform, workQueue, convectionPoints, sunPoints, suggestedJobs);
 
             int i = 0;
+            Transform t = Vessel.transform;
             while (workQueue.Count > 0)
             {
-                Transform t = Vessel.transform;
                 quaternion q = workQueue.Dequeue();
                 float2 bounds = GetBoundaries(q);
                 float2 interval = new float2(math.max(bounds.x / 100, 0.1f), math.max(bounds.y / 100, 0.1f));
 
                 int minXsize = Mathf.CeilToInt(bounds.x / 0.1f);
                 int minYsize = Mathf.CeilToInt(bounds.y / 0.1f);
+                int elements = math.min(100, minXsize) * math.min(100, minYsize);
 
-                int[] dims = new int[2] { math.min(100, minXsize), math.min(100, minYsize) };
-                int elements = dims[0] * dims[1];
-
-                workHitArrays[i] = new NativeArray<RaycastHit>(elements, Allocator.TempJob);
                 workCommandArrays[i] = new NativeArray<RaycastCommand>(elements, Allocator.TempJob);
                 workQuaternions[i] = q;
                 workAreas[i] = interval.x * interval.y;
@@ -324,25 +326,33 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     forwardDir = t.TransformDirection(math.mul(q, Vector3.forward)),
                     rightDir = t.TransformDirection(math.mul(q, Vector3.right)),
                     upDir = t.TransformDirection(math.mul(q, Vector3.up)),
-                    dim_x = dims[0],
-                    dim_y = dims[1],
+                    dim_x = math.min(100, minXsize),
+                    dim_y = math.min(100, minYsize),
                     interval = interval,
-                    results = workHitArrays[i],
                     commands = workCommandArrays[i],
                 };
 
-                workFilteredHits[i] = new NativeList<RaycastHit>(elements / 2, Allocator.TempJob);
+                workHitArrays[i] = new NativeArray<RaycastHit>(elements, Allocator.TempJob);
+                workFilteredHits[i] = new NativeQueue<RaycastHit>(Allocator.TempJob);
                 RaycastFilterJob filter = new RaycastFilterJob
                 {
                     count = elements,
                     hitsIn = workHitArrays[i],
-                    hitsOut = workFilteredHits[i],
+                    hitsOut = workFilteredHits[i].AsParallelWriter(),
+                };
+
+                workHitsMap[i] = new NativeHashMap<int, RaycastHitWithArea>(elements, Allocator.TempJob);
+                RaycastProcessorJob processor = new RaycastProcessorJob
+                {
+                    area = workAreas[i],
+                    hitsIn = workFilteredHits[i],
+                    hitsOut = workHitsMap[i],
                 };
 
                 setupJobs[i] = job.Schedule(elements, 1);
                 raycastJobs[i] = RaycastCommand.ScheduleBatch(workCommandArrays[i], workHitArrays[i], 1, setupJobs[i]);
-                filterJobs[i] = filter.Schedule(raycastJobs[i]);
-
+                filterJobs[i] = filter.Schedule(workHitArrays[i].Length, 16, raycastJobs[i]);
+                raycastProcessorJobs[i] = processor.Schedule(filterJobs[i]);
                 i++;
             }
             jobsInProgress = i;
@@ -354,12 +364,13 @@ namespace FerramAerospaceResearch.FARAeroComponents
         {
             for (int i = 0; i < jobsInProgress; i++)
             {
-                filterJobs[i].Complete();
-                ProcessRaycastResults(ref workFilteredHits[i], workQuaternions[i], workAreas[i]);
+                raycastProcessorJobs[i].Complete();
+                ProcessRaycastResults(ref workHitsMap[i], workQuaternions[i]);
                 processedQuaternionsMap.TryAdd(workQuaternions[i], new EMPTY_STRUCT { });
                 workHitArrays[i].Dispose();
                 workCommandArrays[i].Dispose();
                 workFilteredHits[i].Dispose();
+                workHitsMap[i].Dispose();
             }
 
             running = jobsInProgress > 0;
