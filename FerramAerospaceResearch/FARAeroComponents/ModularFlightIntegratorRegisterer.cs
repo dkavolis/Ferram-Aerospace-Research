@@ -197,6 +197,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 //p.ptd.bodyAreaMultiplier = 1;
                 p.ptd.sunAreaMultiplier = 1;
                 p.ptd.convectionAreaMultiplier = 1;
+                p.ptd.convectionTempMultiplier = 1;
             }
         }
 
