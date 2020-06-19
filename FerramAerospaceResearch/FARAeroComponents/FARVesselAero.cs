@@ -194,7 +194,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     vehicleOcclusion = Vessel.gameObject.AddComponent<VehicleOcclusion>();
                     vehicleOcclusion.Setup(this);
                 }
-                vehicleOcclusion.Reset();
+                vehicleOcclusion.ResetCalculations();
                 vehicleOcclusion.SetVehicleBounds(_vehicleAero.VoxelCenter, _vehicleAero.VoxelMeshExtents);
 
                 if (_flightGUI is null)
