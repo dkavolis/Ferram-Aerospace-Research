@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using FerramAerospaceResearch.UnityJobs;
 using Unity.Collections;
 using Unity.Jobs;
@@ -21,43 +20,53 @@ namespace FerramAerospaceResearch.FARAeroComponents
 {
     public class VehicleOcclusion : MonoBehaviour
     {
-        const int MAX_JOBS = 25;
-        const int UPDATE_JOBS_PER_THREAD = 8;
-        const int FIBONACCI_LATTICE_SIZE = 1000;
+        const int MAX_JOBS = 10;
+        const int UPDATE_JOBS_PER_THREAD = 3;
+        const int FIBONACCI_LATTICE_SIZE = 2000;
+        const double ZERO_VELOCITY_THRESHOLD = 0.01;    // Velocity < threshold will be treated as 0 for vessel travel direction
+        // 1000 points produces typical misses 2-3 degrees when optimized for average miss distance.
 
-        // 1000 points produces typical misses 2-3 degrees, up to 5.5, outlier of 10.
-        // Can try choosing better epsilon for lower average point distance instead of maximizing minimum point separation.
+        public enum State { Invalid, Initialized, Running, Completed }
+        public State state = State.Invalid;
 
         private FARVesselAero farVesselAero;
         Vessel Vessel => farVesselAero?.Vessel;
 
-        public bool running = false;
         private readonly Dictionary<Transform, Part> partsByTransform = new Dictionary<Transform, Part>();
         private readonly Dictionary<Part, DirectionalOcclusionInfo> partOcclusionInfo = new Dictionary<Part, DirectionalOcclusionInfo>();
-        private NativeHashMap<quaternion, EMPTY_STRUCT> processedQuaternionsMap;
 
+        // Quaternions is the full list of orientations for measurement
+        // processedQuaternionsMap is the map of elements in Quaternions that have been processed
+        // quaternionWorkList is the list of quaternions to process on this specific pass.
+        private NativeHashMap<quaternion, EMPTY_STRUCT> processedQuaternionsMap;
+        private NativeArray<quaternion> Quaternions;
+        private NativeList<quaternion> quaternionWorkList = new NativeList<quaternion>(MAX_JOBS, Allocator.Persistent);
+
+        // Closest 3 convection and sun quaternions for each FixedUpdate
         private readonly SphereDistanceInfo[] convectionPoints = new SphereDistanceInfo[3];
         private readonly SphereDistanceInfo[] sunPoints = new SphereDistanceInfo[3];
 
-        private quaternion[] Quaternions;
-        private readonly Queue<quaternion> workQueue = new Queue<quaternion>();
-
-        private readonly JobHandle[] setupJobs = new JobHandle[MAX_JOBS];
-        private readonly JobHandle[] raycastJobs = new JobHandle[MAX_JOBS];
-        private readonly JobHandle[] filterJobs = new JobHandle[MAX_JOBS];
-        private readonly JobHandle[] raycastProcessorJobs = new JobHandle[MAX_JOBS];
-        private readonly NativeArray<RaycastHit>[] workHitArrays = new NativeArray<RaycastHit>[MAX_JOBS];
-        private readonly NativeArray<RaycastCommand>[] workCommandArrays = new NativeArray<RaycastCommand>[MAX_JOBS];
-        private readonly NativeQueue<RaycastHit>[] workFilteredHits = new NativeQueue<RaycastHit>[MAX_JOBS];
-        private readonly NativeHashMap<int, RaycastHitWithArea>[] workHitsMap = new NativeHashMap<int, RaycastHitWithArea>[MAX_JOBS];
-        private readonly quaternion[] workQuaternions = new quaternion[MAX_JOBS];
-        private readonly float[] workAreas = new float[MAX_JOBS];
-
+        // VehicleVoxel center and extents
         private Vector3 center = Vector3.zero;
         private Vector3 extents = new Vector3(10, 10, 10);
 
         private int jobsInProgress;
         private float averageMissOnBestAngle = 0;
+
+        // Large long-term allocations, memory re-used in each
+        // Cleaned and Allocated in ResetCalculations().  Disposed in OnDestroy()
+        private NativeArray<RaycastCommand>[] allCasts;
+        private NativeArray<RaycastHit>[] allHits;
+        private NativeMultiHashMap<int, int>[] allHitsMaps;
+        private NativeHashMap<int, float>[] allHitSizeMaps;
+        private NativeArray<float>[] allSummedHitAreas;
+
+        // allCasts => allHits
+        // allHits => allHitMaps
+        // allHitMaps => allHitSizeMaps,
+        //               allSummedHitAreas,
+
+        private RaycastJobInfo[] raycastJobTracker;
 
         public void Setup(FARVesselAero farVesselAero)
         {
@@ -72,29 +81,72 @@ namespace FerramAerospaceResearch.FARAeroComponents
             FARLogger.Info($"[VehicleOcclusion] Learned Center {center} and Extents {extents}");
         }
 
-        public void Reset()
+        private void DisposeLongTermAllocations()
+        {
+            if (state != State.Invalid)
+            {
+                Quaternions.Dispose();
+                processedQuaternionsMap.Dispose();
+                foreach (var x in allCasts)
+                    x.Dispose();
+                foreach (var x in allHits)
+                    x.Dispose();
+                foreach (var x in allHitsMaps)
+                    x.Dispose();
+                foreach (var x in allSummedHitAreas)
+                    x.Dispose();
+                foreach (var x in allHitSizeMaps)
+                    x.Dispose();
+            }
+        }
+
+        public void ResetCalculations()
         {
             FARLogger.Info($"[VehicleOcclusion] Resetting occlusion calculation data.");
-            running = false;
-            processedQuaternionsMap.Clear();
             partsByTransform.Clear();
             partOcclusionInfo.Clear();
+            DisposeLongTermAllocations();
+            state = State.Initialized;
+
+            allCasts = new NativeArray<RaycastCommand>[MAX_JOBS];
+            allHits = new NativeArray<RaycastHit>[MAX_JOBS];
+            allHitsMaps = new NativeMultiHashMap<int, int>[MAX_JOBS];
+            allSummedHitAreas = new NativeArray<float>[MAX_JOBS];
+            allHitSizeMaps = new NativeHashMap<int, float>[MAX_JOBS];
+
+            raycastJobTracker = new RaycastJobInfo[MAX_JOBS];
+
+            Quaternions = new NativeArray<quaternion>(FIBONACCI_LATTICE_SIZE, Allocator.Persistent);
+            var handle = new SpherePointsJob
+            {
+                points = FIBONACCI_LATTICE_SIZE,
+                epsilon = Lattice_epsilon(FIBONACCI_LATTICE_SIZE),
+                results = Quaternions,
+            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+            JobHandle.ScheduleBatchedJobs();
+
+            processedQuaternionsMap = new NativeHashMap<quaternion, EMPTY_STRUCT>(FIBONACCI_LATTICE_SIZE, Allocator.Persistent);
+            for (int i=0; i<MAX_JOBS; i++)
+            {
+                allCasts[i] = new NativeArray<RaycastCommand>(10000, Allocator.Persistent);
+                allHits[i] = new NativeArray<RaycastHit>(10000, Allocator.Persistent);
+                allHitsMaps[i] = new NativeMultiHashMap<int, int>(10000, Allocator.Persistent);
+                allSummedHitAreas[i] = new NativeArray<float>(10000, Allocator.Persistent);
+                allHitSizeMaps[i] = new NativeHashMap<int, float>(10000, Allocator.Persistent);
+            }
             foreach (Part p in Vessel.Parts)
             {
                 partsByTransform.Add(p.transform, p);
             }
+            handle.Complete();
         }
 
         public void Start()
         {
             FARLogger.Info($"VehicleOcclusion on {Vessel?.name} reporting startup");
-            processedQuaternionsMap = new NativeHashMap<quaternion, EMPTY_STRUCT>(FIBONACCI_LATTICE_SIZE, Allocator.Persistent);
-
+            state = State.Invalid;
             if (Vessel.isActiveVessel)
             {
-                Reset();
-                Quaternions = new quaternion[FIBONACCI_LATTICE_SIZE];
-                BuildSpherePoints();
                 TimingManager.FixedUpdateAdd(TimingManager.TimingStage.ObscenelyEarly, FixedUpdateEarly);
                 TimingManager.UpdateAdd(TimingManager.TimingStage.ObscenelyEarly, UpdateEarly);
                 TimingManager.LateUpdateAdd(TimingManager.TimingStage.Late, LateUpdateComplete);
@@ -103,160 +155,363 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         public void OnDestroy()
         {
-            processedQuaternionsMap.Dispose();
+            quaternionWorkList.Dispose();
+            DisposeLongTermAllocations();
+
             TimingManager.FixedUpdateRemove(TimingManager.TimingStage.ObscenelyEarly, FixedUpdateEarly);
             TimingManager.UpdateRemove(TimingManager.TimingStage.ObscenelyEarly, UpdateEarly);
             TimingManager.LateUpdateRemove(TimingManager.TimingStage.Late, LateUpdateComplete);
         }
 
-        public void BuildSpherePoints()
+        private void LaunchJobs(Transform t, SphereDistanceInfo[] convectionPoints, SphereDistanceInfo[] sunPoints, int suggestedJobs = 1)
         {
-            NativeArray<quaternion> arr = new NativeArray<quaternion>(FIBONACCI_LATTICE_SIZE, Allocator.Temp);
-            SpherePointsJob parallelJob = new SpherePointsJob
-            {
-                points = FIBONACCI_LATTICE_SIZE,
-                epsilon = Lattice_epsilon(FIBONACCI_LATTICE_SIZE),
-                results = arr,
-            };
-            JobHandle h = parallelJob.Schedule(FIBONACCI_LATTICE_SIZE, 16);
-            h.Complete();
-            arr.CopyTo(Quaternions);
-            arr.Dispose();
-        }
+            Profiler.BeginSample("VehicleOcclusion-LaunchJobs");
 
-        private void BuildWorkQueue(Transform t, Queue<quaternion> localWorkQueue, SphereDistanceInfo[] convectionPoints, SphereDistanceInfo[] sunPoints, int suggestedJobs = 1)
-        {
-            Profiler.BeginSample("VehicleOcclusion-BuildWorkQueue");
-            Vector3 localVelocity = t.worldToLocalMatrix * (Vector3)Vessel.velocityD;
-            if (localVelocity == Vector3.zero)
-                localVelocity = Vector3.forward;
-            NativeArray<quaternion> quats = new NativeArray<quaternion>(FIBONACCI_LATTICE_SIZE, Allocator.Temp);
-            quats.CopyFrom(Quaternions);
-            NativeArray<SphereDistanceInfo> convectionSphereDistances = new NativeArray<SphereDistanceInfo>(FIBONACCI_LATTICE_SIZE, Allocator.Temp);
-            SphereSurfaceDistance convectionJob = new SphereSurfaceDistance
+            float4x4 localToWorldMatrix = t.transform.localToWorldMatrix;
+            float offset = extents.magnitude * 2;
+            float4 tmp = math.mul(localToWorldMatrix, new float4(center.x, center.y, center.z, 1));
+            float3 startPosition = new float3(tmp.x, tmp.y, tmp.z);
+
+            Vector3 localVelocity = Vessel.velocityD.magnitude < ZERO_VELOCITY_THRESHOLD ?
+                                    Vector3.forward :
+                                    (Vector3) (t.worldToLocalMatrix * (Vector3)Vessel.velocityD);
+
+            float3 angleSelectionWeights = new float3(0.85f, 0, 0.15f);
+
+            Profiler.BeginSample("VehicleOcclusion-LaunchJobs.Allocation_Angles");
+
+            var fullQuaternionIndexMap = new NativeHashMap<quaternion, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            // Sphere Angle Properties
+            var convectionAngles = new NativeArray<float>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var sunAngles = new NativeArray<float>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var convectionAngleStats = new NativeArray<float3>(1, Allocator.Temp);
+            var sunAngleStats = new NativeArray<float3>(1, Allocator.Temp);
+
+            Profiler.EndSample();
+            Profiler.BeginSample("VehicleOcclusion-LaunchJobs.JobSetup_Angles");
+
+            var makeFullIndexMap = new MakeQuaternionIndexMapJob
+            {
+                arr = Quaternions,
+                map = fullQuaternionIndexMap.AsParallelWriter(),
+            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+            JobHandle.ScheduleBatchedJobs();
+
+            // Calculate angles between vessel orientation and target orientations (sun, convection)
+
+            var convectionAngleJob = new AngleBetween
             {
                 dir = localVelocity.normalized,
-                rotations = quats,
-                distance = convectionSphereDistances,
-            };
+                rotations = Quaternions,
+                angles = convectionAngles,
+            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+
             Vector3 localSunVec = t.worldToLocalMatrix * (Planetarium.fetch.Sun.transform.position - t.position);
-            NativeArray <SphereDistanceInfo> sunSphereDistances = new NativeArray<SphereDistanceInfo>(FIBONACCI_LATTICE_SIZE, Allocator.Temp);
-            SphereSurfaceDistance sunJob = new SphereSurfaceDistance
+            var sunAngleJob = new AngleBetween
             {
                 dir = localSunVec.normalized,
-                rotations = quats,
-                distance = sunSphereDistances,
-            };
+                rotations = Quaternions,
+                angles = sunAngles,
+            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
 
-            NativeQueue<quaternion> filteredConvectionQuaternions = new NativeQueue<quaternion>(Allocator.Temp);
-            FilterCompletedQuaternions filterJob = new FilterCompletedQuaternions
+            // Get properties of sphere coordinates (min/max/mean angular miss)
+
+            var convectionAngleStatsJob = new GeneralDistanceInfo
             {
-                input = convectionSphereDistances,
-                map = processedQuaternionsMap,
-                output = filteredConvectionQuaternions.AsParallelWriter(),
-            };
+                distances = convectionAngles,
+                output = convectionAngleStats,
+            }.Schedule(convectionAngleJob);
 
-            JobHandle convHandle = convectionJob.Schedule(FIBONACCI_LATTICE_SIZE, 32);
-            JobHandle sunHandle = sunJob.Schedule(FIBONACCI_LATTICE_SIZE, 32);
-            JobHandle sortedConvectionHandle = NativeSortExtension.SortJob(convectionSphereDistances, convHandle);
-            JobHandle sortedSunHandle = NativeSortExtension.SortJob(sunSphereDistances, sunHandle);
-            JobHandle filteredSortedConvectionHandle = filterJob.Schedule(convectionSphereDistances.Length, 16, sortedConvectionHandle);
+            var sunAngleStatsJob = new GeneralDistanceInfo
+            {
+                distances = sunAngles,
+                output = sunAngleStats,
+            }.Schedule(sunAngleJob);
+
             JobHandle.ScheduleBatchedJobs();
-            JobHandle.CompleteAll(ref sortedConvectionHandle, ref sortedSunHandle);
+            Profiler.EndSample();
+            Profiler.BeginSample("VehicleOcclusion-LaunchJobs.Allocation_CastPlanes");
 
-            localWorkQueue.Clear();
-            for (int i = 0; i < 3; i++)
+            // Calculate raycast plane orientation/offset, dimensions, spacing, area/ray, element count
+            var boundsArr = new NativeArray<float2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var intervalArr = new NativeArray<float2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var dimensionsArr = new NativeArray<int2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var forwardArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var rightArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var upArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+
+            Profiler.EndSample();
+            Profiler.BeginSample("VehicleOcclusion-LaunchJobs.JobSetup_CastPlanes");
+
+            var setVectors = new SetVectorsJob
             {
-                sunPoints[i] = sunSphereDistances[i];
-                if (!processedQuaternionsMap.ContainsKey(sunSphereDistances[i].q))
-                    localWorkQueue.Enqueue(sunSphereDistances[i].q);
+                quaternions = Quaternions,
+                localToWorldMatrix = localToWorldMatrix,
+                forward = forwardArr,
+                up = upArr,
+                right = rightArr,
+            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
 
-                convectionPoints[i] = convectionSphereDistances[i];
-                if (!processedQuaternionsMap.ContainsKey(convectionSphereDistances[i].q))
-                    localWorkQueue.Enqueue(convectionSphereDistances[i].q);
+            var setBounds = new SetBoundsJob
+            {
+                boundsCenter = center,
+                extents = extents,
+                quaternions = Quaternions,
+                bounds = boundsArr,
+            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+
+            _ = new SetIntervalAndDimensionsJob
+            {
+                bounds = boundsArr,
+                interval = intervalArr,
+                dims = dimensionsArr,
+            }.Schedule(FIBONACCI_LATTICE_SIZE, 16, setBounds);
+
+            JobHandle.ScheduleBatchedJobs();
+
+            Profiler.EndSample();
+            Profiler.BeginSample("VehicleOcclusion-LaunchJobs.Allocation_Filters");
+
+            var convectionQuaternionsPriorityMap = new NativeHashMap<quaternion, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var sunQuaternionsPriorityMap = new NativeHashMap<quaternion, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var indexedPriorityMap = new NativeMultiHashMap<int, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+
+            // Sorting structures
+            var sortableConvectionQuaternionsMap = new NativeMultiHashMap<int, SphereDistanceInfo>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var sortableSunQuaternionsMap = new NativeMultiHashMap<int, SphereDistanceInfo>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var sortableConvectionQuaternions = new NativeList<SphereDistanceInfo>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var sortableSunQuaternions = new NativeList<SphereDistanceInfo>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+
+            Profiler.EndSample();
+            Profiler.BeginSample("VehicleOcclusion-LaunchJobs.FilterJob_Setup");
+
+            // Derive cutoff distance for prioritization
+            JobHandle.CompleteAll(ref sunAngleStatsJob, ref convectionAngleStatsJob);
+            float sunDistanceCutoff = math.dot(angleSelectionWeights, sunAngleStats[0]);
+            float convectionDistanceCutoff = math.dot(angleSelectionWeights, convectionAngleStats[0]);
+
+            // Sorting process (fiter nearby, sort)
+
+            var filterConvectionQuaternions = new FilterByDistanceJob
+            {
+                quaternions = Quaternions,
+                distances = convectionAngles,
+                cutoffDistance = convectionDistanceCutoff,
+                map = sortableConvectionQuaternionsMap.AsParallelWriter(),
+            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+
+            var filterSunQuaternions = new FilterByDistanceJob
+            {
+                quaternions = Quaternions,
+                distances = sunAngles,
+                cutoffDistance = sunDistanceCutoff,
+                map = sortableSunQuaternionsMap.AsParallelWriter(),
+            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+
+            var sortConvectionQuaternions = new GetSortedListFromMultiHashmap
+            {
+                map = sortableConvectionQuaternionsMap,
+                list = sortableConvectionQuaternions,
+            }.Schedule(filterConvectionQuaternions);
+
+            var sortSunQuaternions = new GetSortedListFromMultiHashmap
+            {
+                map = sortableSunQuaternionsMap,
+                list = sortableSunQuaternions,
+            }.Schedule(filterSunQuaternions);
+
+            JobHandle.ScheduleBatchedJobs();
+
+            var makeConvectionPriorityMap = new MakeIndexMapJob
+            {
+                quaternions = sortableConvectionQuaternions.AsDeferredJobArray(),
+                map = convectionQuaternionsPriorityMap.AsParallelWriter(),
+            }.Schedule(sortConvectionQuaternions);
+
+            var makeSunPriorityMap = new MakeIndexMapJob
+            {
+                quaternions = sortableSunQuaternions.AsDeferredJobArray(),
+                map = sunQuaternionsPriorityMap.AsParallelWriter(),
+            }.Schedule(sortSunQuaternions);
+
+            var bucketSortPriority = new BucketSortByPriority
+            {
+                quaternions = Quaternions,
+                priorityMap1 = convectionQuaternionsPriorityMap,
+                priorityMap2 = sunQuaternionsPriorityMap,
+                completed = processedQuaternionsMap,
+                maxIndexForPriority0 = 2,
+                map = indexedPriorityMap.AsParallelWriter(),
+            }.Schedule(FIBONACCI_LATTICE_SIZE, 16, JobHandle.CombineDependencies(makeConvectionPriorityMap, makeSunPriorityMap));
+
+            JobHandle.ScheduleBatchedJobs();
+            Profiler.EndSample();
+
+            bucketSortPriority.Complete();
+
+            convectionPoints[0] = sortableConvectionQuaternions[0];
+            convectionPoints[1] = sortableConvectionQuaternions[1];
+            convectionPoints[2] = sortableConvectionQuaternions[2];
+            sunPoints[0] = sortableSunQuaternions[0];
+            sunPoints[1] = sortableSunQuaternions[1];
+            sunPoints[2] = sortableSunQuaternions[2];
+
+            quaternionWorkList.Clear();
+            SelectQuaternions(ref quaternionWorkList, ref indexedPriorityMap, MAX_JOBS, 0);  // Fill priority 0 (required)
+            SelectQuaternions(ref quaternionWorkList, ref indexedPriorityMap, suggestedJobs, 1);    // Append priority 1 (desired) until size
+            SelectQuaternions(ref quaternionWorkList, ref indexedPriorityMap, suggestedJobs, 2);    // Append priority 2 (anything) until size
+
+            JobHandle.CompleteAll(ref setVectors, ref makeFullIndexMap);
+
+            int i = 0;
+            foreach (quaternion q in quaternionWorkList)
+            {
+                Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup");
+
+                Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup.Prep");
+                int index = fullQuaternionIndexMap[q];
+                int elements = dimensionsArr[index].x * dimensionsArr[index].y;
+                raycastJobTracker[i] = new RaycastJobInfo
+                {
+                    q = q,
+                    index = index,
+                    area = intervalArr[index].x * intervalArr[index].y,
+                };
+                var clearMap1 = new ClearNativeMultiHashMapIntInt { map = allHitsMaps[i], }.Schedule();
+                var clearMap2 = new ClearNativeHashMapIntFloat { map = allHitSizeMaps[i], }.Schedule();
+                Profiler.EndSample();
+                Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup.BuilderJob");
+                raycastJobTracker[i].builderJob = new OcclusionRaycastBuilder
+                {
+                    startPosition = startPosition,
+                    offset = offset,
+                    forwardDir = forwardArr[index],
+                    rightDir = rightArr[index],
+                    upDir = upArr[index],
+                    dimensions = dimensionsArr[index],
+                    interval = intervalArr[index],
+                    commands = allCasts[i],
+                }.Schedule(elements, 8, JobHandle.CombineDependencies(clearMap1, clearMap2));
+                Profiler.EndSample();
+                Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup.RaycastJob");
+                raycastJobTracker[i].raycastJob = RaycastCommand.ScheduleBatch(allCasts[i], allHits[i], 1, raycastJobTracker[i].builderJob);
+                Profiler.EndSample();
+                Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup.PreparerJob");
+                raycastJobTracker[i].preparerJob = new RaycastPrepareJob
+                {
+                    hitsIn = allHits[i],
+                    hitsMap = allHitsMaps[i].AsParallelWriter(),
+                }.Schedule(elements, 8, raycastJobTracker[i].raycastJob);
+                Profiler.EndSample();
+                Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup.ProcessorJob");
+                raycastJobTracker[i].processorJob = new RaycastProcessorJob
+                {
+                    hits = allHits[i],
+                    hitMap = allHitsMaps[i],
+                    hitsOut = allHitSizeMaps[i].AsParallelWriter(),
+                    area = raycastJobTracker[i].area,
+                    areaSum = allSummedHitAreas[i],
+                }.Schedule(allHitsMaps[i], 16, raycastJobTracker[i].preparerJob);
+                Profiler.EndSample();
+
+                JobHandle.ScheduleBatchedJobs();
+                Profiler.EndSample();
+                i++;
             }
+            jobsInProgress = i;
 
-            filteredSortedConvectionHandle.Complete();
+            Profiler.BeginSample("VehicleOcclusion-LaunchJobs.Disposal");
 
-            while (localWorkQueue.Count < suggestedJobs && filteredConvectionQuaternions.Count > 0)
-                localWorkQueue.Enqueue(filteredConvectionQuaternions.Dequeue());
+            // Destroy everything
+            convectionAngles.Dispose();
+            sunAngles.Dispose();
+            convectionAngleStats.Dispose();
+            sunAngleStats.Dispose();
 
-            quats.Dispose();
-            convectionSphereDistances.Dispose();
-            sunSphereDistances.Dispose();
-            filteredConvectionQuaternions.Dispose();
+            boundsArr.Dispose();
+            intervalArr.Dispose();
+            dimensionsArr.Dispose();
+            forwardArr.Dispose();
+            rightArr.Dispose();
+            upArr.Dispose();
+
+            fullQuaternionIndexMap.Dispose();
+            convectionQuaternionsPriorityMap.Dispose();
+            sunQuaternionsPriorityMap.Dispose();
+            indexedPriorityMap.Dispose();
+
+            sortableConvectionQuaternionsMap.Dispose();
+            sortableSunQuaternionsMap.Dispose();
+            sortableConvectionQuaternions.Dispose();
+            sortableSunQuaternions.Dispose();
+            Profiler.EndSample();
+
             Profiler.EndSample();
         }
 
-        private Vector2 GetBoundaries(quaternion q)
+        public struct RaycastJobInfo
         {
-            // We now have center, extents, and the raycaster plane (normal = rotation * vessel.forward)
-            // Project each of the 8 corners of the bounding box onto the plane.
-            // https://stackoverflow.com/questions/9605556/how-to-project-a-point-onto-a-plane-in-3d/41897378#41897378
-
-            Vector3 normal = math.mul(q, Vector3.forward);
-            Vector3 origin = Vector3.zero + 10000 * normal;
-            Vector2 min = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
-            Vector2 max = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
-            Vector3 ext = extents / 2;
-            Vector3[] arr = new Vector3[8]
-            {
-                center - (ext/2),
-                new Vector3(center.x - ext.x, center.y - ext.y, center.z + ext.z),
-                new Vector3(center.x - ext.x, center.y + ext.y, center.z - ext.z),
-                new Vector3(center.x - ext.x, center.y + ext.y, center.z + ext.z),
-                new Vector3(center.x + ext.x, center.y - ext.y, center.z - ext.z),
-                new Vector3(center.x + ext.x, center.y - ext.y, center.z + ext.z),
-                new Vector3(center.x + ext.x, center.y + ext.y, center.z - ext.z),
-                center + (ext/2),
-            };
-
-            for (int i=0; i<8; i++)
-            {
-                // Project the bounding box onto the plane
-                float dist = math.dot(arr[i] - origin, normal);
-                Vector3 projection = arr[i] - dist * normal;
-                // Rotate the projection back towards the vessel alignment
-                projection = math.mul(math.inverse(q), projection);
-
-                // The x,y coords of projection are again aligned to the vessel axes.
-                min.x = Math.Min(min.x, projection.x);
-                min.y = Math.Min(min.y, projection.y);
-                max.x = Math.Max(max.x, projection.x);
-                max.y = Math.Max(max.y, projection.y);
-            }
-            return new float2(math.abs(max.x - min.x), math.abs(max.y - min.y));
+            public quaternion q;
+            public int index;
+            public float area;
+            public JobHandle builderJob;
+            public JobHandle raycastJob;
+            public JobHandle preparerJob;
+            public JobHandle processorJob;
         }
 
-        public void ProcessRaycastResults(ref NativeHashMap<int, RaycastHitWithArea> hits, Quaternion rotation)
+        private void SelectQuaternions(ref NativeList<quaternion> q, ref NativeMultiHashMap<int, int> map, int maxSize = MAX_JOBS, int key=0)
         {
-            Profiler.BeginSample("VehicleOcclusion-ProcessRaycastResults");
-            NativeArray<int> keys = hits.GetKeyArray(Allocator.Temp);
-            for (int i=0; i<keys.Length; i++)
+            if (q.Length < maxSize && map.TryGetFirstValue(key, out int index, out NativeMultiHashMapIterator<int> iter))
             {
-                if (hits.TryGetValue(keys[i], out RaycastHitWithArea info) && info.hit.transform is Transform t)
+                q.Add(Quaternions[index]);
+                while (q.Length< maxSize && map.TryGetNextValue(out index, ref iter))
                 {
-                    while (t.parent != null) t = t.parent;
-                    if (partsByTransform.ContainsKey(t) && partsByTransform[t] is Part p)
-                    {
-                        if (!partOcclusionInfo.ContainsKey(p))
-                        {
-                            partOcclusionInfo.Add(p, new DirectionalOcclusionInfo());
-                        }
-                        DirectionalOcclusionInfo occlInfo = partOcclusionInfo[p];
-                        if (!occlInfo.convectionArea.ContainsKey(rotation))
-                        {
-                            occlInfo.convectionArea.Add(rotation, 0);
-                        }
-                        occlInfo.convectionArea[rotation] += info.area;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[VehicleOcclusion.ProcessRaycastResults] {info.hit.transform} ancestor {t} not associated with any part!");
-                    }
+                    q.Add(Quaternions[index]);
                 }
             }
-            keys.Dispose();
+        }
+
+        public void ProcessRaycastResults(ref RaycastJobInfo jobInfo, ref NativeHashMap<int, float> sizeMap, ref NativeArray<RaycastHit> hits, ref NativeArray<float> summedHitAreas)
+        {
+            Profiler.BeginSample("VehicleOcclusion-ProcessRaycastResults");
+            quaternion rotation = jobInfo.q;
+            if (sizeMap.Length > 0)
+            {
+                // The value in sizeMap is the size of a single element [duplicative of jobInfo.area]
+                // The key is the index into summedHitAreas
+                NativeArray<int> sizeIndices = sizeMap.GetKeyArray(Allocator.Temp);
+                for (int key = 0; key < sizeIndices.Length; key++)
+                {
+                    int index = sizeIndices[key];
+                    float size = summedHitAreas[index];
+                    processedQuaternionsMap.TryAdd(rotation, new EMPTY_STRUCT { });
+                    if (hits[index].transform is Transform t)
+                    {
+                        while (t.parent != null)
+                            t = t.parent;
+                        if (partsByTransform.TryGetValue(t, out Part p))
+                        {
+                            if (!partOcclusionInfo.TryGetValue(p, out DirectionalOcclusionInfo occlInfo))
+                            {
+                                occlInfo = new DirectionalOcclusionInfo();
+                                partOcclusionInfo.Add(p, occlInfo);
+                            }
+                            if (!occlInfo.convectionArea.ContainsKey(rotation))
+                            {
+                                occlInfo.convectionArea.Add(rotation, 0);
+                            }
+                            occlInfo.convectionArea[rotation] += size;
+                        }
+                        else
+                        {
+                            UnityEngine.Debug.LogWarning($"[VehicleOcclusion.ProcessRaycastResults] {hits[index].transform} ancestor {t} not associated with any part!");
+                        }
+                    }
+                }
+                sizeIndices.Dispose();
+            }
+
             Profiler.EndSample();
         }
 
@@ -267,115 +522,51 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             // We must call this to pre-calculate the nearest quaternions for sun and convection.
             // It may return an empty work queue if we are not otherwise running, which is fine.
-            BuildOcclusionJobs();
+            if (state == State.Initialized)
+                state = State.Running;
+            if (state == State.Running)
+                LaunchJobs(Vessel.transform, convectionPoints, sunPoints, 0);
         }
 
         public void FixedUpdate()
         {
             if (!farVesselAero.isValid || FlightGlobals.ActiveVessel != Vessel)
                 return;
-            HandleJobCompletion();
+            if (state == State.Running)
+                HandleJobCompletion();
         }
 
         public void UpdateEarly()
         {
-            if (!farVesselAero.isValid || FlightGlobals.ActiveVessel != Vessel || !running)
+            if (!farVesselAero.isValid || FlightGlobals.ActiveVessel != Vessel)
                 return;
-            int threadCount = System.Environment.ProcessorCount - 1;
-            int updateJobs = math.min(MAX_JOBS, math.max(1, UPDATE_JOBS_PER_THREAD * threadCount));
-            BuildOcclusionJobs(updateJobs);
+            if (state == State.Running)
+            {
+                int threadCount = System.Environment.ProcessorCount - 1;
+                int updateJobs = math.min(MAX_JOBS, math.max(1, UPDATE_JOBS_PER_THREAD * threadCount));
+                LaunchJobs(Vessel.transform, convectionPoints, sunPoints, updateJobs);
+            }
         }
 
         public void LateUpdateComplete()
         {
             if (!farVesselAero.isValid || FlightGlobals.ActiveVessel != Vessel)
                 return;
-            HandleJobCompletion();
-            if (!running)
-                Reset();
-        }
-
-        public void BuildOcclusionJobs(int suggestedJobs = 1)
-        {
-            Profiler.BeginSample("VehicleOcclusion-BuildOcclusionJobs");
-
-            if (Quaternions.Length != FIBONACCI_LATTICE_SIZE)
-                BuildSpherePoints();
-
-            BuildWorkQueue(Vessel.transform, workQueue, convectionPoints, sunPoints, suggestedJobs);
-
-            int i = 0;
-            Transform t = Vessel.transform;
-            while (workQueue.Count > 0)
-            {
-                quaternion q = workQueue.Dequeue();
-                float2 bounds = GetBoundaries(q);
-                float2 interval = new float2(math.max(bounds.x / 100, 0.1f), math.max(bounds.y / 100, 0.1f));
-
-                int minXsize = Mathf.CeilToInt(bounds.x / 0.1f);
-                int minYsize = Mathf.CeilToInt(bounds.y / 0.1f);
-                int elements = math.min(100, minXsize) * math.min(100, minYsize);
-
-                workCommandArrays[i] = new NativeArray<RaycastCommand>(elements, Allocator.TempJob);
-                workQuaternions[i] = q;
-                workAreas[i] = interval.x * interval.y;
-                OcclusionRaycastBuilder job = new OcclusionRaycastBuilder
-                {
-                    startPosition = t.TransformPoint(t.position),
-                    offset = extents.magnitude,
-                    forwardDir = t.TransformDirection(math.mul(q, Vector3.forward)),
-                    rightDir = t.TransformDirection(math.mul(q, Vector3.right)),
-                    upDir = t.TransformDirection(math.mul(q, Vector3.up)),
-                    dim_x = math.min(100, minXsize),
-                    dim_y = math.min(100, minYsize),
-                    interval = interval,
-                    commands = workCommandArrays[i],
-                };
-
-                workHitArrays[i] = new NativeArray<RaycastHit>(elements, Allocator.TempJob);
-                workFilteredHits[i] = new NativeQueue<RaycastHit>(Allocator.TempJob);
-                RaycastFilterJob filter = new RaycastFilterJob
-                {
-                    count = elements,
-                    hitsIn = workHitArrays[i],
-                    hitsOut = workFilteredHits[i].AsParallelWriter(),
-                };
-
-                workHitsMap[i] = new NativeHashMap<int, RaycastHitWithArea>(elements, Allocator.TempJob);
-                RaycastProcessorJob processor = new RaycastProcessorJob
-                {
-                    area = workAreas[i],
-                    hitsIn = workFilteredHits[i],
-                    hitsOut = workHitsMap[i],
-                };
-
-                setupJobs[i] = job.Schedule(elements, 1);
-                raycastJobs[i] = RaycastCommand.ScheduleBatch(workCommandArrays[i], workHitArrays[i], 1, setupJobs[i]);
-                filterJobs[i] = filter.Schedule(workHitArrays[i].Length, 16, raycastJobs[i]);
-                raycastProcessorJobs[i] = processor.Schedule(filterJobs[i]);
-                i++;
-            }
-            jobsInProgress = i;
-            JobHandle.ScheduleBatchedJobs();
-            Profiler.EndSample();
+            if (state == State.Running && jobsInProgress == 0)
+                state = State.Completed;
+            else if (state == State.Running)
+                HandleJobCompletion();
+            else if (state == State.Completed)
+                ResetCalculations();
         }
 
         public void HandleJobCompletion()
         {
-            for (int i = 0; i < jobsInProgress; i++)
-            {
-                raycastProcessorJobs[i].Complete();
-                ProcessRaycastResults(ref workHitsMap[i], workQuaternions[i]);
-                processedQuaternionsMap.TryAdd(workQuaternions[i], new EMPTY_STRUCT { });
-                workHitArrays[i].Dispose();
-                workCommandArrays[i].Dispose();
-                workFilteredHits[i].Dispose();
-                workHitsMap[i].Dispose();
+            for (int i=0; i<jobsInProgress; i++)
+           {
+                raycastJobTracker[i].processorJob.Complete();
+                ProcessRaycastResults(ref raycastJobTracker[i], ref allHitSizeMaps[i], ref allHits[i], ref allSummedHitAreas[i]);
             }
-
-            running = jobsInProgress > 0;
-            if (!running)
-                running = false;        // Do nothing, just a breakpoint target
         }
 
         // http://extremelearning.com.au/how-to-evenly-distribute-points-on-a-sphere-more-effectively-than-the-canonical-fibonacci-lattice/
@@ -415,7 +606,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         public float SunArea(Part p, Vector3 dir)
         {
-            if (partOcclusionInfo.ContainsKey(p) && partOcclusionInfo[p] is DirectionalOcclusionInfo info)
+            if (partOcclusionInfo.TryGetValue(p, out DirectionalOcclusionInfo info))
                 return Area(p, sunPoints, info.area);
             return 0;
         }
@@ -425,16 +616,18 @@ namespace FerramAerospaceResearch.FARAeroComponents
         {
             // convectionPoints is a set of 3 quaternions that should be closest to dir.
             // (They were precalculated, if dir is NOT what we expect for occlusion... that's bad.)
-            Vector3 localVelocity = Vessel.transform.worldToLocalMatrix * dir;
+            Vector3 localVelocity = dir.magnitude < ZERO_VELOCITY_THRESHOLD ?
+                                    Vector3.forward :
+                                    (Vector3) (Vessel.transform.worldToLocalMatrix * dir);
             Quaternion q = Quaternion.FromToRotation(Vector3.forward, localVelocity);
             float a = 0.25f;
 
-            if (partOcclusionInfo.ContainsKey(p) && partOcclusionInfo[p] is DirectionalOcclusionInfo info)
+            if (partOcclusionInfo.TryGetValue(p, out DirectionalOcclusionInfo info))
             {
                 float angle = Quaternion.Angle(q, convectionPoints[0].q);
                 averageMissOnBestAngle = (a * angle) + ((1f - a) * averageMissOnBestAngle);
-                //                if (counter++ % 50 == 0)
-                //                    Debug.Log($"[VehicleOcclusion] {p} {localVelocity} missed {angle} [average {averageMissOnBestAngle}]");
+//                if (counter++ % 50 == 0)
+//                    Debug.Log($"[VehicleOcclusion] {localVelocity} missed {angle} [average {averageMissOnBestAngle}]");
                 return Area(p, convectionPoints, info.convectionArea);
             }
             return 0;
@@ -446,17 +639,17 @@ namespace FerramAerospaceResearch.FARAeroComponents
             float distanceSum = 0;
             foreach (SphereDistanceInfo sdi in sdiArray)
             {
-                if (areaInfos.ContainsKey(sdi.q))
+                if (areaInfos.TryGetValue(sdi.q, out float newArea))
                 {
-                    if (sdi.sqrDistance < float.Epsilon)
-                        return areaInfos[sdi.q];
-                    area += areaInfos[sdi.q] / sdi.sqrDistance;
-                    distanceSum += (1 / sdi.sqrDistance);
+                    if (sdi.distance < float.Epsilon)
+                        return newArea;
+                    area += newArea / sdi.distance;
+                    distanceSum += (1 / sdi.distance);
                 }
                 else if (processedQuaternionsMap.ContainsKey(sdi.q))
                 {
                     // Processed quaternion but no per-part data means 0 area [no raycasters hit]
-                    distanceSum += (1 / sdi.sqrDistance);
+                    distanceSum += (1 / sdi.distance);
                 }
                 else
                 {
