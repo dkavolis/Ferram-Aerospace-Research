@@ -108,6 +108,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
                   guiUnits = "FARUnitKN")]
         public float liftForce;
 
+        [KSPField(guiFormat = "F3", guiUnits = "FARUnitMSq")]
+        public double convectionArea;
+
         private Transform partTransform;
 
         private MaterialColorUpdater materialColorUpdater;
@@ -202,12 +205,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
             {
                 part.ShieldedFromAirstream = true;
                 part.AddShield(shield);
-                if (fieldsVisible)
-                {
-                    Fields["dragForce"].guiActive = false;
-                    Fields["liftForce"].guiActive = false;
-                    fieldsVisible = false;
-                }
 
                 if (!(liftArrow is null))
                 {
@@ -701,23 +698,25 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     momentArrow = null;
                 }
             }
-
             if (PhysicsGlobals.AeroDataDisplay && !part.ShieldedFromAirstream)
             {
                 if (!fieldsVisible)
                 {
-                    Fields["dragForce"].guiActive = true;
-                    Fields["liftForce"].guiActive = true;
+                    Fields[nameof(dragForce)].guiActive = true;
+                    Fields[nameof(liftForce)].guiActive = true;
+                    Fields[nameof(convectionArea)].guiActive = true;
                     fieldsVisible = true;
                 }
 
                 dragForce = worldDragArrow.magnitude;
                 liftForce = worldLiftArrow.magnitude;
+                convectionArea = part.ptd.convectionArea;
             }
             else if (fieldsVisible)
             {
-                Fields["dragForce"].guiActive = false;
-                Fields["liftForce"].guiActive = false;
+                Fields[nameof(dragForce)].guiActive = false;
+                Fields[nameof(liftForce)].guiActive = false;
+                Fields[nameof(convectionArea)].guiActive = false;
                 fieldsVisible = false;
             }
         }
