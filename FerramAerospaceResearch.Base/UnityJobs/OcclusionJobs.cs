@@ -191,35 +191,31 @@ namespace FerramAerospaceResearch.UnityJobs
     }
 
     [BurstCompile]
-    public struct FilterByDistanceJob : IJobParallelFor
+    public struct SortedFilterAndMapByDistanceJob : IJob
     {
         [ReadOnly] public NativeArray<quaternion> quaternions;
         [ReadOnly] public NativeArray<float> distances;
         [ReadOnly] public float cutoffDistance;
-        [WriteOnly] public NativeMultiHashMap<int, SphereDistanceInfo>.ParallelWriter map;
+        public NativeList<SphereDistanceInfo> sdiList;
+        [WriteOnly] public NativeList<quaternion> orderedQuaternions;
 
-        public void Execute(int index)
-        {
-            if (distances[index] < cutoffDistance)
-                map.Add(1, new SphereDistanceInfo { q = quaternions[index], distance = distances[index] });
-        }
-    }
-
-    [BurstCompile]
-    public struct GetSortedListFromMultiHashmap : IJob
-    {
-        [ReadOnly] public NativeMultiHashMap<int, SphereDistanceInfo> map;
-        public NativeList<SphereDistanceInfo> list;
         public void Execute()
         {
-            if (map.Length > 0)
+            for (int i = 0; i < quaternions.Length; i++)
             {
-                NativeArray<SphereDistanceInfo> tmp = map.GetValueArray(Allocator.Temp);
-                for (int i = 0; i < tmp.Length; i++)
-                    list.Add(tmp[i]);
-                NativeSortExtension.Sort(list);
-                tmp.Dispose();
+                if (distances[i] < cutoffDistance)
+                {
+                    SphereDistanceInfo sdi = new SphereDistanceInfo
+                    {
+                        q = quaternions[i],
+                        distance = distances[i]
+                    };
+                    sdiList.Add(sdi);
+                }
             }
+            NativeSortExtension.Sort(sdiList);
+            for (int i = 0; i < sdiList.Length; i++)
+                orderedQuaternions.Add(sdiList[i].q);
         }
     }
 
@@ -236,28 +232,11 @@ namespace FerramAerospaceResearch.UnityJobs
     }
 
     [BurstCompile]
-    public struct MakeIndexMapJob : IJob
-    {
-        [ReadOnly] public NativeArray<SphereDistanceInfo> quaternions;
-        [WriteOnly] public NativeHashMap<quaternion, int>.ParallelWriter map;
-
-        public void Execute()
-        {
-            for (int i = 0; i < quaternions.Length; i++)
-                map.TryAdd(quaternions[i].q, i);
-        }
-        public void Execute(int index)
-        {
-            map.TryAdd(quaternions[index].q, index);
-        }
-    }
-
-    [BurstCompile]
     public struct BucketSortByPriority : IJobParallelFor
     {
         [ReadOnly] public NativeArray<quaternion> quaternions;
-        [ReadOnly] public NativeHashMap<quaternion, int> priorityMap1;
-        [ReadOnly] public NativeHashMap<quaternion, int> priorityMap2;
+        [ReadOnly] public NativeArray<quaternion> priorityList1;
+        [ReadOnly] public NativeArray<quaternion> priorityList2;
         [ReadOnly] public NativeHashMap<quaternion, EMPTY_STRUCT> completed;
         [ReadOnly] public int maxIndexForPriority0;
         [WriteOnly] public NativeMultiHashMap<int, int>.ParallelWriter map;
@@ -267,10 +246,12 @@ namespace FerramAerospaceResearch.UnityJobs
             if (!completed.ContainsKey(quaternions[index]))
             {
                 int pri = 2;
-                if (priorityMap1.TryGetValue(quaternions[index], out int i))
-                    pri = math.min(pri, (i <= maxIndexForPriority0) ? 0 : 1);
-                if (priorityMap2.TryGetValue(quaternions[index], out int j))
-                    pri = math.min(pri, (j <= maxIndexForPriority0) ? 0 : 1);
+                int ind = priorityList1.IndexOf(quaternions[index]);
+                if (ind > -1)
+                    pri = math.min(pri, (ind <= maxIndexForPriority0) ? 0 : 1);
+                ind = priorityList2.IndexOf(quaternions[index]);
+                if (ind > -1)
+                    pri = math.min(pri, (ind <= maxIndexForPriority0) ? 0 : 1);
                 map.Add(pri, index);
             }
         }
