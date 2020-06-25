@@ -83,7 +83,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             part.skinUnexposedTemperature = Math.Max(part.skinTemperature, PhysicsGlobals.SpaceTemperature);
 
-            // This no longer has meaning.
             double a = Math.Max(part.radiativeArea, 0.001);
             ptd.radAreaRecip = 1.0 / Math.Max(part.radiativeArea, 0.001);
 
@@ -117,8 +116,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 ptd.convectionArea = occlusion.ConvectionArea(part, fi.Vel);
                 ptd.convectionCoeffMultiplier = PhysicsGlobals.SurfaceCurves.dragCurveTip.Evaluate(Convert.ToSingle(fi.mach));
 
-                double totalAreaInDir = aeroModule.ProjectedAreaLocal(-part.dragVectorDirLocal);
-                double d = (totalAreaInDir > 0) ? ptd.convectionArea / totalAreaInDir : 0;
+                double d = ptd.convectionArea * ptd.radAreaRecip;
                 areaFraction = (!double.IsNaN(d) && d > 0.001) ? d : 0;
                 areaFraction = Math.Min(areaFraction, 1);
             }
@@ -127,8 +125,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 StockSkinTemperatureHandling(ptd, areaFraction);
                 ptd.exposed = true;
                 part.skinExposedAreaFrac = areaFraction;
-                //part.skinExposedArea = areaFraction * a;  This was stock, and seems incorrect.
-                part.skinExposedArea = ptd.convectionArea;
+                part.skinExposedArea = areaFraction * a;    // == ptd.convectionArea
             }
             else
             {
@@ -181,24 +178,18 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private static void UpdateOcclusion(ModularFlightIntegrator fi, bool all)
         {
-            VehicleOcclusion occlusion = fi.Vessel.GetComponent<VehicleOcclusion>();
-            if (occlusion == null)
+            if (fi.Vessel.GetComponent<VehicleOcclusion>() is VehicleOcclusion occlusion)
             {
+                foreach (Part p in fi.Vessel.Parts)
+                {
+                    p.ptd.bodyAreaMultiplier = 1;
+                    p.ptd.sunAreaMultiplier = 1;
+                    p.ptd.convectionAreaMultiplier = 1;
+                    p.ptd.convectionTempMultiplier = 1;
+                }
+            }
+            else
                 fi.BaseFIUpdateOcclusion(all);
-                return;
-            }
-            fi.BaseFIUpdateOcclusion(all);  // Horrible waste for just updating body occlusion
-                                            // We should do this in VehicleOcclusion also.
-            // UpdateOcclusionConvection(); UpdateOcclusionSolar(); UpdateOcclusionBody();
-            // FAR does its own thing for body occlusion for flight (aero/drag)
-            // New VehicleOcclusion handler can give us direct answers
-            foreach (Part p in fi.Vessel.Parts)
-            {
-                //p.ptd.bodyAreaMultiplier = 1;
-                p.ptd.sunAreaMultiplier = 1;
-                p.ptd.convectionAreaMultiplier = 1;
-                p.ptd.convectionTempMultiplier = 1;
-            }
         }
 
         private static void UpdateThermodynamicsPre(ModularFlightIntegrator fi)
@@ -358,23 +349,29 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private static double CalculateSunArea(ModularFlightIntegrator fi, PartThermalData ptd)
         {
-            FARAeroPartModule module = ptd.part.Modules.GetModule<FARAeroPartModule>();
-
-            if (module is null)
-                return fi.BaseFIGetSunArea(ptd);
-            double sunArea = module.ProjectedAreaWorld(fi.sunVector) * ptd.sunAreaMultiplier;
-
+            double sunArea = 0;
+            if (fi.Vessel.GetComponent<VehicleOcclusion>() is VehicleOcclusion occlusion)
+            {
+                sunArea = occlusion.SunArea(ptd.part, fi.sunVector);
+            }
+            else if (ptd.part.Modules.GetModule<FARAeroPartModule>() is FARAeroPartModule module)
+            {
+                sunArea = module.ProjectedAreaWorld(fi.sunVector) * ptd.sunAreaMultiplier;
+            }
             return sunArea > 0 ? sunArea : fi.BaseFIGetSunArea(ptd);
         }
 
         private static double CalculateBodyArea(ModularFlightIntegrator fi, PartThermalData ptd)
         {
-            FARAeroPartModule module = ptd.part.Modules.GetModule<FARAeroPartModule>();
-
-            if (module is null)
-                return fi.BaseFIBodyArea(ptd);
-            double bodyArea = module.ProjectedAreaWorld(-fi.Vessel.upAxis) * ptd.bodyAreaMultiplier;
-
+            double bodyArea = 0;
+            if (fi.Vessel.GetComponent<VehicleOcclusion>() is VehicleOcclusion occlusion)
+            {
+                bodyArea = occlusion.BodyArea(ptd.part, -fi.Vessel.upAxis);
+            }
+            else if (ptd.part.Modules.GetModule<FARAeroPartModule>() is FARAeroPartModule module)
+            {
+                bodyArea = module.ProjectedAreaWorld(-fi.Vessel.upAxis) * ptd.bodyAreaMultiplier;
+            }
             return bodyArea > 0 ? bodyArea : fi.BaseFIBodyArea(ptd);
         }
     }
