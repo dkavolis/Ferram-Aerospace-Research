@@ -237,6 +237,7 @@ namespace FerramAerospaceResearch.UnityJobs
         [ReadOnly] public NativeArray<quaternion> quaternions;
         [ReadOnly] public NativeArray<quaternion> priorityList1;
         [ReadOnly] public NativeArray<quaternion> priorityList2;
+        [ReadOnly] public NativeArray<quaternion> priorityList3;
         [ReadOnly] public NativeHashMap<quaternion, EMPTY_STRUCT> completed;
         [ReadOnly] public int maxIndexForPriority0;
         [WriteOnly] public NativeMultiHashMap<int, int>.ParallelWriter map;
@@ -250,6 +251,9 @@ namespace FerramAerospaceResearch.UnityJobs
                 if (ind > -1)
                     pri = math.min(pri, (ind <= maxIndexForPriority0) ? 0 : 1);
                 ind = priorityList2.IndexOf(quaternions[index]);
+                if (ind > -1)
+                    pri = math.min(pri, (ind <= maxIndexForPriority0) ? 0 : 1);
+                ind = priorityList3.IndexOf(quaternions[index]);
                 if (ind > -1)
                     pri = math.min(pri, (ind <= maxIndexForPriority0) ? 0 : 1);
                 map.Add(pri, index);
