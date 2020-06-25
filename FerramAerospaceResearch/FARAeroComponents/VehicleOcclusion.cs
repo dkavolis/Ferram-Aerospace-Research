@@ -51,6 +51,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
         // Closest 3 convection and sun quaternions for each FixedUpdate
         private readonly SphereDistanceInfo[] convectionPoints = new SphereDistanceInfo[3];
         private readonly SphereDistanceInfo[] sunPoints = new SphereDistanceInfo[3];
+        private readonly SphereDistanceInfo[] bodyPoints = new SphereDistanceInfo[3];
 
         // VehicleVoxel center and extents
         private Vector3 center = Vector3.zero;
@@ -260,9 +261,12 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             JobHandle.ScheduleBatchedJobs();
         }
-        private void LaunchJobs(Transform t, SphereDistanceInfo[] convectionPoints, SphereDistanceInfo[] sunPoints, int suggestedJobs = 1)
+        private void LaunchJobs(Transform t, SphereDistanceInfo[] convPointsParam, SphereDistanceInfo[] sunPointsParam, SphereDistanceInfo[] bodyPointsParam, int suggestedJobs = 1)
         {
             Profiler.BeginSample("VehicleOcclusion-LaunchJobs");
+
+            var mapClearJob = new ClearNativeMultiHashMapIntInt { map = indexedPriorityMap }.Schedule();
+            //indexedPriorityMap.Clear();
 
             float4x4 localToWorldMatrix = t.transform.localToWorldMatrix;
             float offset = extents.magnitude * 2;
@@ -281,16 +285,21 @@ namespace FerramAerospaceResearch.FARAeroComponents
             var sunAngles = new NativeArray<float>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
             var sunAngleStats = new NativeArray<float3>(1, Allocator.Temp);
 
+            var bodyAngles = new NativeArray<float>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var bodyAngleStats = new NativeArray<float3>(1, Allocator.Temp);
+
             Vector3 localVelocity = Vessel.velocityD.magnitude < ZERO_VELOCITY_THRESHOLD ?
                                     Vector3.forward :
                                     (Vector3)(t.worldToLocalMatrix * (Vector3)Vessel.velocityD);
             Vector3 localSunVec = t.worldToLocalMatrix * (Planetarium.fetch.Sun.transform.position - t.position);
+            Vector3 downVec = t.worldToLocalMatrix * (Vector3) (-Vessel.upAxis);
 
             Profiler.EndSample();
             Profiler.BeginSample("VehicleOcclusion-LaunchJobs.JobSetup_Angles");
 
             JobHandle convectionAngleStatsJob = LaunchAngleJobs(localVelocity.normalized, ref convectionAngles, ref convectionAngleStats);
             JobHandle sunAngleStatsJob = LaunchAngleJobs(localSunVec.normalized, ref sunAngles, ref sunAngleStats);
+            JobHandle bodyAngleStatsJob = LaunchAngleJobs(downVec.normalized, ref bodyAngles, ref bodyAngleStats);
 
             Profiler.EndSample();
             Profiler.BeginSample("VehicleOcclusion-LaunchJobs.Allocation_Filters");
@@ -298,20 +307,20 @@ namespace FerramAerospaceResearch.FARAeroComponents
             // Sorting structures
             var sortedConvectionSDIList = new NativeList<SphereDistanceInfo>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
             var sortedSunSDIList = new NativeList<SphereDistanceInfo>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var sortedBodySDIList = new NativeList<SphereDistanceInfo>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
 
             var orderedConvectionQuaternions = new NativeList<quaternion>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
             var orderedSunQuaternions = new NativeList<quaternion>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            var orderedBodyQuaternions = new NativeList<quaternion>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
             Profiler.EndSample();
 
             Profiler.BeginSample("VehicleOcclusion-LaunchJobs.FilterJob_Setup");
 
-            var mapClearJob = new ClearNativeMultiHashMapIntInt { map = indexedPriorityMap }.Schedule();
-            //indexedPriorityMap.Clear();
-
             // Derive cutoff distance for prioritization
-            JobHandle.CompleteAll(ref sunAngleStatsJob, ref convectionAngleStatsJob);
+            JobHandle.CompleteAll(ref sunAngleStatsJob, ref convectionAngleStatsJob, ref bodyAngleStatsJob);
             float sunDistanceCutoff = math.dot(angleSelectionWeights, sunAngleStats[0]);
             float convectionDistanceCutoff = math.dot(angleSelectionWeights, convectionAngleStats[0]);
+            float bodyDistanceCutoff = math.dot(angleSelectionWeights, bodyAngleStats[0]);
 
             // Sorting process (fiter nearby, sort)
             JobHandle convectionPriorityMapJob = LaunchFilterAndSortJob(
@@ -326,22 +335,20 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 ref sortedSunSDIList,
                 ref orderedSunQuaternions);
 
-            var bucketSortPriority = new BucketSortByPriority
-            {
-                quaternions = Quaternions,
-                priorityList1 = orderedConvectionQuaternions.AsDeferredJobArray(),
-                priorityList2 = orderedSunQuaternions.AsDeferredJobArray(),
-                completed = processedQuaternionsMap,
-                maxIndexForPriority0 = 2,
-                map = indexedPriorityMap.AsParallelWriter(),
-            }.Schedule(FIBONACCI_LATTICE_SIZE, 16, JobHandle.CombineDependencies(convectionPriorityMapJob, sunPriorityMapJob, mapClearJob));
+            JobHandle bodyPriorityMapJob = LaunchFilterAndSortJob(
+                ref bodyAngles,
+                bodyDistanceCutoff,
+                ref sortedBodySDIList,
+                ref orderedBodyQuaternions);
+
             JobHandle.ScheduleBatchedJobs();
 
-            JobHandle.CompleteAll(ref convectionPriorityMapJob, ref sunPriorityMapJob);
+            JobHandle.CompleteAll(ref convectionPriorityMapJob, ref sunPriorityMapJob, ref bodyPriorityMapJob);
             for (int j = 0; j < 3; j++)
             {
-                convectionPoints[j] = sortedConvectionSDIList[j];
-                sunPoints[j] = sortedSunSDIList[j];
+                convPointsParam[j] = sortedConvectionSDIList[j];
+                sunPointsParam[j] = sortedSunSDIList[j];
+                bodyPointsParam[j] = sortedBodySDIList[j];
             }
 
             quaternionWorkList.Clear();
@@ -352,6 +359,17 @@ namespace FerramAerospaceResearch.FARAeroComponents
             if (state == State.Running)
             {
                 Profiler.BeginSample("VehicleOcclusion-LaunchJobs.Allocation_CastPlanes");
+                var bucketSortPriority = new BucketSortByPriority
+                {
+                    quaternions = Quaternions,
+                    priorityList1 = orderedConvectionQuaternions.AsDeferredJobArray(),
+                    priorityList2 = orderedSunQuaternions.AsDeferredJobArray(),
+                    priorityList3 = orderedBodyQuaternions.AsDeferredJobArray(),
+                    completed = processedQuaternionsMap,
+                    maxIndexForPriority0 = 2,
+                    map = indexedPriorityMap.AsParallelWriter(),
+                }.Schedule(FIBONACCI_LATTICE_SIZE, 16, mapClearJob);
+
                 var fullQuaternionIndexMap = new NativeHashMap<quaternion, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
                 var boundsArr = new NativeArray<float2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
                 var intervalArr = new NativeArray<float2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
@@ -388,6 +406,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 foreach (quaternion q in quaternionWorkList)
                 {
                     Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup");
+                    var clearMap1 = new ClearNativeMultiHashMapIntInt { map = allHitsMaps[i], }.Schedule();
+                    var clearMap2 = new ClearNativeHashMapIntFloat { map = allHitSizeMaps[i], }.Schedule();
+                    JobHandle.ScheduleBatchedJobs();
 
                     Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup.Prep");
                     int index = fullQuaternionIndexMap[q];
@@ -398,8 +419,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
                         index = index,
                         area = intervalArr[index].x * intervalArr[index].y,
                     };
-                    var clearMap1 = new ClearNativeMultiHashMapIntInt { map = allHitsMaps[i], }.Schedule();
-                    var clearMap2 = new ClearNativeHashMapIntFloat { map = allHitSizeMaps[i], }.Schedule();
                     Profiler.EndSample();
                     Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup.BuilderJob");
                     raycastJobTracker[i].builderJob = new OcclusionRaycastBuilder
@@ -412,7 +431,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                         dimensions = dimensionsArr[index],
                         interval = intervalArr[index],
                         commands = allCasts[i],
-                    }.Schedule(elements, 8, JobHandle.CombineDependencies(clearMap1, clearMap2));
+                    }.Schedule(elements, 8);
                     Profiler.EndSample();
                     Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup.RaycastJob");
                     raycastJobTracker[i].raycastJob = RaycastCommand.ScheduleBatch(allCasts[i], allHits[i], 1, raycastJobTracker[i].builderJob);
@@ -422,7 +441,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     {
                         hitsIn = allHits[i],
                         hitsMap = allHitsMaps[i].AsParallelWriter(),
-                    }.Schedule(elements, 8, raycastJobTracker[i].raycastJob);
+                    }.Schedule(elements, 8, JobHandle.CombineDependencies(clearMap1, clearMap2, raycastJobTracker[i].raycastJob));
                     Profiler.EndSample();
                     Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup.ProcessorJob");
                     raycastJobTracker[i].processorJob = new RaycastProcessorJob
@@ -453,14 +472,19 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             convectionAngles.Dispose();
             sunAngles.Dispose();
+            bodyAngles.Dispose();
+
             convectionAngleStats.Dispose();
             sunAngleStats.Dispose();
+            bodyAngleStats.Dispose();
 
             sortedConvectionSDIList.Dispose();
             sortedSunSDIList.Dispose();
+            sortedBodySDIList.Dispose();
 
             orderedConvectionQuaternions.Dispose();
             orderedSunQuaternions.Dispose();
+            orderedBodyQuaternions.Dispose();
 
             Profiler.EndSample();
         }
@@ -492,6 +516,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
         {
             Profiler.BeginSample("VehicleOcclusion-ProcessRaycastResults");
             quaternion rotation = jobInfo.q;
+            processedQuaternionsMap.TryAdd(rotation, new EMPTY_STRUCT { });
             if (sizeMap.Length > 0)
             {
                 // The value in sizeMap is the size of a single element [duplicative of jobInfo.area]
@@ -501,7 +526,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 {
                     int index = sizeIndices[key];
                     float size = summedHitAreas[index];
-                    processedQuaternionsMap.TryAdd(rotation, new EMPTY_STRUCT { });
                     if (hits[index].transform is Transform t)
                     {
                         while (t.parent != null)
@@ -530,7 +554,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 }
                 sizeIndices.Dispose();
             }
-
             Profiler.EndSample();
         }
 
@@ -544,7 +567,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             if (state == State.Initialized)
                 state = State.Running;
             if (state == State.Running || state == State.Completed)
-                LaunchJobs(Vessel.transform, convectionPoints, sunPoints, 0);
+                LaunchJobs(Vessel.transform, convectionPoints, sunPoints, bodyPoints, 0);
         }
 
         public void FixedUpdate()
@@ -563,7 +586,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             {
                 int threadCount = System.Environment.ProcessorCount - 1;
                 int updateJobs = math.min(MAX_JOBS, math.max(1, UPDATE_JOBS_PER_THREAD * threadCount));
-                LaunchJobs(Vessel.transform, convectionPoints, sunPoints, updateJobs);
+                LaunchJobs(Vessel.transform, convectionPoints, sunPoints, bodyPoints, updateJobs);
             }
         }
 
@@ -571,7 +594,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
         {
             if (!OnValidPhysicsVessel)
                 return;
-            if (state == State.Running && jobsInProgress == 0)
+            if (state == State.Running && jobsInProgress == 0 && processedQuaternionsMap.Length == Quaternions.Length)
                 state = State.Completed;
             else if (state == State.Running)
                 HandleJobCompletion();
@@ -637,7 +660,13 @@ namespace FerramAerospaceResearch.FARAeroComponents
         public float SunArea(Part p, Vector3 dir)
         {
             if (partOcclusionInfo.TryGetValue(p, out DirectionalOcclusionInfo info))
-                return Area(p, sunPoints, info.area);
+                return Area(p, sunPoints, info.convectionArea);
+            return 0;
+        }
+        public float BodyArea(Part p, Vector3 dir)
+        {
+            if (partOcclusionInfo.TryGetValue(p, out DirectionalOcclusionInfo info))
+                return Area(p, bodyPoints, info.convectionArea);
             return 0;
         }
 
