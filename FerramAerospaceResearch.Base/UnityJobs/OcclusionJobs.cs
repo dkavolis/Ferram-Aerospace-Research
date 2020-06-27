@@ -231,13 +231,33 @@ namespace FerramAerospaceResearch.UnityJobs
         }
     }
 
+    // Given anl array of items and a map, update the map s.t. map[item] = min(current value, index in array)
+    // Can't parallelize the read/write cycle of the NativeHashMap, so can't do .ParallelWriter
+    [BurstCompile]
+    public struct ListToIndexedMap : IJob
+    {
+        [ReadOnly] public NativeArray<quaternion> sorted;
+        public NativeHashMap<quaternion, int> map;
+        public void Execute()
+        {
+            for (int index=0; index < sorted.Length; index++)
+            {
+                quaternion q = sorted[index];
+                if (map.TryGetValue(q, out int i) && index < i)
+                {
+                    map[q] = index;
+                }
+                else
+                    map.TryAdd(q, index);
+            }
+        }
+    }
+
     [BurstCompile]
     public struct BucketSortByPriority : IJobParallelFor
     {
         [ReadOnly] public NativeArray<quaternion> quaternions;
-        [ReadOnly] public NativeArray<quaternion> priorityList1;
-        [ReadOnly] public NativeArray<quaternion> priorityList2;
-        [ReadOnly] public NativeArray<quaternion> priorityList3;
+        [ReadOnly] public NativeHashMap<quaternion, int> priorityMap;
         [ReadOnly] public NativeHashMap<quaternion, EMPTY_STRUCT> completed;
         [ReadOnly] public int maxIndexForPriority0;
         [WriteOnly] public NativeMultiHashMap<int, int>.ParallelWriter map;
@@ -247,15 +267,8 @@ namespace FerramAerospaceResearch.UnityJobs
             if (!completed.ContainsKey(quaternions[index]))
             {
                 int pri = 2;
-                int ind = priorityList1.IndexOf(quaternions[index]);
-                if (ind > -1)
-                    pri = math.min(pri, (ind <= maxIndexForPriority0) ? 0 : 1);
-                ind = priorityList2.IndexOf(quaternions[index]);
-                if (ind > -1)
-                    pri = math.min(pri, (ind <= maxIndexForPriority0) ? 0 : 1);
-                ind = priorityList3.IndexOf(quaternions[index]);
-                if (ind > -1)
-                    pri = math.min(pri, (ind <= maxIndexForPriority0) ? 0 : 1);
+                if (priorityMap.TryGetValue(quaternions[index], out int i))
+                    pri = math.min(pri, (i <= maxIndexForPriority0) ? 0 : 1);
                 map.Add(pri, index);
             }
         }
