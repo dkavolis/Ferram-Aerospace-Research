@@ -80,8 +80,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 fi.BaseFIetSkinPropertie(ptd);
                 return;
             }
-
-            part.skinUnexposedTemperature = Math.Max(part.skinTemperature, PhysicsGlobals.SpaceTemperature);
+            if (part.skinUnexposedTemperature < PhysicsGlobals.SpaceTemperature)
+                part.skinUnexposedTemperature = part.skinTemperature;
 
             double a = Math.Max(part.radiativeArea, 0.001);
             ptd.radAreaRecip = 1.0 / Math.Max(part.radiativeArea, 0.001);
@@ -119,6 +119,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 double d = ptd.convectionArea * ptd.radAreaRecip;
                 areaFraction = (!double.IsNaN(d) && d > 0.001) ? d : 0;
                 areaFraction = Math.Min(areaFraction, 1);
+                if (areaFraction < 0.01)
+                    areaFraction = 0;
             }
             if (areaFraction > 0)
             {
@@ -139,12 +141,12 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private static void StockSkinTemperatureHandling(PartThermalData ptd, double areaFraction)
         {
+            if (areaFraction <= 0)
+                return;
             Part part = ptd.part;
-            if (!ptd.exposed || (ptd.exposed && areaFraction != 1.0))
-            {
+            if (!ptd.exposed || areaFraction == 1.0)
                 part.skinUnexposedTemperature = part.skinTemperature;
-                ptd.exposed = true;
-            }
+            ptd.exposed = true;
             part.skinExposedMassMult = 1.0 / areaFraction;
             if (areaFraction < 1.0)
                 part.skinUnexposedMassMult = 1.0 / (1.0 - areaFraction);
@@ -165,9 +167,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     double dAreaFrac = areaFraction - part.skinExposedAreaFrac;
                     double dThermalEnergy;
                     if (dAreaFrac > 0.0)
-                    {
                         dThermalEnergy = dAreaFrac / unexposedAreaFrac * thermalEnergyInUnexposedSkin;
-                    }
                     else
                         dThermalEnergy = dAreaFrac / part.skinExposedAreaFrac * thermalEnergyInExposedSkin;
                     part.skinTemperature = (thermalEnergyInExposedSkin + dThermalEnergy) * part.skinExposedMassMult * part.skinThermalMassRecip;
@@ -364,13 +364,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private static double CalculateBodyArea(ModularFlightIntegrator fi, PartThermalData ptd)
         {
             double bodyArea = 0;
+            Vector3 bodyVec = fi.Vessel.transform.worldToLocalMatrix * (Vector3)(fi.Vessel.mainBody.position - fi.Vessel.transform.position);
             if (fi.Vessel.GetComponent<VehicleOcclusion>() is VehicleOcclusion occlusion)
             {
-                bodyArea = occlusion.BodyArea(ptd.part, -fi.Vessel.upAxis);
+                bodyArea = occlusion.BodyArea(ptd.part, bodyVec.normalized);
             }
             else if (ptd.part.Modules.GetModule<FARAeroPartModule>() is FARAeroPartModule module)
             {
-                bodyArea = module.ProjectedAreaWorld(-fi.Vessel.upAxis) * ptd.bodyAreaMultiplier;
+                bodyArea = module.ProjectedAreaWorld(bodyVec.normalized) * ptd.bodyAreaMultiplier;
             }
             return bodyArea > 0 ? bodyArea : fi.BaseFIBodyArea(ptd);
         }
