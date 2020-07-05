@@ -52,6 +52,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     public class ModularFlightIntegratorRegisterer : MonoBehaviour
     {
+        public static float MIN_AREA_FRACTION = 0.01f;
         private void Start()
         {
             FARLogger.Info("Modular Flight Integrator function registration started");
@@ -88,7 +89,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
 //            Vector3 localForward = (part.vessel.transform.worldToLocalMatrix * part.vessel.transform.forward);
 //            Vector3 localVel = part.vessel.transform.worldToLocalMatrix * fi.Vel;
-            double areaFraction = 1.0;
+            double areaFraction = 0;
             if (!part.ShieldedFromAirstream && part.atmDensity > 0)
             {
                 // Stock calculation:
@@ -119,7 +120,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 double d = ptd.convectionArea * ptd.radAreaRecip;
                 areaFraction = (!double.IsNaN(d) && d > 0.001) ? d : 0;
                 areaFraction = Math.Min(areaFraction, 1);
-                if (areaFraction < 0.01)
+                if (areaFraction < MIN_AREA_FRACTION)
                     areaFraction = 0;
             }
             if (areaFraction > 0)
