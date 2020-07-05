@@ -191,11 +191,24 @@ namespace FerramAerospaceResearch.UnityJobs
     }
 
     [BurstCompile]
+    public struct DotProductJob : IJobParallelFor
+    {
+        [ReadOnly] public NativeArray<float3> A;
+        [ReadOnly] public float3 B;
+        [WriteOnly] public NativeArray<float> result;
+
+        public void Execute(int index)
+        {
+            result[index] = math.dot(A[index], B);
+        }
+    }
+
+    [BurstCompile]
     public struct SortedFilterAndMapByDistanceJob : IJob
     {
         [ReadOnly] public NativeArray<quaternion> quaternions;
         [ReadOnly] public NativeArray<float> distances;
-        [ReadOnly] public float cutoffDistance;
+        [ReadOnly] public NativeArray<float> cutoffDistance;
         public NativeList<SphereDistanceInfo> sdiList;
         [WriteOnly] public NativeList<quaternion> orderedQuaternions;
 
@@ -203,7 +216,7 @@ namespace FerramAerospaceResearch.UnityJobs
         {
             for (int i = 0; i < quaternions.Length; i++)
             {
-                if (distances[i] < cutoffDistance)
+                if (distances[i] < cutoffDistance[0])
                 {
                     SphereDistanceInfo sdi = new SphereDistanceInfo
                     {
