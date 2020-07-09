@@ -138,6 +138,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 ptd.convectionArea = part.skinExposedArea = part.skinUnexposedMassMult = 0.0;
                 part.skinExposedAreaFrac = part.skinExposedMassMult = 1.0;
             }
+            ptd.convectionTempMultiplier = ptd.exposed ? 1 : 0;
         }
 
         private static void StockSkinTemperatureHandling(PartThermalData ptd, double areaFraction)
