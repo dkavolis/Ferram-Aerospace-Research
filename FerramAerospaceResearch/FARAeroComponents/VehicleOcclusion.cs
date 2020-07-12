@@ -68,18 +68,18 @@ namespace FerramAerospaceResearch.FARAeroComponents
         // Cleaned and Allocated in ResetCalculations().  Disposed in OnDestroy()
         private NativeMultiHashMap<int, int> indexedPriorityMap;
 
-        private NativeArray<RaycastCommand>[] allCasts = new NativeArray<RaycastCommand>[MAX_JOBS];
-        private NativeArray<RaycastHit>[] allHits = new NativeArray<RaycastHit>[MAX_JOBS];
-        private NativeMultiHashMap<int, int>[] allHitsMaps = new NativeMultiHashMap<int, int>[MAX_JOBS];
-        private NativeHashMap<int, float>[] allHitSizeMaps = new NativeHashMap<int, float>[MAX_JOBS];
-        private NativeArray<float>[] allSummedHitAreas = new NativeArray<float>[MAX_JOBS];
+        private readonly NativeArray<RaycastCommand>[] allCasts = new NativeArray<RaycastCommand>[MAX_JOBS];
+        private readonly NativeArray<RaycastHit>[] allHits = new NativeArray<RaycastHit>[MAX_JOBS];
+        private readonly NativeMultiHashMap<int, int>[] allHitsMaps = new NativeMultiHashMap<int, int>[MAX_JOBS];
+        private readonly NativeHashMap<int, float>[] allHitSizeMaps = new NativeHashMap<int, float>[MAX_JOBS];
+        private readonly NativeArray<float>[] allSummedHitAreas = new NativeArray<float>[MAX_JOBS];
 
         // allCasts => allHits
         // allHits => allHitMaps
         // allHitMaps => allHitSizeMaps,
         //               allSummedHitAreas,
 
-        private RaycastJobInfo[] raycastJobTracker = new RaycastJobInfo[MAX_JOBS];
+        private readonly RaycastJobInfo[] raycastJobTracker = new RaycastJobInfo[MAX_JOBS];
         public bool RequestReset = false;
 
         public void Setup(FARVesselAero farVesselAero)
@@ -180,7 +180,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             TimingManager.LateUpdateRemove(TimingManager.TimingStage.Late, LateUpdateComplete);
         }
 
-        private void LaunchAngleJobs(ref DirectionPreprocessInfo info, ref NativeArray<quaternion> quaternions)
+        private void LaunchAngleJobs(ref DirectionPreprocessInfo info, in NativeArray<quaternion> quaternions)
         {
             var angleJob = new AngleBetween
             {
@@ -215,14 +215,14 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private void LaunchRaycastJobs(
             float4x4 localToWorldMatrix,
-            ref NativeArray<quaternion> quaternions,
-            ref NativeHashMap<quaternion, int> fullQuaternionIndexMap,
-            ref NativeArray<float2> boundsArr,
-            ref NativeArray<float2> intervalArr,
-            ref NativeArray<int2> dimensionsArr,
-            ref NativeArray<float3> forwardArr,
-            ref NativeArray<float3> rightArr,
-            ref NativeArray<float3> upArr,
+            in NativeArray<quaternion> quaternions,
+            in NativeHashMap<quaternion, int> fullQuaternionIndexMap,
+            in NativeArray<float2> boundsArr,
+            in NativeArray<float2> intervalArr,
+            in NativeArray<int2> dimensionsArr,
+            in NativeArray<float3> forwardArr,
+            in NativeArray<float3> rightArr,
+            in NativeArray<float3> upArr,
             out JobHandle indexMapJob,
             out JobHandle vectorJob,
             out JobHandle intervalJob)
@@ -282,9 +282,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
             Vessel v,
             DirectionPreprocessInfo[] dirInfos,
             RaycastJobInfo[] tracker,
-            ref NativeArray<quaternion> quaternions,
-            ref NativeHashMap<quaternion, EMPTY_STRUCT> processedMap,
-            ref NativeMultiHashMap<int, int> priorityMap,
+            in NativeArray<quaternion> quaternions,
+            in NativeHashMap<quaternion, EMPTY_STRUCT> processedMap,
+            in NativeMultiHashMap<int, int> priorityMap,
             int suggestedJobs,
             float3 startPosition,
             float offset,
@@ -296,8 +296,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
         {
             Profiler.BeginSample("VehicleOcclusion-LaunchJobs.Allocation_CastPlanes");
             var mapClearJob = new ClearNativeMultiHashMapIntInt { map = priorityMap }.Schedule();
-            var workList = new NativeList<quaternion>(MAX_JOBS, Allocator.TempJob);
-            var indexMap = new NativeHashMap<quaternion, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            using var workList = new NativeList<quaternion>(MAX_JOBS, Allocator.TempJob);
+            using var indexMap = new NativeHashMap<quaternion, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
             JobHandle lastJob = default;
             for (int j = 0; j < dirInfos.Length; j++)
             {
@@ -319,36 +319,36 @@ namespace FerramAerospaceResearch.FARAeroComponents
             }.Schedule(FIBONACCI_LATTICE_SIZE, 16, JobHandle.CombineDependencies(lastJob, mapClearJob));
             JobHandle.ScheduleBatchedJobs();
 
-            var fullQuaternionIndexMap = new NativeHashMap<quaternion, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
-            var boundsArr = new NativeArray<float2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
-            var intervalArr = new NativeArray<float2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            var dimensionsArr = new NativeArray<int2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            var forwardArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            var rightArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            var upArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            using var fullQuaternionIndexMap = new NativeHashMap<quaternion, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            using var boundsArr = new NativeArray<float2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            using var intervalArr = new NativeArray<float2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            using var dimensionsArr = new NativeArray<int2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            using var forwardArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            using var rightArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            using var upArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
             Profiler.EndSample();
 
             // Calculate raycast plane orientation/offset, dimensions, spacing, area/ray, element count
             Profiler.BeginSample("VehicleOcclusion-LaunchJobs.JobSetup_CastPlanes");
             LaunchRaycastJobs(
                 v.transform.localToWorldMatrix,
-                ref quaternions,
-                ref fullQuaternionIndexMap,
-                ref boundsArr,
-                ref intervalArr,
-                ref dimensionsArr,
-                ref forwardArr,
-                ref rightArr,
-                ref upArr,
+                in quaternions,
+                in fullQuaternionIndexMap,
+                in boundsArr,
+                in intervalArr,
+                in dimensionsArr,
+                in forwardArr,
+                in rightArr,
+                in upArr,
                 out var makeFullIndexMap,
                 out var setVectorsJob,
                 out var intervalJob);
             Profiler.EndSample();
 
             bucketSortPriority.Complete();
-            SelectQuaternions(ref workList, ref priorityMap, MAX_JOBS, 0);  // Fill priority 0 (required)
-            SelectQuaternions(ref workList, ref priorityMap, suggestedJobs, 1);    // Append priority 1 (desired) until size
-            SelectQuaternions(ref workList, ref priorityMap, suggestedJobs, 2);    // Append priority 2 (anything) until size
+            SelectQuaternions(workList, priorityMap, MAX_JOBS, 0);  // Fill priority 0 (required)
+            SelectQuaternions(workList, priorityMap, suggestedJobs, 1);    // Append priority 1 (desired) until size
+            SelectQuaternions(workList, priorityMap, suggestedJobs, 2);    // Append priority 2 (anything) until size
 
             JobHandle.CompleteAll(ref setVectorsJob, ref intervalJob, ref makeFullIndexMap);
 
@@ -413,18 +413,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 i++;
                 
             }
-
-            //jobsInProgress = i;
-
-            indexMap.Dispose();
-            boundsArr.Dispose();
-            intervalArr.Dispose();
-            dimensionsArr.Dispose();
-            forwardArr.Dispose();
-            rightArr.Dispose();
-            upArr.Dispose();
-            workList.Dispose();
-            fullQuaternionIndexMap.Dispose();
             return i;
         }
 
@@ -442,11 +430,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
             BuildPreprocessInfo(dirInfos, dirs);
 
             for (int i=0; i< dirs.Count; i++)
-                LaunchAngleJobs(ref dirInfos[i], ref Quaternions);
+                LaunchAngleJobs(ref dirInfos[i], Quaternions);
             for (int i = 0; i < dirs.Count; i++)
                 dirInfos[i].sortJob.Complete();
 
-            NativeList<quaternion> requiredQuaternions = new NativeList<quaternion>(sdiArrays.Count * dirs.Count, Allocator.Temp);
+            using NativeList<quaternion> requiredQuaternions = new NativeList<quaternion>(sdiArrays.Count * dirs.Count, Allocator.Temp);
 
             for (int i = 0; i < sdiArrays.Count; i++)
             {
@@ -469,9 +457,9 @@ namespace FerramAerospaceResearch.FARAeroComponents
                                     Vessel,
                                     dirInfos,
                                     raycastJobTracker,
-                                    ref Quaternions,
-                                    ref processedQuaternionsMap,
-                                    ref indexedPriorityMap,
+                                    Quaternions,
+                                    processedQuaternionsMap,
+                                    indexedPriorityMap,
                                     suggestedJobs,
                                     startPosition,
                                     offset,
@@ -486,7 +474,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
             {
                 dirInfos[i].DisposeAll();
             }
-            requiredQuaternions.Dispose();
             Profiler.EndSample();
         }
 
@@ -505,7 +492,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
                 var infos = new DirectionPreprocessInfo[1];
                 BuildPreprocessInfo(infos, new List<Vector3>(1) { dir.normalized });
-                LaunchAngleJobs(ref infos[0], ref Quaternions);
+                LaunchAngleJobs(ref infos[0], Quaternions);
                 infos[0].sortJob.Complete();
 
                 NativeList<quaternion> requiredQuaternions = new NativeList<quaternion>(3, Allocator.Temp);
@@ -518,7 +505,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 // Raycast if necessary
                 if (requiredQuaternions.Length > 0)
                 {
-                    var requiredArr = new NativeArray<quaternion>(requiredQuaternions, Allocator.Temp);
+                    using var requiredArr = new NativeArray<quaternion>(requiredQuaternions, Allocator.Temp);
                     var tracker = new RaycastJobInfo[3];
 
                     var casts = new NativeArray<RaycastCommand>[3];
@@ -526,15 +513,15 @@ namespace FerramAerospaceResearch.FARAeroComponents
                     var hitsMaps = new NativeMultiHashMap<int, int>[3];
                     var summedHitAreas = new NativeArray<float>[3];
                     var hitSizeMaps = new NativeHashMap<int, float>[3];
-                    var emptyPriMap = new NativeMultiHashMap<int, int>(1, Allocator.TempJob);
+                    using var emptyPriMap = new NativeMultiHashMap<int, int>(1, Allocator.TempJob);
 
                     jobsInProgress = BuildAndLaunchRaycastJobs(
                                         p.vessel,
                                         infos,
                                         tracker,
-                                        ref requiredArr,
-                                        ref processedQuaternionsMap,
-                                        ref emptyPriMap,
+                                        requiredArr,
+                                        processedQuaternionsMap,
+                                        emptyPriMap,
                                         MAX_JOBS,
                                         startPosition,
                                         offset,
@@ -554,8 +541,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
                         hitSizeMaps[i].Dispose();
                         i++;
                     }
-
-                    requiredArr.Dispose();
                 }
 
                 // Raycasts are complete, we have saved the angle data.
@@ -600,7 +585,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             }
         }
 
-        private void SelectQuaternions(ref NativeList<quaternion> q, ref NativeMultiHashMap<int, int> map, int maxSize = MAX_JOBS, int key=0)
+        private void SelectQuaternions(in NativeList<quaternion> q, in NativeMultiHashMap<int, int> map, int maxSize = MAX_JOBS, int key=0)
         {
             if (q.Length < maxSize && map.TryGetFirstValue(key, out int index, out NativeMultiHashMapIterator<int> iter))
             {
@@ -612,7 +597,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             }
         }
 
-        public void ProcessRaycastResults(ref RaycastJobInfo jobInfo, ref NativeHashMap<int, float> sizeMap, ref NativeArray<RaycastHit> hits, ref NativeArray<float> summedHitAreas)
+        public void ProcessRaycastResults(ref RaycastJobInfo jobInfo, in NativeHashMap<int, float> sizeMap, in NativeArray<RaycastHit> hits, in NativeArray<float> summedHitAreas)
         {
             Profiler.BeginSample("VehicleOcclusion-ProcessRaycastResults");
             quaternion rotation = jobInfo.q;
@@ -737,7 +722,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             for (int i=0; i<jobsInProgress; i++)
            {
                 tracker[i].processorJob.Complete();
-                ProcessRaycastResults(ref tracker[i], ref allHitSizeMaps[i], ref allHits[i], ref allSummedHitAreas[i]);
+                ProcessRaycastResults(ref tracker[i], allHitSizeMaps[i], allHits[i], allSummedHitAreas[i]);
             }
         }
 
