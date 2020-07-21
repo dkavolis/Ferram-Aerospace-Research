@@ -90,11 +90,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private DummyAirstreamShield shield;
 
-        public const string groupName = "FARAeroGroup";
-        public const string groupDisplayName = "FAR Debug";
+        public const string GroupName = "FARAeroGroup";
+        public const string GroupDisplayName = "FAR Debug";
         private bool fieldsVisible;
         private bool thermalFieldsVisible;
-        public readonly List<BaseField> thermalFields = new List<BaseField>();
+        public readonly List<BaseField> ThermalFields = new List<BaseField>();
 
         // ReSharper disable once NotAccessedField.Global -> unity
         [KSPField(isPersistant = false,
@@ -102,8 +102,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
                   guiActiveEditor = false,
                   guiFormat = "F3",
                   guiUnits = "FARUnitKN",
-                  groupName = groupName,
-                  groupDisplayName = groupDisplayName)]
+                  groupName = GroupName,
+                  groupDisplayName = GroupDisplayName)]
         public float dragForce;
 
         // ReSharper disable once NotAccessedField.Global -> unity
@@ -112,51 +112,51 @@ namespace FerramAerospaceResearch.FARAeroComponents
                   guiActiveEditor = false,
                   guiFormat = "F3",
                   guiUnits = "FARUnitKN",
-                  groupName = groupName)]
+                  groupName = GroupName)]
         public float liftForce;
 
-        [KSPField(guiFormat = "F3", guiUnits = "FARUnitMSq", groupName = groupName, groupDisplayName = groupDisplayName)]
+        [KSPField(guiFormat = "F3", guiUnits = "FARUnitMSq", groupName = GroupName, groupDisplayName = GroupDisplayName)]
         public double radiativeArea;
-        [KSPField(guiFormat = "F3", guiUnits = "FARUnitMSq", groupName = groupName)]
+        [KSPField(guiFormat = "F3", guiUnits = "FARUnitMSq", groupName = GroupName)]
         public double convectionArea;
-        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = GroupName)]
         public double exposedSkinTemp;
-        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = GroupName)]
         public double unexposedSkinTemp;
-        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = GroupName)]
         public double partTemp;
-        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = GroupName)]
         public double atmosphereTemp;
-        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = GroupName)]
         public double externalTemp;
-        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "K", groupName = GroupName)]
         public double exposedBackgroundTemp;
 
-        [KSPField(guiFormat = "F3", groupName = groupName)]
+        [KSPField(guiFormat = "F3", groupName = GroupName)]
         public double convergenceFactor;
-        [KSPField(guiFormat = "F3", groupName = groupName)]
+        [KSPField(guiFormat = "F3", groupName = GroupName)]
         public double skinSkinConductionMult;
-        [KSPField(guiFormat = "F3", groupName = groupName)]
-        public double SkinSkinConductionFactor;
-        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = groupName)]
+        [KSPField(guiFormat = "F3", groupName = GroupName)]
+        public double skinSkinConductionFactor;
+        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = GroupName)]
         public double convectionFlux;
-        [KSPField(guiFormat = "F3", groupName = groupName)]
+        [KSPField(guiFormat = "F3", groupName = GroupName)]
         public double finalConvCoeff;
-        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = GroupName)]
         public double intConductionFlux;
-        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = GroupName)]
         public double skinConductionFlux;
-        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = GroupName)]
         public double skinInternalConductionFlux;
-        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = GroupName)]
         public double unexpSkinInternalConductionFlux;
-        [KSPField(guiFormat = "P1", groupName = groupName)]
+        [KSPField(guiFormat = "P1", groupName = GroupName)]
         public double skinExposedAreaFrac;
-        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = GroupName)]
         public double radiationFlux;
-        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = GroupName)]
         public double unexpRadiationFlux;
-        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = groupName)]
+        [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = GroupName)]
         public double skinSkinConductionFlux;
 
         private Transform partTransform;
@@ -362,40 +362,40 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private void AddThermalDebugFields()
         {
-            thermalFields.Clear();
-            thermalFields.Add(Fields[nameof(convergenceFactor)]);
-            thermalFields.Add(Fields[nameof(skinSkinConductionMult)]);
-            thermalFields.Add(Fields[nameof(SkinSkinConductionFactor)]);
-            thermalFields.Add(Fields[nameof(convectionArea)]);
-            thermalFields.Add(Fields[nameof(radiativeArea)]);
-            thermalFields.Add(Fields[nameof(skinExposedAreaFrac)]);
-            thermalFields.Add(Fields[nameof(exposedSkinTemp)]);
-            thermalFields.Add(Fields[nameof(unexposedSkinTemp)]);
-            thermalFields.Add(Fields[nameof(partTemp)]);
-            thermalFields.Add(Fields[nameof(externalTemp)]);
-            thermalFields.Add(Fields[nameof(atmosphereTemp)]);
-            thermalFields.Add(Fields[nameof(exposedBackgroundTemp)]);
-            thermalFields.Add(Fields[nameof(convectionFlux)]);
-            thermalFields.Add(Fields[nameof(finalConvCoeff)]);
-            thermalFields.Add(Fields[nameof(intConductionFlux)]);
-            thermalFields.Add(Fields[nameof(skinConductionFlux)]);
-            thermalFields.Add(Fields[nameof(skinInternalConductionFlux)]);
-            thermalFields.Add(Fields[nameof(skinSkinConductionFlux)]);
-            thermalFields.Add(Fields[nameof(unexpSkinInternalConductionFlux)]);
-            thermalFields.Add(Fields[nameof(radiationFlux)]);
-            thermalFields.Add(Fields[nameof(unexpRadiationFlux)]);
+            ThermalFields.Clear();
+            ThermalFields.Add(Fields[nameof(convergenceFactor)]);
+            ThermalFields.Add(Fields[nameof(skinSkinConductionMult)]);
+            ThermalFields.Add(Fields[nameof(skinSkinConductionFactor)]);
+            ThermalFields.Add(Fields[nameof(convectionArea)]);
+            ThermalFields.Add(Fields[nameof(radiativeArea)]);
+            ThermalFields.Add(Fields[nameof(skinExposedAreaFrac)]);
+            ThermalFields.Add(Fields[nameof(exposedSkinTemp)]);
+            ThermalFields.Add(Fields[nameof(unexposedSkinTemp)]);
+            ThermalFields.Add(Fields[nameof(partTemp)]);
+            ThermalFields.Add(Fields[nameof(externalTemp)]);
+            ThermalFields.Add(Fields[nameof(atmosphereTemp)]);
+            ThermalFields.Add(Fields[nameof(exposedBackgroundTemp)]);
+            ThermalFields.Add(Fields[nameof(convectionFlux)]);
+            ThermalFields.Add(Fields[nameof(finalConvCoeff)]);
+            ThermalFields.Add(Fields[nameof(intConductionFlux)]);
+            ThermalFields.Add(Fields[nameof(skinConductionFlux)]);
+            ThermalFields.Add(Fields[nameof(skinInternalConductionFlux)]);
+            ThermalFields.Add(Fields[nameof(skinSkinConductionFlux)]);
+            ThermalFields.Add(Fields[nameof(unexpSkinInternalConductionFlux)]);
+            ThermalFields.Add(Fields[nameof(radiationFlux)]);
+            ThermalFields.Add(Fields[nameof(unexpRadiationFlux)]);
         }
         private void SetThermalFieldsVisibility(bool enabled)
         {
             thermalFieldsVisible = enabled;
-            foreach (BaseField f in thermalFields)
+            foreach (BaseField f in ThermalFields)
                 f.guiActive = enabled;
         }
         private void UpdateThermalDebugFields()
         {
             convergenceFactor = PhysicsGlobals.ThermalConvergenceFactor;
             skinSkinConductionMult = part.skinSkinConductionMult;
-            SkinSkinConductionFactor = PhysicsGlobals.SkinSkinConductionFactor;
+            skinSkinConductionFactor = PhysicsGlobals.SkinSkinConductionFactor;
             convectionArea = part.ptd.convectionArea;
             radiativeArea = 1f / part.ptd.radAreaRecip;
             skinExposedAreaFrac = part.skinExposedAreaFrac;
