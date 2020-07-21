@@ -30,6 +30,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         public enum State { Invalid, Initialized, Running, Completed }
         public State state = State.Invalid;
+        public static bool PassStarted { get; private set; } = false;
+        public static int JobsInCurrentPass { get; private set; } = 0;
         private bool resetCoroutineRunning = false;
         private IEnumerator resetWaitCoroutine;
 
@@ -668,11 +670,18 @@ namespace FerramAerospaceResearch.FARAeroComponents
             {
                 SetupDefaultDirs(directionList, Vessel);
                 LaunchJobs(Vessel, directionPreprocessInfos, directionList, occlusionPointsList, 0);
+                if (!PassStarted)
+                {
+                    PassStarted = true;
+                    JobsInCurrentPass = 0;
+                }
+                JobsInCurrentPass += jobsInProgress;
             }
         }
 
         public void FixedUpdate()
         {
+            PassStarted = false;
             if (!OnValidPhysicsVessel)
                 return;
             if (state == State.Running)
@@ -686,14 +695,22 @@ namespace FerramAerospaceResearch.FARAeroComponents
             if (state == State.Running)
             {
                 int threadCount = System.Environment.ProcessorCount - 1;
-                int updateJobs = math.min(MAX_JOBS, math.max(1, UPDATE_JOBS_PER_THREAD * threadCount));
+                int availableJobs = math.max(MAX_JOBS - JobsInCurrentPass, 0);
+                int updateJobs = math.min(availableJobs, math.max(1, UPDATE_JOBS_PER_THREAD * threadCount));
                 SetupDefaultDirs(directionList, Vessel);
                 LaunchJobs(Vessel, directionPreprocessInfos, directionList, occlusionPointsList, updateJobs);
+                if (!PassStarted)
+                {
+                    PassStarted = true;
+                    JobsInCurrentPass = 0;
+                }
+                JobsInCurrentPass += jobsInProgress;
             }
         }
 
         public void LateUpdateComplete()
         {
+            PassStarted = false;
             if (!OnValidPhysicsVessel)
                 return;
             if (state == State.Running && jobsInProgress == 0 && processedQuaternionsMap.Length == Quaternions.Length)
