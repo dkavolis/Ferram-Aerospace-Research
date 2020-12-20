@@ -64,8 +64,21 @@ namespace FerramAerospaceResearch.FARAeroComponents
             ModularFlightIntegrator.RegisterGetBodyAreaOverride(CalculateBodyArea);
             ModularFlightIntegrator.RegisterUpdateOcclusionOverride(UpdateOcclusion);
             ModularFlightIntegrator.RegisterSetSkinProperties(SetSkinProperties);
+            ModularFlightIntegrator.RegisterUpdateConductionOverride(UpdateConduction);
             FARLogger.Info("Modular Flight Integrator function registration complete");
             Destroy(this);
+        }
+
+        private void UpdateConduction(ModularFlightIntegrator fi)
+        {
+            // Improve the skinSkinTransfer calc: move the exposed fraction into the sqrt.
+            foreach (PartThermalData ptd in fi.partThermalDataList)
+            {
+                double frac = Math.Min(ptd.part.skinExposedAreaFrac, 1.0 - ptd.part.skinExposedAreaFrac);
+                double exposedArea = frac * ptd.part.radiativeArea;
+                ptd.skinSkinTransfer = ptd.part.skinSkinConductionMult * PhysicsGlobals.SkinSkinConductionFactor * 2.0 * Math.Sqrt(exposedArea);
+            }
+            fi.BaseFIUpdateConduction();
         }
 
         // This is the primary consumer of DragCube.ExposedArea, so handling this ourselves may
