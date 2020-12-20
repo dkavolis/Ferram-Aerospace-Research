@@ -133,9 +133,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 p.AddModule("FARAeroPartModule").OnStart(StartState());
                 _currentGeoModules.Add(g);
             }
-
-            vehicleOcclusion = Vessel.gameObject.AddComponent<VehicleOcclusion>();
-            vehicleOcclusion.Setup(this);
+            if (Settings.OcclusionSettings.UseRaycaster)
+            {
+                vehicleOcclusion = Vessel.gameObject.AddComponent<VehicleOcclusion>();
+                vehicleOcclusion.Setup(this);
+            }
 
             RequestUpdateVoxel(false);
 
@@ -189,7 +191,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                                             out _currentAeroSections,
                                             out _legacyWingModels);
 
-                if (vehicleOcclusion is null)
+                if (vehicleOcclusion is null && Settings.OcclusionSettings.UseRaycaster)
                 {
                     vehicleOcclusion = Vessel.gameObject.AddComponent<VehicleOcclusion>();
                     vehicleOcclusion.Setup(this);
