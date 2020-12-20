@@ -7,6 +7,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Jobs;
 using UnityEngine.Profiling;
+using FerramAerospaceResearch.Settings;
 
 /* Theory of Job Control:
  * At beginning of FixedUpdate cycle, pre-calculate the occlusion orientations we need.
@@ -21,13 +22,6 @@ namespace FerramAerospaceResearch.FARAeroComponents
 {
     public class VehicleOcclusion : MonoBehaviour
     {
-        const int MAX_JOBS = 10;
-        const int UPDATE_JOBS_PER_THREAD = 3;
-        const int FIBONACCI_LATTICE_SIZE = 2000;
-        const float RESET_INTERVAL_SEC = 30;
-        const double ZERO_VELOCITY_THRESHOLD = 0.01;    // Velocity < threshold will be treated as 0 for vessel travel direction
-        // 1000 points produces typical misses 2-3 degrees when optimized for average miss distance.
-
         public enum State { Invalid, Initialized, Running, Completed }
         public State state = State.Invalid;
         public static bool PassStarted { get; private set; } = false;
@@ -38,7 +32,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private FARVesselAero farVesselAero;
         //private Vessel Vessel => farVesselAero?.Vessel;
         public Vessel Vessel { get; private set; }
-        bool OnValidPhysicsVessel => farVesselAero && Vessel && !Vessel.packed;
+        bool OnValidPhysicsVessel => farVesselAero && Vessel && (!Vessel.packed || Vessel == FlightIntegrator.ActiveVesselFI?.Vessel);
 
         private readonly Dictionary<Transform, Part> partsByTransform = new Dictionary<Transform, Part>();
         private readonly Dictionary<Part, DirectionalOcclusionInfo> partOcclusionInfo = new Dictionary<Part, DirectionalOcclusionInfo>();
@@ -55,7 +49,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private readonly SphereDistanceInfo[] bodyPoints = new SphereDistanceInfo[3];
         
         private readonly DirectionPreprocessInfo[] directionPreprocessInfos = new DirectionPreprocessInfo[3];
-        private readonly List<Vector3> directionList = new List<Vector3>(MAX_JOBS);
+        private readonly List<Vector3> directionList = new List<Vector3>(OcclusionSettings.MaxJobs);
         private readonly List<SphereDistanceInfo[]> occlusionPointsList = new List<SphereDistanceInfo[]>(3);
         public float3 DefaultAngleWeights => new float3(0.85f, 0, 0.15f);
 
@@ -70,18 +64,18 @@ namespace FerramAerospaceResearch.FARAeroComponents
         // Cleaned and Allocated in ResetCalculations().  Disposed in OnDestroy()
         private NativeMultiHashMap<int, int> indexedPriorityMap;
 
-        private readonly NativeArray<RaycastCommand>[] allCasts = new NativeArray<RaycastCommand>[MAX_JOBS];
-        private readonly NativeArray<RaycastHit>[] allHits = new NativeArray<RaycastHit>[MAX_JOBS];
-        private readonly NativeMultiHashMap<int, int>[] allHitsMaps = new NativeMultiHashMap<int, int>[MAX_JOBS];
-        private readonly NativeHashMap<int, float>[] allHitSizeMaps = new NativeHashMap<int, float>[MAX_JOBS];
-        private readonly NativeArray<float>[] allSummedHitAreas = new NativeArray<float>[MAX_JOBS];
+        private readonly NativeArray<RaycastCommand>[] allCasts = new NativeArray<RaycastCommand>[OcclusionSettings.MaxJobs];
+        private readonly NativeArray<RaycastHit>[] allHits = new NativeArray<RaycastHit>[OcclusionSettings.MaxJobs];
+        private readonly NativeMultiHashMap<int, int>[] allHitsMaps = new NativeMultiHashMap<int, int>[OcclusionSettings.MaxJobs];
+        private readonly NativeHashMap<int, float>[] allHitSizeMaps = new NativeHashMap<int, float>[OcclusionSettings.MaxJobs];
+        private readonly NativeArray<float>[] allSummedHitAreas = new NativeArray<float>[OcclusionSettings.MaxJobs];
 
         // allCasts => allHits
         // allHits => allHitMaps
         // allHitMaps => allHitSizeMaps,
         //               allSummedHitAreas,
 
-        private readonly RaycastJobInfo[] raycastJobTracker = new RaycastJobInfo[MAX_JOBS];
+        private readonly RaycastJobInfo[] raycastJobTracker = new RaycastJobInfo[OcclusionSettings.MaxJobs];
         public bool RequestReset = false;
 
         public void Setup(FARVesselAero farVesselAero)
@@ -132,24 +126,25 @@ namespace FerramAerospaceResearch.FARAeroComponents
             partOcclusionInfo.Clear();
             DisposeLongTermAllocations();
 
-            indexedPriorityMap = new NativeMultiHashMap<int, int>(FIBONACCI_LATTICE_SIZE, Allocator.Persistent);
-            Quaternions = new NativeArray<quaternion>(FIBONACCI_LATTICE_SIZE, Allocator.Persistent);
+            indexedPriorityMap = new NativeMultiHashMap<int, int>(OcclusionSettings.FibonacciLatticeSize, Allocator.Persistent);
+            Quaternions = new NativeArray<quaternion>(OcclusionSettings.FibonacciLatticeSize, Allocator.Persistent);
             var handle = new SpherePointsJob
             {
-                points = FIBONACCI_LATTICE_SIZE,
-                epsilon = Lattice_epsilon(FIBONACCI_LATTICE_SIZE),
+                points = OcclusionSettings.FibonacciLatticeSize,
+                epsilon = Lattice_epsilon(OcclusionSettings.FibonacciLatticeSize),
                 results = Quaternions,
-            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+            }.Schedule(OcclusionSettings.FibonacciLatticeSize, 16);
             JobHandle.ScheduleBatchedJobs();
 
-            processedQuaternionsMap = new NativeHashMap<quaternion, EMPTY_STRUCT>(FIBONACCI_LATTICE_SIZE, Allocator.Persistent);
-            for (int i=0; i<MAX_JOBS; i++)
+            processedQuaternionsMap = new NativeHashMap<quaternion, EMPTY_STRUCT>(OcclusionSettings.FibonacciLatticeSize, Allocator.Persistent);
+            int sz = OcclusionSettings.MaxRaycastDimension * OcclusionSettings.MaxRaycastDimension;
+            for (int i=0; i<OcclusionSettings.MaxJobs; i++)
             {
-                allCasts[i] = new NativeArray<RaycastCommand>(10000, Allocator.Persistent);
-                allHits[i] = new NativeArray<RaycastHit>(10000, Allocator.Persistent);
-                allHitsMaps[i] = new NativeMultiHashMap<int, int>(10000, Allocator.Persistent);
-                allSummedHitAreas[i] = new NativeArray<float>(10000, Allocator.Persistent);
-                allHitSizeMaps[i] = new NativeHashMap<int, float>(10000, Allocator.Persistent);
+                allCasts[i] = new NativeArray<RaycastCommand>(sz, Allocator.Persistent);
+                allHits[i] = new NativeArray<RaycastHit>(sz, Allocator.Persistent);
+                allHitsMaps[i] = new NativeMultiHashMap<int, int>(sz, Allocator.Persistent);
+                allSummedHitAreas[i] = new NativeArray<float>(sz, Allocator.Persistent);
+                allHitSizeMaps[i] = new NativeHashMap<int, float>(sz, Allocator.Persistent);
             }
             foreach (Part p in Vessel.Parts)
             {
@@ -189,7 +184,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 dir = info.dir,
                 rotations = quaternions,
                 angles = info.angles,
-            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+            }.Schedule(OcclusionSettings.FibonacciLatticeSize, 16);
 
             var statsJob = new GeneralDistanceInfo
             {
@@ -233,7 +228,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             {
                 arr = quaternions,
                 map = fullQuaternionIndexMap.AsParallelWriter(),
-            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+            }.Schedule(OcclusionSettings.FibonacciLatticeSize, 16);
 
             vectorJob = new SetVectorsJob
             {
@@ -242,7 +237,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 forward = forwardArr,
                 up = upArr,
                 right = rightArr,
-            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+            }.Schedule(OcclusionSettings.FibonacciLatticeSize, 16);
 
             var setBounds = new SetBoundsJob
             {
@@ -250,29 +245,31 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 extents = extents,
                 quaternions = quaternions,
                 bounds = boundsArr,
-            }.Schedule(FIBONACCI_LATTICE_SIZE, 16);
+            }.Schedule(OcclusionSettings.FibonacciLatticeSize, 16);
 
             intervalJob = new SetIntervalAndDimensionsJob
             {
                 bounds = boundsArr,
+                maxDim = OcclusionSettings.MaxRaycastDimension,
+                resolution = OcclusionSettings.RaycastResolution,
                 interval = intervalArr,
                 dims = dimensionsArr,
-            }.Schedule(FIBONACCI_LATTICE_SIZE, 16, setBounds);
+            }.Schedule(OcclusionSettings.FibonacciLatticeSize, 16, setBounds);
 
             JobHandle.ScheduleBatchedJobs();
         }
 
         private void BuildPreprocessInfo(DirectionPreprocessInfo[] infos, List<Vector3> directions)
         {
-            for (int i=0; i<directions.Count && i < MAX_JOBS; i++)
+            for (int i=0; i<directions.Count && i < OcclusionSettings.MaxJobs; i++)
             {
                 Vector3 v = directions[i];
                 infos[i] = new DirectionPreprocessInfo
                 {
-                    angles = new NativeArray<float>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob),
+                    angles = new NativeArray<float>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob),
                     angleStats = new NativeArray<float3>(1, Allocator.TempJob),
-                    sortedSDIList = new NativeList<SphereDistanceInfo>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob),
-                    orderedQuaternions = new NativeList<quaternion>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob),
+                    sortedSDIList = new NativeList<SphereDistanceInfo>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob),
+                    orderedQuaternions = new NativeList<quaternion>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob),
                     distanceCutoff = new NativeArray<float>(1, Allocator.TempJob),
                     dir = v.normalized,
                     weights = DefaultAngleWeights,
@@ -298,8 +295,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
         {
             Profiler.BeginSample("VehicleOcclusion-LaunchJobs.Allocation_CastPlanes");
             var mapClearJob = new ClearNativeMultiHashMapIntInt { map = priorityMap }.Schedule();
-            using var workList = new NativeList<quaternion>(MAX_JOBS, Allocator.TempJob);
-            using var indexMap = new NativeHashMap<quaternion, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
+            using var workList = new NativeList<quaternion>(OcclusionSettings.MaxJobs, Allocator.TempJob);
+            using var indexMap = new NativeHashMap<quaternion, int>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob);
             JobHandle lastJob = default;
             for (int j = 0; j < dirInfos.Length; j++)
             {
@@ -318,16 +315,16 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 completed = processedMap,
                 maxIndexForPriority0 = 2,
                 map = priorityMap.AsParallelWriter(),
-            }.Schedule(FIBONACCI_LATTICE_SIZE, 16, JobHandle.CombineDependencies(lastJob, mapClearJob));
+            }.Schedule(OcclusionSettings.FibonacciLatticeSize, 16, JobHandle.CombineDependencies(lastJob, mapClearJob));
             JobHandle.ScheduleBatchedJobs();
 
-            using var fullQuaternionIndexMap = new NativeHashMap<quaternion, int>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
-            using var boundsArr = new NativeArray<float2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob);
-            using var intervalArr = new NativeArray<float2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            using var dimensionsArr = new NativeArray<int2>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            using var forwardArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            using var rightArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            using var upArr = new NativeArray<float3>(FIBONACCI_LATTICE_SIZE, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            using var fullQuaternionIndexMap = new NativeHashMap<quaternion, int>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob);
+            using var boundsArr = new NativeArray<float2>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob);
+            using var intervalArr = new NativeArray<float2>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            using var dimensionsArr = new NativeArray<int2>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            using var forwardArr = new NativeArray<float3>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            using var rightArr = new NativeArray<float3>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+            using var upArr = new NativeArray<float3>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
             Profiler.EndSample();
 
             // Calculate raycast plane orientation/offset, dimensions, spacing, area/ray, element count
@@ -348,7 +345,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             Profiler.EndSample();
 
             bucketSortPriority.Complete();
-            SelectQuaternions(workList, priorityMap, MAX_JOBS, 0);  // Fill priority 0 (required)
+            SelectQuaternions(workList, priorityMap, OcclusionSettings.MaxJobs, 0);  // Fill priority 0 (required)
             SelectQuaternions(workList, priorityMap, suggestedJobs, 1);    // Append priority 1 (desired) until size
             SelectQuaternions(workList, priorityMap, suggestedJobs, 2);    // Append priority 2 (anything) until size
 
@@ -524,7 +521,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                                         requiredArr,
                                         processedQuaternionsMap,
                                         emptyPriMap,
-                                        MAX_JOBS,
+                                        OcclusionSettings.MaxJobs,
                                         startPosition,
                                         offset,
                                         casts,
@@ -587,7 +584,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             }
         }
 
-        private void SelectQuaternions(in NativeList<quaternion> q, in NativeMultiHashMap<int, int> map, int maxSize = MAX_JOBS, int key=0)
+        private void SelectQuaternions(in NativeList<quaternion> q, in NativeMultiHashMap<int, int> map, int maxSize, int key=0)
         {
             if (q.Length < maxSize && map.TryGetFirstValue(key, out int index, out NativeMultiHashMapIterator<int> iter))
             {
@@ -630,10 +627,10 @@ namespace FerramAerospaceResearch.FARAeroComponents
                             }
                             occlInfo.convectionArea[rotation] += size;
                         }
-                        else if (t.gameObject.GetComponent<Part>() is Part part && Vessel != part.vessel)
+                        else if (t.name.Equals("localspace") || (t.gameObject.GetComponent<Part>() is Part part && Vessel != part.vessel))
                         {
-                            //Debug.Log($"[VehicleOcclusion.ProcessRaycastResults] Occlusion of {Vessel?.name} by {part} on {part.vessel}");
-                        } else
+                        }
+                        else
                         {
                             Debug.LogWarning($"[VehicleOcclusion.ProcessRaycastResults] {Vessel?.name}: {hits[index].transform} ancestor {t} not associated with any part!");
                         }
@@ -647,7 +644,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private void SetupDefaultDirs(List<Vector3> dirs, Vessel v)
         {
             dirs.Clear();
-            Vector3 localVelocity = v.velocityD.magnitude < ZERO_VELOCITY_THRESHOLD ?
+            Vector3 localVelocity = v.velocityD.magnitude < OcclusionSettings.VelocityThreshold ?
                                     Vector3.forward :
                                     (Vector3)(v.transform.worldToLocalMatrix * (Vector3)v.velocityD);
             Vector3 localSunVec = v.transform.worldToLocalMatrix * (Planetarium.fetch.Sun.transform.position - v.transform.position);
@@ -695,8 +692,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             if (state == State.Running)
             {
                 int threadCount = System.Environment.ProcessorCount - 1;
-                int availableJobs = math.max(MAX_JOBS - JobsInCurrentPass, 0);
-                int updateJobs = math.min(availableJobs, math.max(1, UPDATE_JOBS_PER_THREAD * threadCount));
+                int availableJobs = math.max(OcclusionSettings.MaxJobs - JobsInCurrentPass, 0);
+                int updateJobs = math.min(availableJobs, math.max(1, Settings.OcclusionSettings.JobsPerThread * threadCount));
                 SetupDefaultDirs(directionList, Vessel);
                 LaunchJobs(Vessel, directionPreprocessInfos, directionList, occlusionPointsList, updateJobs);
                 if (!PassStarted)
@@ -720,7 +717,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             else if (state == State.Completed)
             {
                 if (!resetCoroutineRunning)
-                    StartCoroutine(resetWaitCoroutine = WaitForResetCR(RESET_INTERVAL_SEC));
+                    StartCoroutine(resetWaitCoroutine = WaitForResetCR(OcclusionSettings.ResetInterval));
             }
             if (RequestReset)
                 ResetCalculations();
@@ -764,7 +761,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
         {
             // convectionPoints is a set of 3 quaternions that should be closest to dir.
             // (They were precalculated, if dir is NOT what we expect for occlusion... that's bad.)
-            Vector3 localVelocity = dir.magnitude < ZERO_VELOCITY_THRESHOLD ?
+            Vector3 localVelocity = dir.magnitude < OcclusionSettings.VelocityThreshold ?
                                     Vector3.forward :
                                     (Vector3) (Vessel.transform.worldToLocalMatrix * dir);
             Quaternion q = Quaternion.FromToRotation(Vector3.forward, localVelocity);

@@ -117,16 +117,18 @@ namespace FerramAerospaceResearch.UnityJobs
     public struct SetIntervalAndDimensionsJob : IJobParallelFor
     {
         [ReadOnly] public NativeArray<float2> bounds;
+        [ReadOnly] public int maxDim;
+        [ReadOnly] public float resolution;
         [WriteOnly] public NativeArray<float2> interval;
         [WriteOnly] public NativeArray<int2> dims;
 
         public void Execute(int index)
         {
-            int minXsize = (int)math.ceil(bounds[index].x / 0.1f);
-            int minYsize = (int)math.ceil(bounds[index].y / 0.1f);
-            dims[index] = new int2(math.min(100, minXsize), math.min(100, minYsize));
+            int minXsize = (int)math.ceil(bounds[index].x / resolution);
+            int minYsize = (int)math.ceil(bounds[index].y / resolution);
+            dims[index] = new int2(math.min(maxDim, minXsize), math.min(maxDim, minYsize));
 
-            interval[index] = new float2(math.max(bounds[index].x / 100, 0.1f), math.max(bounds[index].y / 100, 0.1f));
+            interval[index] = new float2(math.max(bounds[index].x / maxDim, resolution), math.max(bounds[index].y / maxDim, resolution));
         }
     }
 
