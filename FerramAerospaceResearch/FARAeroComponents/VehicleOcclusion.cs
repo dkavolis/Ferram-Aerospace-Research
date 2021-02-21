@@ -77,6 +77,10 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private readonly RaycastJobInfo[] raycastJobTracker = new RaycastJobInfo[OcclusionSettings.MaxJobs];
         public bool RequestReset = false;
+        public Utils.Metrics metrics = new Utils.Metrics();
+        public const string FixedUpdateMetric = "FixedUpdateStall";
+        public const string UpdateMetric = "UpdateStall";
+        private System.Diagnostics.Stopwatch JobCompleteWatch = new System.Diagnostics.Stopwatch();
 
         public void Setup(FARVesselAero farVesselAero)
         {
@@ -682,7 +686,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             if (!OnValidPhysicsVessel)
                 return;
             if (state == State.Running)
-                HandleJobCompletion(raycastJobTracker);
+                HandleJobCompletion(raycastJobTracker, FixedUpdateMetric);
         }
 
         public void UpdateEarly()
@@ -713,7 +717,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             if (state == State.Running && jobsInProgress == 0 && processedQuaternionsMap.Length == Quaternions.Length)
                 state = State.Completed;
             else if (state == State.Running)
-                HandleJobCompletion(raycastJobTracker);
+                HandleJobCompletion(raycastJobTracker, UpdateMetric);
             else if (state == State.Completed)
             {
                 if (!resetCoroutineRunning)
@@ -731,13 +735,18 @@ namespace FerramAerospaceResearch.FARAeroComponents
             ResetCalculations();
         }
 
-        public void HandleJobCompletion(RaycastJobInfo[] tracker)
+        public void HandleJobCompletion(RaycastJobInfo[] tracker, string metric)
         {
+            JobCompleteWatch.Reset();
             for (int i=0; i<jobsInProgress; i++)
-           {
+            {
+                JobCompleteWatch.Start();
                 tracker[i].processorJob.Complete();
+                JobCompleteWatch.Stop();
                 ProcessRaycastResults(ref tracker[i], allHitSizeMaps[i], allHits[i], allSummedHitAreas[i]);
             }
+            metrics.AddMeasurement(metric, JobCompleteWatch.Elapsed.TotalMilliseconds);
+            FARLogger.Debug($"Occlusion {metric}: {JobCompleteWatch.Elapsed.TotalMilliseconds:F2}ms");
         }
 
         // http://extremelearning.com.au/how-to-evenly-distribute-points-on-a-sphere-more-effectively-than-the-canonical-fibonacci-lattice/
