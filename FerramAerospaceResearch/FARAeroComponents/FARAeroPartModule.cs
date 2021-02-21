@@ -158,6 +158,10 @@ namespace FerramAerospaceResearch.FARAeroComponents
         public double unexpRadiationFlux;
         [KSPField(guiFormat = "F1", guiUnits = "kW", groupName = GroupName)]
         public double skinSkinConductionFlux;
+        [KSPField(guiFormat = "F3", guiUnits = "ms", groupName = GroupName)]
+        public double fixedUpdateStall;
+        [KSPField(guiFormat = "F3", guiUnits = "ms", groupName = GroupName)]
+        public double updateStall;
 
         private Transform partTransform;
 
@@ -384,6 +388,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             ThermalFields.Add(Fields[nameof(unexpSkinInternalConductionFlux)]);
             ThermalFields.Add(Fields[nameof(radiationFlux)]);
             ThermalFields.Add(Fields[nameof(unexpRadiationFlux)]);
+            ThermalFields.Add(Fields[nameof(fixedUpdateStall)]);
+            ThermalFields.Add(Fields[nameof(updateStall)]);
         }
         private void SetThermalFieldsVisibility(bool enabled)
         {
@@ -418,6 +424,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
             //unexpFlux = part.ptd.unexpFlux;
             radiationFlux = part.ptd.radiationFlux;
             unexpRadiationFlux = part.ptd.unexpRadiationFlux;
+            if (vessel.GetComponent<VehicleOcclusion>() is VehicleOcclusion vo)
+            {
+                fixedUpdateStall = vo.metrics.data.TryGetValue(VehicleOcclusion.FixedUpdateMetric, out Utils.MetricsElement e) ? e.hysteresisTime : 0;
+                updateStall = vo.metrics.data.TryGetValue(VehicleOcclusion.UpdateMetric, out Utils.MetricsElement e2) ? e2.hysteresisTime : 0;
+            }
         }
 
         public double ProjectedAreaWorld(Vector3 normalizedDirectionVector)
