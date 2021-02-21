@@ -191,13 +191,16 @@ namespace FerramAerospaceResearch.FARAeroComponents
                                             out _currentAeroSections,
                                             out _legacyWingModels);
 
-                if (vehicleOcclusion is null && Settings.OcclusionSettings.UseRaycaster)
+                if (Settings.OcclusionSettings.UseRaycaster)
                 {
-                    vehicleOcclusion = Vessel.gameObject.AddComponent<VehicleOcclusion>();
-                    vehicleOcclusion.Setup(this);
+                    if (vehicleOcclusion is null)
+                    {
+                        vehicleOcclusion = Vessel.gameObject.AddComponent<VehicleOcclusion>();
+                        vehicleOcclusion.Setup(this);
+                    }
+                    vehicleOcclusion.RequestReset = true;
+                    vehicleOcclusion.SetVehicleBounds(_vehicleAero.VoxelCenter, _vehicleAero.VoxelMeshExtents);
                 }
-                vehicleOcclusion.RequestReset = true;
-                vehicleOcclusion.SetVehicleBounds(_vehicleAero.VoxelCenter, _vehicleAero.VoxelMeshExtents);
 
                 if (_flightGUI is null)
                     _flightGUI = vessel.GetComponent<FlightGUI>();
