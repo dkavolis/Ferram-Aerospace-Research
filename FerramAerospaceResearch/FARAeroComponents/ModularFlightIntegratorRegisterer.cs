@@ -86,10 +86,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private static void SetSkinProperties(ModularFlightIntegrator fi, PartThermalData ptd)
         {
             Part part = ptd.part;
-            VehicleOcclusion occlusion = fi.Vessel.GetComponent<VehicleOcclusion>();
-            FARAeroPartModule aeroModule = part.Modules.Contains<FARAeroPartModule>() ? part.Modules.GetModule<FARAeroPartModule>() : null;
 
-            if (occlusion == null || aeroModule == null)
+            //if (occlusion == null || occlusion.state == VehicleOcclusion.State.Invalid || aeroModule == null)
+            if (!(fi.Vessel.GetComponent<VehicleOcclusion>() is VehicleOcclusion occlusion &&
+                  part.Modules.GetModule<FARAeroPartModule>() is FARAeroPartModule aeroModule &&
+                  occlusion.state != VehicleOcclusion.State.Invalid))
             {
                 fi.BaseFIetSkinPropertie(ptd);
                 return;
@@ -193,7 +194,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private static void UpdateOcclusion(ModularFlightIntegrator fi, bool all)
         {
-            if (fi.Vessel.GetComponent<VehicleOcclusion>() is VehicleOcclusion occlusion)
+            if (fi.Vessel.GetComponent<VehicleOcclusion>() is VehicleOcclusion occlusion
+                && occlusion.state != VehicleOcclusion.State.Invalid)
             {
                 foreach (Part p in fi.Vessel.Parts)
                 {
@@ -216,8 +218,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             {
                 PartThermalData ptd = fi.partThermalDataList[i];
                 Part part = ptd.part;
-                FARAeroPartModule aeroModule = part.Modules.GetModule<FARAeroPartModule>();
-                if (aeroModule is null)
+                if (!(part.Modules.GetModule<FARAeroPartModule>() is FARAeroPartModule aeroModule))
                     continue;
 
                 // make sure drag cube areas are correct based on voxelization
@@ -334,7 +335,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             FARAeroPartModule aeroModule
         )
         {
-            if (aeroModule is null)
+            if (aeroModule is null || !FARAPI.VesselVoxelizationCompletedEver(part.vessel))
                 return fi.BaseFICalculateAreaRadiative(part);
             double radArea = aeroModule.ProjectedAreas.totalArea;
 
@@ -349,7 +350,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         private static double CalculateAreaExposed(ModularFlightIntegrator fi, Part part, FARAeroPartModule aeroModule)
         {
-            if (aeroModule is null)
+            if (aeroModule is null || !FARAPI.VesselVoxelizationCompletedEver(part.vessel))
                 return fi.BaseFICalculateAreaExposed(part);
 
             // Apparently stock exposed area is actually weighted by some function of mach number...
@@ -368,7 +369,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             {
                 sunArea = occlusion.SunArea(ptd.part, fi.sunVector);
             }
-            else if (ptd.part.Modules.GetModule<FARAeroPartModule>() is FARAeroPartModule module)
+            else if (ptd.part.Modules.GetModule<FARAeroPartModule>() is FARAeroPartModule module && FARAPI.VesselVoxelizationCompletedEver(ptd.part.vessel))
             {
                 sunArea = module.ProjectedAreaWorld(fi.sunVector) * ptd.sunAreaMultiplier;
             }
@@ -379,11 +380,11 @@ namespace FerramAerospaceResearch.FARAeroComponents
         {
             double bodyArea = 0;
             Vector3 bodyVec = fi.Vessel.transform.worldToLocalMatrix * (Vector3)(fi.Vessel.mainBody.position - fi.Vessel.transform.position);
-            if (fi.Vessel.GetComponent<VehicleOcclusion>() is VehicleOcclusion occlusion)
+            if (fi.Vessel.GetComponent<VehicleOcclusion>() is VehicleOcclusion occlusion && occlusion.state != VehicleOcclusion.State.Invalid)
             {
                 bodyArea = occlusion.BodyArea(ptd.part, bodyVec.normalized);
             }
-            else if (ptd.part.Modules.GetModule<FARAeroPartModule>() is FARAeroPartModule module)
+            else if (ptd.part.Modules.GetModule<FARAeroPartModule>() is FARAeroPartModule module && FARAPI.VesselVoxelizationCompletedEver(ptd.part.vessel))
             {
                 bodyArea = module.ProjectedAreaWorld(bodyVec.normalized) * ptd.bodyAreaMultiplier;
             }
