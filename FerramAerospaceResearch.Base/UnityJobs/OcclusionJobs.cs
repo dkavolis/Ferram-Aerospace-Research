@@ -74,7 +74,7 @@ namespace FerramAerospaceResearch.UnityJobs
         public void Execute(int index)
         {
             float3 normal = math.mul(quaternions[index], new float3(0, 0, 1));
-            float3 origin = float3.zero + 10000 * normal;
+            float3 origin = float3.zero + math.length(extents) * normal;
             float2 min = new float2(float.PositiveInfinity, float.PositiveInfinity);
             float2 max = new float2(float.NegativeInfinity, float.NegativeInfinity);
             float3 ext = extents / 2;
@@ -83,14 +83,14 @@ namespace FerramAerospaceResearch.UnityJobs
             {
                 float3* arr = stackalloc[]
                 {
-                    center - (ext / 2),
+                    center - ext,
                     new float3(center.x - ext.x, center.y - ext.y, center.z + ext.z),
                     new float3(center.x - ext.x, center.y + ext.y, center.z - ext.z),
                     new float3(center.x - ext.x, center.y + ext.y, center.z + ext.z),
                     new float3(center.x + ext.x, center.y - ext.y, center.z - ext.z),
                     new float3(center.x + ext.x, center.y - ext.y, center.z + ext.z),
                     new float3(center.x + ext.x, center.y + ext.y, center.z - ext.z),
-                    center + (ext / 2),
+                    center + ext,
                 };
 
                 for (int i = 0; i < 8; i++)
@@ -370,11 +370,11 @@ namespace FerramAerospaceResearch.UnityJobs
             float3 origin = startPosition + offset * forwardDir;
             int row = index / dimensions.x;
             int col = index % dimensions.x;
-            float row_eff = row - (dimensions.x / 2);
-            float col_eff = col - (dimensions.y / 2);
+            float row_eff = row - (dimensions.y / 2);
+            float col_eff = col - (dimensions.x / 2);
 
             // All raycasts are in the same direction.
-            float3 pos = origin + (row_eff * interval.x * upDir) + (col_eff * interval.y * rightDir);
+            float3 pos = origin + (row_eff * interval.y * upDir) + (col_eff * interval.x * rightDir);
             commands[index] = new RaycastCommand(pos, -forwardDir, distance: 1e5f, layerMask: 19, maxHits: 1);
         }
     }
