@@ -34,27 +34,37 @@ namespace FerramAerospaceResearch.UnityJobs
         [ReadOnly] public int points;
         [ReadOnly] public float epsilon;
         [WriteOnly] public NativeArray<quaternion> results;
+        private const float GoldenRatio = 1.61803398875f;   //(1 + math.sqrt(5)) / 2;
+        private const float ThetaConstantTerm = 2 * math.PI / GoldenRatio;
+        private readonly float denomRecip;
+
+        public SpherePointsJob(int points, float epsilon) : this()
+        {
+            this.points = points;
+            this.epsilon = epsilon;
+            denomRecip = 1f / (points - 1 + (2 * epsilon));
+        }
+
         public void Execute(int index)
         {
-            float goldenRatio = (1 + math.sqrt(5)) / 2;
-            float thetaConstantTerm = 2 * math.PI / goldenRatio;
-            if (index == 0)
+            if (Unity.Burst.CompilerServices.Hint.Unlikely(index == 0))
             {
                 results[index] = quaternion.identity;
             }
-            else if (index == points - 1)
+            else if (Unity.Burst.CompilerServices.Hint.Unlikely(index == points - 1))
             {
                 results[index] = quaternion.Euler(180, 0, 0);
             }
             else
             {
-                float theta = index * thetaConstantTerm;
-                float denom = points - 1 + (2 * epsilon);
+                float theta = index * ThetaConstantTerm;
                 float num = 2 * (index + epsilon);
-                float phi = math.acos(1 - num / denom);
-                float3 res = new float3(math.cos(theta) * math.sin(phi),
-                                        math.sin(theta) * math.sin(phi),
-                                        math.cos(phi));
+                float cosPhi = 1 - num * denomRecip;
+                float sinPhi = math.sqrt(1 - cosPhi * cosPhi);
+                math.sincos(theta, out float sinTheta, out float cosTheta);
+                float3 res = new float3(cosTheta * sinPhi,
+                                        sinTheta * sinPhi,
+                                        cosPhi);
                 results[index] = Quaternion.FromToRotation(new float3(0,0,1), res);
             }
         }
@@ -92,24 +102,22 @@ namespace FerramAerospaceResearch.UnityJobs
                     new float3(center.x + ext.x, center.y + ext.y, center.z - ext.z),
                     center + ext,
                 };
-
+                var quaternionInverse = math.inverse(quaternions[index]);
                 for (int i = 0; i < 8; i++)
                 {
                     // Project the bounding box onto the plane
                     float dist = math.dot(arr[i] - origin, normal);
                     float3 projection = arr[i] - dist * normal;
                     // Rotate the projection back towards the vessel alignment
-                    projection = math.mul(math.inverse(quaternions[index]), projection);
+                    projection = math.mul(quaternionInverse, projection);
 
                     // The x,y coords of projection are again aligned to the vessel axes.
-                    min.x = math.min(min.x, projection.x);
-                    min.y = math.min(min.y, projection.y);
-                    max.x = math.max(max.x, projection.x);
-                    max.y = math.max(max.y, projection.y);
+                    min = math.min(min, projection.xy);
+                    max = math.max(max, projection.xy);
                 }
             }
 
-            bounds[index] = new float2(math.abs(max.x - min.x), math.abs(max.y - min.y));
+            bounds[index] = math.abs(max - min);
         }
     }
 
@@ -124,11 +132,9 @@ namespace FerramAerospaceResearch.UnityJobs
 
         public void Execute(int index)
         {
-            int minXsize = (int)math.ceil(bounds[index].x / resolution);
-            int minYsize = (int)math.ceil(bounds[index].y / resolution);
-            dims[index] = new int2(math.min(maxDim, minXsize), math.min(maxDim, minYsize));
-
-            interval[index] = new float2(math.max(bounds[index].x / maxDim, resolution), math.max(bounds[index].y / maxDim, resolution));
+            var minSize = new int2(math.ceil(bounds[index] / resolution));
+            dims[index] = math.min(minSize, maxDim);
+            interval[index] = math.max(bounds[index] / maxDim, resolution);
         }
     }
 
@@ -144,16 +150,14 @@ namespace FerramAerospaceResearch.UnityJobs
         public void Execute(int index)
         {
             float3 dir = math.mul(quaternions[index], new float3(0, 0, 1));
-            float4 tmp = math.mul(localToWorldMatrix, new float4(dir.x, dir.y, dir.z, 0));
-            forward[index] = new float3(tmp.x, tmp.y, tmp.z);
+            float4 fwd = math.mul(localToWorldMatrix, new float4(dir.x, dir.y, dir.z, 0));
+            forward[index] = fwd.xyz;
 
             dir = math.mul(quaternions[index], new float3(0, 1, 0));
-            tmp = math.mul(localToWorldMatrix, new float4(dir.x, dir.y, dir.z, 0));
-            up[index] = new float3(tmp.x, tmp.y, tmp.z);
+            var upLoc = math.mul(localToWorldMatrix, new float4(dir.x, dir.y, dir.z, 0));
+            up[index] = upLoc.xyz;
 
-            dir = math.mul(quaternions[index], new float3(1 ,0, 0));
-            tmp = math.mul(localToWorldMatrix, new float4(dir.x, dir.y, dir.z, 0));
-            right[index] = new float3(tmp.x, tmp.y, tmp.z);
+            right[index] = math.cross(fwd.xyz, upLoc.xyz);
         }
     }
 
@@ -167,7 +171,7 @@ namespace FerramAerospaceResearch.UnityJobs
         public void Execute(int index)
         {
             float3 rot_dir = math.mul(rotations[index], new float3(0, 0, 1));
-            angles[index] = math.degrees(math.acos(math.min(math.max(math.dot(dir, rot_dir), -1f), 1f)));
+            angles[index] = math.degrees(math.acos(math.clamp(math.dot(dir, rot_dir), -1, 1)));
         }
     }
 
@@ -235,18 +239,19 @@ namespace FerramAerospaceResearch.UnityJobs
     }
 
     [BurstCompile]
-    public struct MakeQuaternionIndexMapJob : IJobParallelFor
+    public struct MakeQuaternionIndexMapJob : IJob
     {
         [ReadOnly] public NativeArray<quaternion> arr;
-        [WriteOnly] public NativeHashMap<quaternion, int>.ParallelWriter map;
+        [WriteOnly] public NativeHashMap<quaternion, int> map;
 
-        public void Execute(int index)
+        public void Execute()
         {
-            map.TryAdd(arr[index], index);
+            for (int index=0; index<arr.Length; index++)
+                map.TryAdd(arr[index], index);
         }
     }
 
-    // Given anl array of items and a map, update the map s.t. map[item] = min(current value, index in array)
+    // Given an array of items and a map, update the map s.t. map[item] = min(current value, index in array)
     // Can't parallelize the read/write cycle of the NativeHashMap, so can't do .ParallelWriter
     [BurstCompile]
     public struct ListToIndexedMap : IJob
@@ -290,16 +295,17 @@ namespace FerramAerospaceResearch.UnityJobs
     }
 
     [BurstCompile]
-    public struct ClearNativeHashMapIntFloat : IJob
+    public struct ClearNativeHashMap<T1,T2> : IJob where T1:struct, IEquatable<T1> where T2:struct
     {
-        public NativeHashMap<int, float> map;
+        public NativeHashMap<T1, T2> map;
         public void Execute() => map.Clear();
     }
 
+
     [BurstCompile]
-    public struct ClearNativeMultiHashMapIntInt : IJob
+    public struct ClearNativeMultiHashMap<T1, T2> : IJob where T1 : struct, IEquatable<T1> where T2 : struct
     {
-        public NativeMultiHashMap<int, int> map;
+        public NativeMultiHashMap<T1, T2> map;
         public void Execute() => map.Clear();
     }
 

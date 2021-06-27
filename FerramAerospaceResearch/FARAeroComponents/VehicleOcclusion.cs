@@ -132,10 +132,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             indexedPriorityMap = new NativeMultiHashMap<int, int>(OcclusionSettings.FibonacciLatticeSize, Allocator.Persistent);
             Quaternions = new NativeArray<quaternion>(OcclusionSettings.FibonacciLatticeSize, Allocator.Persistent);
-            var handle = new SpherePointsJob
+            var handle = new SpherePointsJob(points: OcclusionSettings.FibonacciLatticeSize, epsilon: Lattice_epsilon(OcclusionSettings.FibonacciLatticeSize))
             {
-                points = OcclusionSettings.FibonacciLatticeSize,
-                epsilon = Lattice_epsilon(OcclusionSettings.FibonacciLatticeSize),
                 results = Quaternions,
             }.Schedule(OcclusionSettings.FibonacciLatticeSize, 16);
             JobHandle.ScheduleBatchedJobs();
@@ -231,8 +229,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             indexMapJob = new MakeQuaternionIndexMapJob
             {
                 arr = quaternions,
-                map = fullQuaternionIndexMap.AsParallelWriter(),
-            }.Schedule(OcclusionSettings.FibonacciLatticeSize, 16);
+                map = fullQuaternionIndexMap,
+            }.Schedule();
 
             vectorJob = new SetVectorsJob
             {
@@ -298,7 +296,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
             NativeArray<float>[] summedHitAreas)
         {
             Profiler.BeginSample("VehicleOcclusion-LaunchJobs.Allocation_CastPlanes");
-            var mapClearJob = new ClearNativeMultiHashMapIntInt { map = priorityMap }.Schedule();
+            var mapClearJob = new ClearNativeMultiHashMap<int, int> { map = priorityMap }.Schedule();
             using var workList = new NativeList<quaternion>(OcclusionSettings.MaxJobs, Allocator.TempJob);
             using var indexMap = new NativeHashMap<quaternion, int>(OcclusionSettings.FibonacciLatticeSize, Allocator.TempJob);
             JobHandle lastJob = default;
@@ -359,8 +357,8 @@ namespace FerramAerospaceResearch.FARAeroComponents
             foreach (quaternion q in workList)
             {
                 Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup");
-                var clearMap1 = new ClearNativeMultiHashMapIntInt { map = hitsMaps[i], }.Schedule();
-                var clearMap2 = new ClearNativeHashMapIntFloat { map = hitSizeMaps[i], }.Schedule();
+                var clearMap1 = new ClearNativeMultiHashMap<int,int> { map = hitsMaps[i], }.Schedule();
+                var clearMap2 = new ClearNativeHashMap<int,float> { map = hitSizeMaps[i], }.Schedule();
                 JobHandle.ScheduleBatchedJobs();
 
                 Profiler.BeginSample("VehicleOcclusion-LaunchJobs.SingleRaycastJobSetup.Prep");
