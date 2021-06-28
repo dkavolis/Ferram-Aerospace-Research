@@ -26,8 +26,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
         public State state = State.Invalid;
         public static bool PassStarted { get; private set; } = false;
         public static int JobsInCurrentPass { get; private set; } = 0;
-        private bool resetCoroutineRunning = false;
-        private IEnumerator resetWaitCoroutine;
+        private IEnumerator resetWaitCoroutine = null;
 
         private FARVesselAero farVesselAero;
         //private Vessel Vessel => farVesselAero?.Vessel;
@@ -120,10 +119,10 @@ namespace FerramAerospaceResearch.FARAeroComponents
         private void ResetCalculations()
         {
             FARLogger.Info($"[VehicleOcclusion] {Vessel?.name} Resetting occlusion calculation data.");
-            if (resetCoroutineRunning && resetWaitCoroutine != null)
+            if (resetWaitCoroutine != null)
             {
                 StopCoroutine(resetWaitCoroutine);
-                resetCoroutineRunning = false;
+                resetWaitCoroutine = null;
             }
 
             partsByTransform.Clear();
@@ -132,7 +131,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
             indexedPriorityMap = new NativeMultiHashMap<int, int>(OcclusionSettings.FibonacciLatticeSize, Allocator.Persistent);
             Quaternions = new NativeArray<quaternion>(OcclusionSettings.FibonacciLatticeSize, Allocator.Persistent);
-            var handle = new SpherePointsJob(points: OcclusionSettings.FibonacciLatticeSize, epsilon: Lattice_epsilon(OcclusionSettings.FibonacciLatticeSize))
+            var handle = new SpherePointsJob(OcclusionSettings.FibonacciLatticeSize, Lattice_epsilon)
             {
                 results = Quaternions,
             }.Schedule(OcclusionSettings.FibonacciLatticeSize, 16);
@@ -718,7 +717,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
                 HandleJobCompletion(raycastJobTracker, UpdateMetric);
             else if (state == State.Completed)
             {
-                if (!resetCoroutineRunning)
+                if (resetWaitCoroutine == null)
                     StartCoroutine(resetWaitCoroutine = WaitForResetCR(OcclusionSettings.ResetInterval));
             }
             if (RequestReset)
@@ -727,9 +726,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
 
         IEnumerator WaitForResetCR(float interval)
         {
-            resetCoroutineRunning = true;
             yield return new WaitForSeconds(interval);
-            resetCoroutineRunning = false;
             ResetCalculations();
         }
 
@@ -748,7 +745,7 @@ namespace FerramAerospaceResearch.FARAeroComponents
         }
 
         // http://extremelearning.com.au/how-to-evenly-distribute-points-on-a-sphere-more-effectively-than-the-canonical-fibonacci-lattice/
-        private float Lattice_epsilon(int n) => 0.36f;
+        private const float Lattice_epsilon = 0.36f;
 
         public float SunArea(Part p, Vector3 dir)
         {
