@@ -4,19 +4,19 @@ namespace FerramAerospaceResearch.Utils
 {
     public class Metrics
     {
-        public Dictionary<string, MetricsElement> data = new Dictionary<string, MetricsElement>();
-        const int hysteresisFactor = 20;
+        public Dictionary<string, MetricsElement> data = new();
+        const int HysteresisFactor = 20;
         public Metrics() { }
         public void Reset() => data.Clear();
         public void AddMeasurement(string name, double t)
         {
-            if (!data.ContainsKey(name))
+            if (!data.TryGetValue(name, out MetricsElement m))
             {
-                data.Add(name, new MetricsElement());
+                m = new MetricsElement();
+                data.Add(name, m);
             }
-            MetricsElement m = data[name];
             m.iterations++;
-            m.hysteresisTime = (m.hysteresisTime * (hysteresisFactor - 1) + t) / hysteresisFactor;
+            m.hysteresisTime = (m.hysteresisTime * (HysteresisFactor - 1) + t) / HysteresisFactor;
         }
     }
 
