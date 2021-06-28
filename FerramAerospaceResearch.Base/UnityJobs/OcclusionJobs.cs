@@ -62,7 +62,7 @@ namespace FerramAerospaceResearch.UnityJobs
                 float cosPhi = 1 - num * denomRecip;
                 float sinPhi = math.sqrt(1 - cosPhi * cosPhi);
                 math.sincos(theta, out float sinTheta, out float cosTheta);
-                float3 res = new float3(cosTheta * sinPhi,
+                var res = new float3(cosTheta * sinPhi,
                                         sinTheta * sinPhi,
                                         cosPhi);
                 results[index] = Quaternion.FromToRotation(new float3(0,0,1), res);
@@ -85,8 +85,8 @@ namespace FerramAerospaceResearch.UnityJobs
         {
             float3 normal = math.mul(quaternions[index], new float3(0, 0, 1));
             float3 origin = float3.zero + math.length(extents) * normal;
-            float2 min = new float2(float.PositiveInfinity, float.PositiveInfinity);
-            float2 max = new float2(float.NegativeInfinity, float.NegativeInfinity);
+            float2 min = new(float.PositiveInfinity, float.PositiveInfinity);
+            float2 max = new(float.NegativeInfinity, float.NegativeInfinity);
             float3 ext = extents / 2;
             float3 center = boundsCenter;
             unsafe
@@ -224,7 +224,7 @@ namespace FerramAerospaceResearch.UnityJobs
             {
                 if (distances[i] < cutoffDistance[0])
                 {
-                    SphereDistanceInfo sdi = new SphereDistanceInfo
+                    SphereDistanceInfo sdi = new()
                     {
                         q = quaternions[i],
                         distance = distances[i]
